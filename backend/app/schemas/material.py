@@ -26,12 +26,11 @@ class MaterialUpdate(MaterialBase):
 
 class MaterialResponse(MaterialBase):
     """物料响应"""
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class MaterialListResponse(BaseModel):
