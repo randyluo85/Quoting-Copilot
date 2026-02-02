@@ -1,10 +1,11 @@
 # tests/conftest.py
 import pytest
+import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from app.models import Base
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def mock_db_session():
     """Mock 数据库会话 - 使用内存 SQLite 测试"""
     try:
@@ -20,3 +21,5 @@ async def mock_db_session():
 
     async with async_session() as session:
         yield session
+
+    await engine.dispose()
