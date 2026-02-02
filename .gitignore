@@ -39,3 +39,25 @@ lerna-debug.log*
 
 # Spec workflow directory
 .spec-workflow/
+
+# Next.js
+frontend/.next/
+frontend/out/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend/.venv/
+venv/
+ENV/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Alembic
+*.pyc
+
+# Docker volumes data
