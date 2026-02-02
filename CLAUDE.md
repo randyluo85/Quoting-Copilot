@@ -8,6 +8,16 @@
 **Project:** SmartQuote MVP (Dual-Price Edition) v2.0
 **Context:** 这是一个 AI 辅助的制造业报价系统，核心逻辑是"双轨计价"（标准价 vs VAVE 优化价）。
 
+- **👉 CRITICAL RULE:** Before writing any code or answering logic questions, you MUST read `PROJECT_CONTEXT.md`. It is the "Single Source of Truth" for business logic and database schema.
+  *(翻译：关键规则——在写任何代码或回答逻辑问题前，你必须阅读 PROJECT_CONTEXT.md。它是业务逻辑和数据库结构的唯一真理。)*
+
+- **📄 Documentation Relationship:**
+  | 文档 | 角色 | 说明 |
+  |------|------|------|
+  | `PROJECT_CONTEXT.md` | **The Constitution** | WHAT to build（业务逻辑的唯一真理源） |
+  | `CLAUDE.md` | **The Guidelines** | HOW to build（编码规范与技术栈指南） |
+  | `README.md` | **General Overview** | 项目概览与环境搭建（面向新人） |
+
 ## 🛠 Tech Stack & Style
 - **Frontend:** Next.js (App Router), TypeScript, TailwindCSS, **ShadcnUI**.
   - *Rule:* 保持 B 端界面极简，优先使用 Shadcn 组件。
