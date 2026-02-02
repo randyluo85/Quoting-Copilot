@@ -14,8 +14,11 @@ from app.models import Base  # noqa
 settings = get_settings()
 config = context.config
 
+# 将异步 URL 转换为同步 URL 用于 Alembic 迁移
+sync_db_url = settings.database_url.replace("+aiomysql", "+pymysql")
+
 # Set database URL
-config.set_main_option("sqlalchemy.url", settings.database_url)
+config.set_main_option("sqlalchemy.url", sync_db_url)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
