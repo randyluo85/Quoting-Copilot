@@ -28,3 +28,9 @@ async def root():
 @app.get("/health")
 async def health():
     return {"status": "healthy", "database": "connected"}
+
+
+# 导入并注册路由
+from app.api.v1.materials import router as materials_router
+
+app.include_router(materials_router, prefix=settings.api_v1_prefix)
