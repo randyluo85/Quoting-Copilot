@@ -1,4 +1,6 @@
 # backend/app/services/material_service.py
+from __future__ import annotations
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from typing import Optional
