@@ -2,10 +2,6 @@
 from sqlalchemy import Column, String, Numeric, DateTime, func
 from sqlalchemy.orm import DeclarativeBase
 from decimal import Decimal
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from app.models import Base
 
 
 class Material(DeclarativeBase):
