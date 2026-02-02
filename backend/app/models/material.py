@@ -1,10 +1,12 @@
 # backend/app/models/material.py
 from sqlalchemy import Column, String, Numeric, DateTime, func
-from sqlalchemy.orm import DeclarativeBase
 from decimal import Decimal
 
+# 延迟导入避免循环
+from app.models import Base
 
-class Material(DeclarativeBase):
+
+class Material(Base):
     """物料主数据表"""
     __tablename__ = "materials"
 
