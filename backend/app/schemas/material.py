@@ -1,5 +1,5 @@
 # backend/app/schemas/material.py
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from decimal import Decimal
 from datetime import datetime
 from typing import Optional
