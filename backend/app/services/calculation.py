@@ -58,11 +58,11 @@ class DualTrackCalculator:
     ) -> PricePair:
         """计算工艺成本（双轨）.
 
-        公式: Cost = CycleTime * (MHR + Labor)
+        公式: Cost = CycleTime * HourlyRate
 
         Args:
             process_name: 工艺名称
-            cycle_time: 循环时间
+            cycle_time: 循环时间（小时）
 
         Returns:
             PricePair: 标准成本和 VAVE 成本
@@ -78,13 +78,9 @@ class DualTrackCalculator:
         if rate is None:
             return self._zero_price_pair()
 
-        std_mhr = Decimal(str(rate.std_mhr)) if rate.std_mhr else Decimal("0")
-        std_labor = Decimal(str(rate.std_labor)) if rate.std_labor else Decimal("0")
-        std_hourly_rate = std_mhr + std_labor
-
-        vave_mhr = Decimal(str(rate.vave_mhr)) if rate.vave_mhr else std_mhr
-        vave_labor = Decimal(str(rate.vave_labor)) if rate.vave_labor else std_labor
-        vave_hourly_rate = vave_mhr + vave_labor
+        # MHR (Machine Hour Rate) = 综合工时费率（含机时+人工）
+        std_hourly_rate = Decimal(str(rate.std_hourly_rate)) if rate.std_hourly_rate else Decimal("0")
+        vave_hourly_rate = Decimal(str(rate.vave_hourly_rate)) if rate.vave_hourly_rate else std_hourly_rate
 
         efficiency = Decimal(str(rate.efficiency_factor))
         cycle_time_dec = Decimal(str(cycle_time))
