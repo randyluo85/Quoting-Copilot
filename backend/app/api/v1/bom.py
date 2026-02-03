@@ -243,6 +243,7 @@ async def upload_bom(
                 material=m.material or price_data.get("material", ""),
                 supplier=m.supplier or price_data.get("supplier", ""),
                 quantity=m.quantity,
+                unit=m.unit,  # 从 BOM 文件解析的单位
                 unit_price=price_data.get("unit_price"),
                 vave_price=price_data.get("vave_price"),
                 has_history_data=price_data.get("has_history_data", False),
