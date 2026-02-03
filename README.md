@@ -5,7 +5,7 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.0   | 2026-02-02 | 2026-02-02 | SmartQuote MVP 项目说明 | Randy Luo |
+| v1.1   | 2026-02-02 | 2026-02-03 | SmartQuote MVP 项目说明 | Randy Luo |
 
 ## 1. 项目简介 (Vision)
 
@@ -25,12 +25,12 @@ SmartQuote 是一个专为制造业成本工程师和销售经理设计的 AI �
 
 ## 3. 技术栈 (Tech Stack)
 
-* **Frontend:** Next.js (App Router), React, TailwindCSS, ShadcnUI
+* **Frontend:** Vite 6 + React 18 + TypeScript, TailwindCSS, ShadcnUI (Radix UI primitives)
 * **Backend:** Python FastAPI (AI Native)
 * **Database:**
     * **MySQL:** 结构化主数据 (物料、费率)
     * **PostgreSQL (pgvector):** 非结构化历史报价 & 向量检索 (RAG)
-* **AI:** LLM Service (用于语义清洗与 VAVE 建议)
+* **AI:** 通义千问 Qwen-Plus (阿里云 DashScope)
 
 ## 4. 环境搭建 (Setup)
 
@@ -39,8 +39,8 @@ SmartQuote 是一个专为制造业成本工程师和销售经理设计的 AI �
 ```bash
 cd frontend
 npm install
-npm run dev
-# 访问: http://localhost:3000
+npm run dev      # 开发模式: http://localhost:5173
+npm run build    # 生产构建
 ```
 
 ### 后端 (Server)
@@ -64,7 +64,18 @@ $$ \sum (Qty \times P_{std}) + \sum (CycleTime_{std} \times (MHR_{std} + Labor_{
 **VAVE Cost (目标成本):**
 $$ \sum (Qty \times P_{vave}) + \sum (CycleTime_{opt} \times (MHR_{vave} + Labor_{vave})) $$
 
-## 6. 目录结构
+## 6. 设计文档
+
+| 文档 | 用途 | 目标读者 |
+|------|------|---------|
+| [docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md) | 数据库结构唯一真理源 | 后端开发、DBA |
+| [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) | 业务逻辑与 API 契约 | 全体开发者 |
+| [CLAUDE.md](CLAUDE.md) | AI 编码协作指南 | AI 助手、开发者 |
+| [README.md](README.md) | 项目概览与入门 | 新成员 |
+
+> 💡 **规则：** 当数据库结构需要变更时，仅更新 `docs/DATABASE_DESIGN.md`，其他文档引用即可。
+
+## 7. 目录结构
 
 ```
 smartquote/
@@ -77,9 +88,48 @@ smartquote/
 │   │   └── main.py
 │   └── tests/
 ├── frontend/
-│   ├── app/              # Next.js Pages
-│   ├── components/       # ShadcnUI Components
-│   ├── lib/              # Utils & API Hooks
-│   └── public/
-└── docs/                 # PRD & 资源文件
+│   ├── src/              # Vite 源码目录
+│   │   ├── components/   # 业务组件
+│   │   │   ├── ui/       # ShadcnUI 基础组件
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── BOMManagement.tsx
+│   │   │   ├── CostCalculation.tsx
+│   │   │   ├── QuoteSummary.tsx
+│   │   │   └── ...       # 其他业务组件
+│   │   ├── App.tsx       # 应用入口（含类型定义）
+│   │   └── main.tsx
+│   ├── index.html
+│   ├── vite.config.ts
+│   └── package.json
+├── CLAUDE.md             # AI 协作指南
+├── PROJECT_CONTEXT.md    # 业务逻辑唯一真理源
+└── README.md             # 本文件
 ```
+
+## 8. 前端组件说明
+
+| 组件 | 功能 | 对应视图 |
+|------|------|---------|
+| Dashboard | 项目列表仪表板 | dashboard |
+| NewProject | 创建新项目 | - |
+| ProjectCreationSuccess | 项目创建成功页 | project-success |
+| BOMManagement | BOM 管理（物料/工艺清单） | bom |
+| ProcessAssessment | 新工艺评估（条件触发） | process |
+| CostCalculation | 成本核算 | cost-calc |
+| QuoteSummary | QS/BC 报价摘要 | quotation |
+| InvestmentRecovery | Payback 投资回收 | investment |
+| QuotationOutput | 报价输出 | output |
+| AppSidebar | 侧边栏流程导航 | - |
+| QualityAssessment | 质量评估 | - |
+| InvestmentAnalysis | 投资分析 | - |
+| WorkflowGuide | 工作流指南 | - |
+| QuotationGeneration | 报价生成 | - |
+
+**视图流程顺序：**
+```
+dashboard → project-success → bom → process → cost-calc → quotation → investment → output
+```
+
+**分支流程（条件触发）：**
+- `process` - 当识别到新工艺路线时触发，需 IE 工程师评估
+- 采购询价 - 当物料无历史数据时触发
