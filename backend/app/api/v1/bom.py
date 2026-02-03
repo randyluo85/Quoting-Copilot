@@ -1,6 +1,7 @@
 """BOM API 路由."""
 
 from fastapi import APIRouter, Depends, UploadFile, File, Form
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
@@ -40,14 +41,14 @@ async def upload_bom(
         materials.append(
             MaterialResponse(
                 id=f"M-{idx + 1:03d}",
-                partNumber=m.part_number,
-                partName=m.part_name,
+                part_number=m.part_number,
+                part_name=m.part_name,
                 material=m.material,
                 supplier=m.supplier,
                 quantity=m.quantity,
-                unitPrice=None,
-                vavePrice=None,
-                hasHistoryData=False,
+                unit_price=None,
+                vave_price=None,
+                has_history_data=False,
                 comments=m.comments,
                 status=StatusLight.MISSING,
             )
@@ -55,9 +56,9 @@ async def upload_bom(
 
     # TODO: 转换工艺数据
 
-    return {
+    return JSONResponse(content={
         "parseId": f"parse-{project_id}",
         "status": "completed",
-        "materials": materials,
+        "materials": [m.model_dump(by_alias=True) for m in materials],
         "processes": [],
-    }
+    })
