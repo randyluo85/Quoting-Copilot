@@ -579,18 +579,37 @@ export function NewProject({ onNavigate, onProjectCreated }: NewProjectProps) {
 
         {/* Action Buttons */}
         <div className="flex justify-between pt-4">
-          <Button variant="outline" onClick={() => onNavigate('dashboard')}>
+          <Button variant="outline" onClick={() => onNavigate('dashboard')} disabled={isCreating}>
             取消
           </Button>
-          <Button 
+          <Button
             onClick={handleCreateProject}
-            disabled={!isFormValid()}
+            disabled={!isFormValid() || isCreating}
             className="gap-2"
           >
-            创建项目并继续
-            <ArrowRight className="h-4 w-4" />
+            {isCreating ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                创建中...
+              </>
+            ) : (
+              <>
+                创建项目并继续
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
           </Button>
         </div>
+
+        {/* Error Display */}
+        {createError && (
+          <Alert className="border-red-200 bg-red-50">
+            <AlertCircle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-800 text-sm">
+              创建失败：{createError}
+            </AlertDescription>
+          </Alert>
+        )}
       </div>
     </div>
   );
