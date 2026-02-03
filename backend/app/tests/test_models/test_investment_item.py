@@ -5,7 +5,6 @@ from __future__ import annotations
 import pytest
 import uuid
 from decimal import Decimal
-from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.investment_item import InvestmentItem, InvestmentType
@@ -66,11 +65,6 @@ class TestInvestmentItem:
 
     async def test_all_investment_types(self, clean_db: AsyncSession):
         """测试所有投资类型."""
-        # 清理表
-        await clean_db.execute(text("TRUNCATE TABLE investment_items"))
-        await clean_db.execute(text("TRUNCATE TABLE projects"))
-        await clean_db.commit()
-
         # 创建关联项目
         project = Project(
             id=str(uuid.uuid4()),
@@ -129,11 +123,6 @@ class TestInvestmentItem:
 
     async def test_shared_asset_reference(self, clean_db: AsyncSession):
         """测试共享资产引用."""
-        # 清理表
-        await clean_db.execute(text("TRUNCATE TABLE investment_items"))
-        await clean_db.execute(text("TRUNCATE TABLE projects"))
-        await clean_db.commit()
-
         # 创建关联项目
         project = Project(
             id=str(uuid.uuid4()),
@@ -185,11 +174,6 @@ class TestInvestmentItem:
 
     async def test_default_values(self, clean_db: AsyncSession):
         """测试默认值."""
-        # 清理表
-        await clean_db.execute(text("TRUNCATE TABLE investment_items"))
-        await clean_db.execute(text("TRUNCATE TABLE projects"))
-        await clean_db.commit()
-
         # 创建关联项目
         project = Project(
             id=str(uuid.uuid4()),
@@ -226,11 +210,6 @@ class TestInvestmentItem:
 
     async def test_foreign_key_to_project(self, clean_db: AsyncSession):
         """测试项目外键约束."""
-        # 清理表
-        await clean_db.execute(text("TRUNCATE TABLE investment_items"))
-        await clean_db.execute(text("TRUNCATE TABLE projects"))
-        await clean_db.commit()
-
         # 创建项目
         project = Project(
             id=str(uuid.uuid4()),
