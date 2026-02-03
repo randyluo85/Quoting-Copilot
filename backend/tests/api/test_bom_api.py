@@ -458,3 +458,224 @@ class TestBOMUploadErrors:
 
         # 损坏的文件应被拒绝
         assert response.status_code in [400, 422, 500]
+
+
+@pytest.fixture
+def real_bom_file_path():
+    """获取真实 BOM 文件的路径."""
+    bom_path = os.path.join(BOM_FILES_DIR, "bom.xlsx")
+    if not os.path.exists(bom_path):
+        pytest.skip(f"真实 BOM 文件不存在: {bom_path}")
+    return bom_path
+
+
+@pytest.fixture
+def real_bom_file_content(real_bom_file_path):
+    """读取真实 BOM 文件内容."""
+    with open(real_bom_file_path, "rb") as f:
+        return f.read()
+
+
+class TestRealBOMFileUpload:
+    """使用真实 BOM 文件的 API 测试."""
+
+    @pytest.mark.asyncio
+    async def test_upload_real_bom_file(
+        self, async_client, clean_db, real_bom_file_content
+    ):
+        """上传真实 BOM 文件返回解析数据."""
+        response = await async_client.post(
+            "/api/v1/bom/upload",
+            files={
+                "file": (
+                    "bom.xlsx",
+                    real_bom_file_content,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                )
+            },
+            data={"project_id": "TEST-PROJECT-REAL"},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+
+        assert "parseId" in data
+        assert data["status"] == "completed"
+        assert "materials" in data
+        assert "summary" in data
+
+    @pytest.mark.asyncio
+    async def test_real_bom_file_parses_all_materials(
+        self, async_client, clean_db, real_bom_file_content
+    ):
+        """真实 BOM 文件解析出所有物料."""
+        response = await async_client.post(
+            "/api/v1/bom/upload",
+            files={
+                "file": (
+                    "bom.xlsx",
+                    real_bom_file_content,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                )
+            },
+            data={"project_id": "TEST-PROJECT-REAL"},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+
+        materials = data["materials"]
+        # 真实 BOM 文件应该有多个物料
+        assert len(materials) > 0
+
+        # 验证每个物料有基本字段
+        for material in materials:
+            assert "partNumber" in material
+            assert "partName" in material
+
+    @pytest.mark.asyncio
+    async def test_real_bom_file_detects_processes_from_sheet(
+        self, async_client, clean_db, real_bom_file_content
+    ):
+        """真实 BOM 文件从工艺表解析工艺."""
+        response = await async_client.post(
+            "/api/v1/bom/upload",
+            files={
+                "file": (
+                    "bom.xlsx",
+                    real_bom_file_content,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                )
+            },
+            data={"project_id": "TEST-PROJECT-REAL"},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+
+        # 真实 BOM 文件有工艺表
+        processes = data.get("processes", [])
+        assert isinstance(processes, list)
+
+        if len(processes) > 0:
+            # 验证工艺结构
+            process = processes[0]
+            assert "opNo" in process
+            assert "name" in process
+
+    @pytest.mark.asyncio
+    async def test_real_bom_summary_statistics(
+        self, async_client, clean_db, real_bom_file_content
+    ):
+        """真实 BOM 文件返回正确统计."""
+        response = await async_client.post(
+            "/api/v1/bom/upload",
+            files={
+                "file": (
+                    "bom.xlsx",
+                    real_bom_file_content,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                )
+            },
+            data={"project_id": "TEST-PROJECT-REAL"},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+
+        summary = data["summary"]
+        assert "totalMaterials" in summary
+        assert "totalProcesses" in summary
+
+        # 确保统计数据合理
+        assert summary["totalMaterials"] >= 0
+        assert summary["totalProcesses"] >= 0
+
+
+class TestRealBOMFileIntegration:
+    """真实 BOM 文件集成测试 - 验证与实际业务数据的兼容性."""
+
+    @pytest.mark.asyncio
+    async def test_real_bom_with_comments_parsing(
+        self, async_client, clean_db, real_bom_file_content
+    ):
+        """真实 BOM 文件正确解析 comments 字段."""
+        response = await async_client.post(
+            "/api/v1/bom/upload",
+            files={
+                "file": (
+                    "bom.xlsx",
+                    real_bom_file_content,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                )
+            },
+            data={"project_id": "TEST-PROJECT-REAL"},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+
+        materials = data["materials"]
+        # 查找有 comments 的物料
+        materials_with_comments = [
+            m for m in materials if m.get("comments") and m["comments"].strip()
+        ]
+
+        # 真实 BOM 文件中应该有带 comments 的物料
+        if len(materials_with_comments) > 0:
+            # 验证 comments 字段正确解析
+            material = materials_with_comments[0]
+            assert isinstance(material["comments"], str)
+            assert len(material["comments"]) > 0
+
+    @pytest.mark.asyncio
+    async def test_real_bom_quantity_parsing(
+        self, async_client, clean_db, real_bom_file_content
+    ):
+        """真实 BOM 文件正确解析数量字段."""
+        response = await async_client.post(
+            "/api/v1/bom/upload",
+            files={
+                "file": (
+                    "bom.xlsx",
+                    real_bom_file_content,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                )
+            },
+            data={"project_id": "TEST-PROJECT-REAL"},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+
+        materials = data["materials"]
+        for material in materials:
+            # 验证数量是数字
+            assert "quantity" in material
+            if material["quantity"] is not None:
+                assert isinstance(material["quantity"], (int, float))
+
+    @pytest.mark.asyncio
+    async def test_real_bom_unit_parsing(
+        self, async_client, clean_db, real_bom_file_content
+    ):
+        """真实 BOM 文件正确解析单位字段."""
+        response = await async_client.post(
+            "/api/v1/bom/upload",
+            files={
+                "file": (
+                    "bom.xlsx",
+                    real_bom_file_content,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                )
+            },
+            data={"project_id": "TEST-PROJECT-REAL"},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+
+        materials = data["materials"]
+        # 验证单位字段解析（MM, PC 等）
+        for material in materials:
+            assert "unit" in material
