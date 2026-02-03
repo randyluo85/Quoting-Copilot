@@ -13,7 +13,7 @@ from sqlalchemy import select
 router = APIRouter()
 
 
-@router.get("", response_model=list[ProjectResponse])
+@router.get("", response_model=list[ProjectResponse], response_model_by_alias=True)
 async def list_projects(
     status_filter: ProjectStatus | None = None,
     db: AsyncSession = Depends(get_db),
