@@ -2,12 +2,10 @@
 
 import pytest
 from decimal import Decimal
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.calculation import DualTrackCalculator
-from app.models.material import Material
-from app.models.process_rate import ProcessRate
 
 
 @pytest.mark.asyncio
@@ -16,8 +14,7 @@ class TestDualTrackCalculation:
 
     async def test_zero_price_pair(self):
         """测试零价格对 - 无物料编码."""
-        db = AsyncMock()
-        calc = DualTrackCalculator(db)
+        calc = DualTrackCalculator(None)
         result = await calc.calculate_material_cost(None, 10)
 
         assert result.std == Decimal("0.00")
@@ -27,25 +24,31 @@ class TestDualTrackCalculation:
 
     async def test_zero_price_pair_no_process(self):
         """测试零价格对 - 无工艺名称."""
-        db = AsyncMock()
-        calc = DualTrackCalculator(db)
+        calc = DualTrackCalculator(None)
         result = await calc.calculate_process_cost(None, 2.5)
 
         assert result.std == Decimal("0.00")
         assert result.vave == Decimal("0.00")
 
+    @pytest.mark.asyncio
     async def test_material_not_found(self):
         """测试物料不存在."""
-        db = AsyncMock()
-        mock_result = AsyncMock()
-        mock_result.scalar_one_or_none.return_value = None
-        db.execute.return_value = mock_result
+        # Mock execute 返回标量为 None 的结果
+        with patch("app.services.calculation.select") as mock_select:
+            mock_result = AsyncMock()
+            mock_result.scalar_one_or_none = MagicMock(return_value=None)
 
-        calc = DualTrackCalculator(db)
-        result = await calc.calculate_material_cost("NONEXISTENT", 10)
+            mock_execute = AsyncMock()
+            mock_execute.return_value = mock_result
 
-        assert result.std == Decimal("0.00")
-        assert result.vave == Decimal("0.00")
+            db = AsyncMock()
+            db.execute = mock_execute
+
+            calc = DualTrackCalculator(db)
+            result = await calc.calculate_material_cost("NONEXISTENT", 10)
+
+            assert result.std == Decimal("0.00")
+            assert result.vave == Decimal("0.00")
 
     async def test_material_cost_calculation(self):
         """测试物料成本计算."""
@@ -54,18 +57,23 @@ class TestDualTrackCalculation:
         mock_material.std_price = Decimal("100.00")
         mock_material.vave_price = Decimal("85.00")
 
-        db = AsyncMock()
-        mock_result = AsyncMock()
-        mock_result.scalar_one_or_none.return_value = mock_material
-        db.execute.return_value = mock_result
+        with patch("app.services.calculation.select") as mock_select:
+            mock_result = AsyncMock()
+            mock_result.scalar_one_or_none = MagicMock(return_value=mock_material)
 
-        calc = DualTrackCalculator(db)
-        result = await calc.calculate_material_cost("TEST-001", 10)
+            mock_execute = AsyncMock()
+            mock_execute.return_value = mock_result
 
-        assert result.std == Decimal("1000.00")  # 100 * 10
-        assert result.vave == Decimal("850.00")  # 85 * 10
-        assert result.savings == Decimal("150.00")
-        assert result.savings_rate == 0.15
+            db = AsyncMock()
+            db.execute = mock_execute
+
+            calc = DualTrackCalculator(db)
+            result = await calc.calculate_material_cost("TEST-001", 10)
+
+            assert result.std == Decimal("1000.00")  # 100 * 10
+            assert result.vave == Decimal("850.00")  # 85 * 10
+            assert result.savings == Decimal("150.00")
+            assert result.savings_rate == 0.15
 
     async def test_material_cost_no_vave_price(self):
         """测试物料成本计算 - 无 VAVE 价格."""
@@ -74,18 +82,20 @@ class TestDualTrackCalculation:
         mock_material.std_price = Decimal("100.00")
         mock_material.vave_price = None
 
-        db = AsyncMock()
-        mock_result = AsyncMock()
-        mock_result.scalar_one_or_none.return_value = mock_material
-        db.execute.return_value = mock_result
+        with patch("app.services.calculation.select"):
+            mock_result = AsyncMock()
+            mock_result.scalar_one_or_none = MagicMock(return_value=mock_material)
 
-        calc = DualTrackCalculator(db)
-        result = await calc.calculate_material_cost("TEST-001", 10)
+            db = AsyncMock()
+            db.execute = MagicMock(return_value=mock_result)
 
-        # VAVE 价格应等于标准价格
-        assert result.std == Decimal("1000.00")
-        assert result.vave == Decimal("1000.00")
-        assert result.savings == Decimal("0.00")
+            calc = DualTrackCalculator(db)
+            result = await calc.calculate_material_cost("TEST-001", 10)
+
+            # VAVE 价格应等于标准价格
+            assert result.std == Decimal("1000.00")
+            assert result.vave == Decimal("1000.00")
+            assert result.savings == Decimal("0.00")
 
     async def test_process_cost_calculation(self):
         """测试工艺成本计算."""
@@ -97,19 +107,21 @@ class TestDualTrackCalculation:
         mock_rate.vave_labor = Decimal("28.00")
         mock_rate.efficiency_factor = Decimal("0.95")
 
-        db = AsyncMock()
-        mock_result = AsyncMock()
-        mock_result.scalar_one_or_none.return_value = mock_rate
-        db.execute.return_value = mock_result
+        with patch("app.services.calculation.select"):
+            mock_result = AsyncMock()
+            mock_result.scalar_one_or_none = MagicMock(return_value=mock_rate)
 
-        calc = DualTrackCalculator(db)
-        result = await calc.calculate_process_cost("重力铸造", 2.5)
+            db = AsyncMock()
+            db.execute = MagicMock(return_value=mock_result)
 
-        # 标准成本 = 2.5 * (45 + 30) = 2.5 * 75 = 187.5
-        # VAVE成本 = 2.5 * (42 + 28) * 0.95 = 2.5 * 70 * 0.95 = 166.25
-        assert result.std == Decimal("187.50")
-        assert result.vave == Decimal("166.25")
-        assert result.savings == Decimal("21.25")
+            calc = DualTrackCalculator(db)
+            result = await calc.calculate_process_cost("重力铸造", 2.5)
+
+            # 标准成本 = 2.5 * (45 + 30) = 2.5 * 75 = 187.5
+            # VAVE成本 = 2.5 * (42 + 28) * 0.95 = 2.5 * 70 * 0.95 = 166.25
+            assert result.std == Decimal("187.50")
+            assert result.vave == Decimal("166.25")
+            assert result.savings == Decimal("21.25")
 
     def test_savings_calculation(self):
         """测试节省率计算."""
