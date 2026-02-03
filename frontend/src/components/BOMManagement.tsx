@@ -44,6 +44,7 @@ import {
 } from './ui/dialog';
 import type { View, ProjectData, Product } from '../App';
 import { api } from '../lib/api';
+import { useProjectStore } from '../lib/store';
 
 // 材质类型定义
 const MATERIAL_TYPES = [
