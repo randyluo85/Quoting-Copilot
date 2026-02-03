@@ -99,8 +99,8 @@ export function AppSidebar({ currentView, onNavigate }: AppSidebarProps) {
       id: 'create-project',
       title: '创建项目',
       icon: FileText,
-      view: 'project-success',
-      status: getStepStatus('project-success'),
+      view: 'new-project',
+      status: getStepStatus('new-project'),
     },
     {
       id: 'bom-management',
