@@ -79,10 +79,10 @@ class DualTrackCalculator:
             return self._zero_price_pair()
 
         # MHR (Machine Hour Rate) = 综合工时费率（含机时+人工）
-        std_hourly_rate = Decimal(str(rate.std_hourly_rate)) if rate.std_hourly_rate else Decimal("0")
-        vave_hourly_rate = Decimal(str(rate.vave_hourly_rate)) if rate.vave_hourly_rate else std_hourly_rate
+        std_hourly_rate = rate.std_hourly_rate if rate.std_hourly_rate else Decimal("0")
+        vave_hourly_rate = rate.vave_hourly_rate if rate.vave_hourly_rate else std_hourly_rate
 
-        efficiency = Decimal(str(rate.efficiency_factor))
+        efficiency = rate.efficiency_factor if rate.efficiency_factor else Decimal("1.0")
         cycle_time_dec = Decimal(str(cycle_time))
 
         std_cost = cycle_time_dec * std_hourly_rate
