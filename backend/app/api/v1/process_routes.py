@@ -333,7 +333,7 @@ async def update_process_route(
         更新后的工艺路线
     """
     result = await db.execute(
-        select(ProcessRoute).where(ProcessRoute.id == route_id)
+        select(ProcessRoute).options(selectinload(ProcessRoute.items)).where(ProcessRoute.id == route_id)
     )
     route = result.scalar_one_or_none()
 
@@ -419,7 +419,7 @@ async def delete_process_route(
         成功消息
     """
     result = await db.execute(
-        select(ProcessRoute).where(ProcessRoute.id == route_id)
+        select(ProcessRoute).options(selectinload(ProcessRoute.items)).where(ProcessRoute.id == route_id)
     )
     route = result.scalar_one_or_none()
 
@@ -461,7 +461,7 @@ async def submit_process_route(
         更新后的工艺路线
     """
     result = await db.execute(
-        select(ProcessRoute).where(ProcessRoute.id == route_id)
+        select(ProcessRoute).options(selectinload(ProcessRoute.items)).where(ProcessRoute.id == route_id)
     )
     route = result.scalar_one_or_none()
 
@@ -513,7 +513,7 @@ async def approve_process_route(
         审批结果
     """
     result = await db.execute(
-        select(ProcessRoute).where(ProcessRoute.id == route_id)
+        select(ProcessRoute).options(selectinload(ProcessRoute.items)).where(ProcessRoute.id == route_id)
     )
     route = result.scalar_one_or_none()
 
