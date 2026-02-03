@@ -264,7 +264,9 @@ async def get_process_route(
         工艺路线详情
     """
     result = await db.execute(
-        select(ProcessRoute).where(ProcessRoute.id == route_id)
+        select(ProcessRoute)
+        .options(selectinload(ProcessRoute.items))
+        .where(ProcessRoute.id == route_id)
     )
     route = result.scalar_one_or_none()
 
@@ -272,14 +274,6 @@ async def get_process_route(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Process route not found"
         )
-
-    # 加载工序明细
-    items_result = await db.execute(
-        select(ProcessRouteItem)
-        .where(ProcessRouteItem.route_id == route_id)
-        .order_by(ProcessRouteItem.sequence)
-    )
-    route.items = items_result.scalars().all()
 
     return JSONResponse(content=_route_to_response(route).model_dump(by_alias=True))
 
