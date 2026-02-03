@@ -31,6 +31,7 @@
 - **Backend:** `uvicorn app.main:app --reload`
 - **Test:** `pytest`
 - **Install:** `pip install -r requirements.txt` / `npm install`
+- **Redis:** `docker run -d -p 6379:6379 redis:7-alpine`
 
 ## 📜 Database Schema (不可变契约)
 
