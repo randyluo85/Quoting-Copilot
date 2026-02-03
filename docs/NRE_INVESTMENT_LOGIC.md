@@ -8,7 +8,7 @@
 
 ## 1. 核心定义与分类
 
-**NRE (Non-Recurring Engineering)** 费用是指为了生产特定产品而发生的一次性投入。在 SmartQuote 系统中，NRE 不随订单数量线性增加，而是作为**"资产"**进行管理。
+**NRE (Non-Recurring Engineering)** 费用是指为了生产特定产品而发生的一次性投入。在 Dr.aiVOSS 系统中，NRE 不随订单数量线性增加，而是作为**"资产"**进行管理。
 
 系统将 NRE 分为四大类（Enum: `InvestmentType`）：
 
