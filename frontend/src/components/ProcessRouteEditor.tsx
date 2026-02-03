@@ -192,7 +192,7 @@ export function ProcessRouteEditor({
                 stdMhrVar: process.stdMhrVar,
                 stdMhrFix: process.stdMhrFix,
                 vaveMhrVar: process.vaveMhrVar,
-                vaveMhrFix: process.vameMhrFix,
+                vaveMhrFix: process.vaveMhrFix,
               }
             : item
         )
