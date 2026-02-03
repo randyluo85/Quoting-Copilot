@@ -132,44 +132,29 @@ export function ProcessAssessment({ onNavigate }: ProcessAssessmentProps) {
 
   const loadAvailableProcesses = async () => {
     try {
-      // TODO: 实际应调用 API
-      // const response = await fetch('/api/v1/process-rates');
-      // const data = await response.json();
+      // 获取工序费率列表（用于编辑器选择）
+      const response = await fetch('http://localhost:8000/api/v1/process-rates');
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      const data = await response.json();
 
-      // 模拟数据
-      const mockProcesses: ProcessRateOption[] = [
-        {
-          processCode: 'CAST-001',
-          processName: '重力铸造',
-          equipment: '铸造车间-A线',
-          stdMhrVar: 30,
-          stdMhrFix: 15,
-          vaveMhrVar: 28,
-          vaveMhrFix: 14,
-        },
-        {
-          processCode: 'MACH-001',
-          processName: '粗加工',
-          equipment: '机加车间-B线',
-          stdMhrVar: 25,
-          stdMhrFix: 10,
-          vaveMhrVar: 23,
-          vaveMhrFix: 9,
-        },
-        {
-          processCode: 'MACH-002',
-          processName: '精加工',
-          equipment: '机加车间-C线',
-          stdMhrVar: 28,
-          stdMhrFix: 12,
-          vaveMhrVar: 26,
-          vaveMhrFix: 11,
-        },
-      ];
+      // 转换 API 响应为前端类型
+      const processes: ProcessRateOption[] = data.map((item: any) => ({
+        processCode: item.process_code,
+        processName: item.process_name,
+        equipment: item.equipment || '',
+        stdMhrVar: parseFloat(item.std_mhr_var) || 0,
+        stdMhrFix: parseFloat(item.std_mhr_fix) || 0,
+        vaveMhrVar: parseFloat(item.vave_mhr_var) || 0,
+        vaveMhrFix: parseFloat(item.vave_mhr_fix) || 0,
+      }));
 
-      setAvailableProcesses(mockProcesses);
+      setAvailableProcesses(processes);
     } catch (error) {
       console.error('Failed to load process rates:', error);
+      // 设置默认值确保编辑器可用
+      setAvailableProcesses([]);
     }
   };
 
