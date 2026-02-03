@@ -84,17 +84,22 @@ def _query_processes_sync(process_names: list[str]) -> dict:
 
     try:
         with conn.cursor() as cursor:
-            placeholders = ','.join(['%s'] * len(process_names))
             # 使用新的 MHR 拆分字段，同时支持按工艺名称或编码匹配
+            # 分别为 process_name 和 process_code 构建占位符
+            name_placeholders = ','.join(['%s'] * len(process_names))
+            code_placeholders = ','.join(['%s'] * len(process_names))
             query = f"""
                 SELECT process_code, process_name, equipment, work_center,
                        std_mhr_var, std_mhr_fix, vave_mhr_var, vave_mhr_fix,
                        std_hourly_rate, vave_hourly_rate, efficiency_factor
                 FROM process_rates
-                WHERE process_name IN ({placeholders}) OR process_code IN ({placeholders})
+                WHERE process_name IN ({name_placeholders}) OR process_code IN ({code_placeholders})
             """
-            cursor.execute(query, process_names + process_names)
+            all_params = process_names + process_names
+            print(f"[DEBUG] Executing query with params: {all_params}")
+            cursor.execute(query, all_params)
             results = cursor.fetchall()
+            print(f"[DEBUG] Query returned {len(results)} rows")
 
             for row in results:
                 # 优先使用新的 MHR 拆分费率
