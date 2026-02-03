@@ -174,6 +174,16 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
   const [bomData, setBomData] = useState<Record<string, ProductBOMData>>({});
   const [fileName, setFileName] = useState('');
 
+  // 新增产品状态
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [isAddingProduct, setIsAddingProduct] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    code: '',
+    annualVolume: project.annualVolume || '0',
+    description: '',
+  });
+
   // 获取当前产品的BOM数据
   const currentBomData = bomData[selectedProduct.id];
 
