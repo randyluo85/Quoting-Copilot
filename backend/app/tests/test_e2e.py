@@ -3,11 +3,19 @@
 import pytest
 from httpx import AsyncClient, ASGITransport
 from app.main import app
+from app.db.session import engine
+
+
+@pytest.fixture(scope="class")
+async def cleanup_engine():
+    """在每个测试类后清理数据库引擎."""
+    yield
+    await engine.dispose()
 
 
 @pytest.mark.asyncio
 class TestE2E:
-    """端到端测试."""
+    """端到端测试（无需数据库）."""
 
     async def test_health_check(self):
         """测试健康检查端点."""
