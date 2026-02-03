@@ -187,6 +187,11 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
     description: '',
   });
 
+  // 调试：监听 isAddProductOpen 变化
+  useEffect(() => {
+    console.log('isAddProductOpen changed to:', isAddProductOpen);
+  }, [isAddProductOpen]);
+
   // 获取当前产品的BOM数据
   const currentBomData = bomData[selectedProduct.id];
 
