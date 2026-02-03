@@ -22,9 +22,9 @@ export class ApiError extends Error {
 }
 
 /**
- * 通用 fetch 封装
+ * 通用 API 请求封装
  */
-async function fetch<T>(
+async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
@@ -39,7 +39,7 @@ async function fetch<T>(
   };
 
   try {
-    const response = await fetch(url, config);
+    const response = await window.fetch(url, config);
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: '请求失败' }));
