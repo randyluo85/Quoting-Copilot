@@ -1,6 +1,7 @@
 """项目 API 路由."""
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
 import uuid
@@ -13,7 +14,7 @@ from sqlalchemy import select
 router = APIRouter()
 
 
-@router.get("", response_model=list[ProjectResponse], response_model_by_alias=True)
+@router.get("")
 async def list_projects(
     status_filter: ProjectStatus | None = None,
     db: AsyncSession = Depends(get_db),
@@ -34,28 +35,29 @@ async def list_projects(
     result = await db.execute(query.order_by(Project.created_at.desc()))
     projects = result.scalars().all()
 
-    return [
+    responses = [
         ProjectResponse(
             id=p.id,
-            asacNumber=p.asac_number,
-            customerNumber=p.customer_number,
-            productVersion=p.product_version,
-            customerVersion=p.customer_version,
-            clientName=p.client_name,
-            projectName=p.project_name,
-            annualVolume=str(p.annual_volume),
+            asac_number=p.asac_number,
+            customer_number=p.customer_number,
+            product_version=p.product_version,
+            customer_version=p.customer_version,
+            client_name=p.client_name,
+            project_name=p.project_name,
+            annual_volume=str(p.annual_volume),
             description=p.description or "",
             products=p.products,
             owners=p.owners,
             status=p.status,
-            createdDate=p.created_at.isoformat(),
-            updatedDate=p.updated_at.isoformat(),
+            created_date=p.created_at.isoformat(),
+            updated_date=p.updated_at.isoformat(),
         )
         for p in projects
     ]
+    return JSONResponse(content=[r.model_dump(by_alias=True) for r in responses])
 
 
-@router.post("", response_model=ProjectResponse, status_code=status.HTTP_201_CREATED, response_model_by_alias=True)
+@router.post("", status_code=status.HTTP_201_CREATED)
 async def create_project(
     data: ProjectCreate,
     db: AsyncSession = Depends(get_db),
@@ -73,16 +75,16 @@ async def create_project(
 
     project = Project(
         id=project_id,
-        asac_number=data.asacNumber,
-        customer_number=data.customerNumber,
-        product_version=data.productVersion,
-        customer_version=data.customerVersion,
-        client_name=data.clientName,
-        project_name=data.projectName,
-        annual_volume=int(data.annualVolume),
+        asac_number=data.asac_number,
+        customer_number=data.customer_number,
+        product_version=data.product_version,
+        customer_version=data.customer_version,
+        client_name=data.client_name,
+        project_name=data.project_name,
+        annual_volume=int(data.annual_volume),
         description=data.description,
-        products=[p.model_dump() for p in data.products],
-        owners=data.owners.model_dump(),
+        products=[p.model_dump(by_alias=False) for p in data.products],
+        owners=data.owners.model_dump(by_alias=False),
         status=ProjectStatus.DRAFT,
     )
 
@@ -90,25 +92,26 @@ async def create_project(
     await db.commit()
     await db.refresh(project)
 
-    return ProjectResponse(
+    response = ProjectResponse(
         id=project.id,
-        asacNumber=project.asac_number,
-        customerNumber=project.customer_number,
-        productVersion=project.product_version,
-        customerVersion=project.customer_version,
-        clientName=project.client_name,
-        projectName=project.project_name,
-        annualVolume=str(project.annual_volume),
+        asac_number=project.asac_number,
+        customer_number=project.customer_number,
+        product_version=project.product_version,
+        customer_version=project.customer_version,
+        client_name=project.client_name,
+        project_name=project.project_name,
+        annual_volume=str(project.annual_volume),
         description=project.description or "",
         products=project.products,
         owners=project.owners,
         status=project.status,
-        createdDate=project.created_at.isoformat(),
-        updatedDate=project.updated_at.isoformat(),
+        created_date=project.created_at.isoformat(),
+        updated_date=project.updated_at.isoformat(),
     )
+    return JSONResponse(content=response.model_dump(by_alias=True), status_code=201)
 
 
-@router.get("/{project_id}", response_model=ProjectResponse, response_model_by_alias=True)
+@router.get("/{project_id}")
 async def get_project(
     project_id: str,
     db: AsyncSession = Depends(get_db),
@@ -128,19 +131,20 @@ async def get_project(
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    return ProjectResponse(
+    response = ProjectResponse(
         id=project.id,
-        asacNumber=project.asac_number,
-        customerNumber=project.customer_number,
-        productVersion=project.product_version,
-        customerVersion=project.customer_version,
-        clientName=project.client_name,
-        projectName=project.project_name,
-        annualVolume=str(project.annual_volume),
+        asac_number=project.asac_number,
+        customer_number=project.customer_number,
+        product_version=project.product_version,
+        customer_version=project.customer_version,
+        client_name=project.client_name,
+        project_name=project.project_name,
+        annual_volume=str(project.annual_volume),
         description=project.description or "",
         products=project.products,
         owners=project.owners,
         status=project.status,
-        createdDate=project.created_at.isoformat(),
-        updatedDate=project.updated_at.isoformat(),
+        created_date=project.created_at.isoformat(),
+        updated_date=project.updated_at.isoformat(),
     )
+    return JSONResponse(content=response.model_dump(by_alias=True))
