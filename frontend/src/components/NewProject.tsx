@@ -8,19 +8,21 @@ import { Progress } from './ui/progress';
 import { Alert, AlertDescription } from './ui/alert';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { 
-  Upload, 
-  FileSpreadsheet, 
-  CheckCircle2, 
+import {
+  Upload,
+  FileSpreadsheet,
+  CheckCircle2,
   AlertCircle,
   Loader2,
   ArrowRight,
   Sparkles,
   FileText,
   Brain,
-  X
+  X,
 } from 'lucide-react';
 import type { View } from '../App';
+import { api } from '../lib/api';
+import { useProjectStore } from '../lib/store';
 
 interface NewProjectProps {
   onNavigate: (view: View) => void;
