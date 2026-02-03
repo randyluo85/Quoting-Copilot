@@ -109,6 +109,9 @@ async def create_project(
         products=project.products,
         owners=project.owners,
         status=project.status,
+        target_margin=project.target_margin,
+        owner=project.owner,
+        remarks=project.remarks,
         created_date=project.created_at.isoformat(),
         updated_date=project.updated_at.isoformat(),
     )
