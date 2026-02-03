@@ -5,7 +5,6 @@ from __future__ import annotations
 import pytest
 import uuid
 from decimal import Decimal
-from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.business_case import BusinessCaseParams, BusinessCaseYears
@@ -18,12 +17,6 @@ class TestBusinessCaseModels:
 
     async def test_create_bc_params(self, clean_db: AsyncSession):
         """测试创建 Business Case 参数."""
-        # 清理表
-        await clean_db.execute(text("TRUNCATE TABLE business_case_params"))
-        await clean_db.execute(text("TRUNCATE TABLE business_case_years"))
-        await clean_db.execute(text("TRUNCATE TABLE projects"))
-        await clean_db.commit()
-
         # 创建项目
         project = Project(
             id=str(uuid.uuid4()),
@@ -61,12 +54,6 @@ class TestBusinessCaseModels:
 
     async def test_bc_params_default_sa_rate(self, clean_db: AsyncSession):
         """测试 BC 参数默认 SA 费用率."""
-        # 清理表
-        await clean_db.execute(text("TRUNCATE TABLE business_case_params"))
-        await clean_db.execute(text("TRUNCATE TABLE business_case_years"))
-        await clean_db.execute(text("TRUNCATE TABLE projects"))
-        await clean_db.commit()
-
         # 创建项目
         project = Project(
             id=str(uuid.uuid4()),
@@ -102,12 +89,6 @@ class TestBusinessCaseModels:
 
     async def test_create_bc_years(self, clean_db: AsyncSession):
         """测试创建 Business Case 年度数据."""
-        # 清理表
-        await clean_db.execute(text("TRUNCATE TABLE business_case_params"))
-        await clean_db.execute(text("TRUNCATE TABLE business_case_years"))
-        await clean_db.execute(text("TRUNCATE TABLE projects"))
-        await clean_db.commit()
-
         # 创建项目
         project = Project(
             id=str(uuid.uuid4()),
@@ -152,12 +133,6 @@ class TestBusinessCaseModels:
 
     async def test_year_unique_constraint_per_project(self, clean_db: AsyncSession):
         """测试同一项目同年份唯一约束."""
-        # 清理表
-        await clean_db.execute(text("TRUNCATE TABLE business_case_params"))
-        await clean_db.execute(text("TRUNCATE TABLE business_case_years"))
-        await clean_db.execute(text("TRUNCATE TABLE projects"))
-        await clean_db.commit()
-
         # 创建项目
         project_id = str(uuid.uuid4())
         project = Project(
@@ -201,12 +176,6 @@ class TestBusinessCaseModels:
 
     async def test_different_projects_same_year(self, clean_db: AsyncSession):
         """测试不同项目可以有同一年份."""
-        # 清理表
-        await clean_db.execute(text("TRUNCATE TABLE business_case_params"))
-        await clean_db.execute(text("TRUNCATE TABLE business_case_years"))
-        await clean_db.execute(text("TRUNCATE TABLE projects"))
-        await clean_db.commit()
-
         # 创建两个项目
         project1 = Project(
             id=str(uuid.uuid4()),
@@ -261,12 +230,6 @@ class TestBusinessCaseModels:
 
     async def test_bc_params_unique_constraint(self, clean_db: AsyncSession):
         """测试项目 BC 参数唯一约束（一个项目只能有一组参数）."""
-        # 清理表
-        await clean_db.execute(text("TRUNCATE TABLE business_case_params"))
-        await clean_db.execute(text("TRUNCATE TABLE business_case_years"))
-        await clean_db.execute(text("TRUNCATE TABLE projects"))
-        await clean_db.commit()
-
         # 创建项目
         project_id = str(uuid.uuid4())
         project = Project(
