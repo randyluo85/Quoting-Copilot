@@ -96,10 +96,10 @@ class TestDualTrackCalculation:
     async def test_process_cost_calculation(self):
         """测试工艺成本计算."""
         mock_rate = MagicMock()
-        mock_rate.std_mhr = Decimal("45.00")
-        mock_rate.std_labor = Decimal("30.00")
-        mock_rate.vave_mhr = Decimal("42.00")
-        mock_rate.vave_labor = Decimal("28.00")
+        # 模拟 std_hourly_rate = std_mhr + std_labor = 45 + 30 = 75
+        mock_rate.std_hourly_rate = Decimal("75.00")
+        # 模拟 vave_hourly_rate = vave_mhr + vave_labor = 42 + 28 = 70
+        mock_rate.vave_hourly_rate = Decimal("70.00")
         mock_rate.efficiency_factor = Decimal("0.95")
 
         with patch("app.services.calculation.select"):
