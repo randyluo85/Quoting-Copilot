@@ -70,6 +70,7 @@ $$ \sum (Qty \times P_{vave}) + \sum (CycleTime_{opt} \times (MHR_{vave} + Labor
 |------|------|---------|
 | [docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md) | 数据库结构唯一真理源 | 后端开发、DBA |
 | [docs/PAYBACK_LOGIC.md](docs/PAYBACK_LOGIC.md) | 投资回收期计算逻辑与 BOM 映射 | 全体开发者 |
+| [docs/BUSINESS_CASE_LOGIC.md](docs/BUSINESS_CASE_LOGIC.md) | Business Case 计算逻辑 (HK/SK/DB) | 全体开发者 |
 | [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) | 业务逻辑与 API 契约 | 全体开发者 |
 | [CLAUDE.md](CLAUDE.md) | AI 编码协作指南 | AI 助手、开发者 |
 | [README.md](README.md) | 项目概览与入门 | 新成员 |
