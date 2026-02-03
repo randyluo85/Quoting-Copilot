@@ -3,18 +3,18 @@ version: "3.8"
 services:
   mysql:
     image: mysql:8.0
-    container_name: smartquote-mysql
+    container_name: doha-mysql
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: smartquote
       MYSQL_USER: smartquote
       MYSQL_PASSWORD: smartpassword
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - doha_mysql_data:/var/lib/mysql
     networks:
-      - smartquote-net
+      - doha-net
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -23,17 +23,17 @@ services:
 
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: smartquote-postgres
+    container_name: doha-postgres
     environment:
       POSTGRES_DB: smartquote_vector
       POSTGRES_USER: smartquote
       POSTGRES_PASSWORD: smartpassword
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - doha_postgres_data:/var/lib/postgresql/data
     networks:
-      - smartquote-net
+      - doha-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U smartquote"]
       interval: 10s
@@ -42,13 +42,13 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: smartquote-redis
+    container_name: doha-redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
-      - redis_data:/data
+      - doha_redis_data:/data
     networks:
-      - smartquote-net
+      - doha-net
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -56,10 +56,10 @@ services:
       retries: 5
 
 volumes:
-  mysql_data:
-  postgres_data:
-  redis_data:
+  doha_mysql_data:
+  doha_postgres_data:
+  doha_redis_data:
 
 networks:
-  smartquote-net:
+  doha-net:
     driver: bridge
