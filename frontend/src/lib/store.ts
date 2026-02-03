@@ -21,6 +21,7 @@ interface ProjectState {
   fetchProjects: () => Promise<void>;
   createProject: (data: ProjectCreate) => Promise<ProjectData>;
   selectProject: (id: string | null) => void;
+  updateProject: (project: ProjectData) => void;
   clearError: () => void;
 }
 
