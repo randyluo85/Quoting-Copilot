@@ -26,17 +26,15 @@ import { useProjectStore } from '../lib/store';
 
 interface NewProjectProps {
   onNavigate: (view: View) => void;
-  onProjectCreated: (data: {
-    asacNumber: string;
-    customerNumber: string;
-    productVersion: string;
-    customerVersion: string;
-    clientName: string;
-    projectName: string;
-    annualVolume: string;
-    description: string;
-    products: Product[];
-  }) => void;
+  onProjectCreated?: (projectId: string) => void;
+}
+
+interface ProjectOwner {
+  sales: string;
+  vm: string;
+  ie: string;
+  pe: string;
+  controlling: string;
 }
 
 interface ProjectForm {
@@ -75,10 +73,12 @@ interface ParsedData {
 export function NewProject({ onNavigate, onProjectCreated }: NewProjectProps) {
   const [activeTab, setActiveTab] = useState<'manual' | 'import'>('manual');
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'parsing' | 'success' | 'error'>('idle');
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
   const [parseProgress, setParseProgress] = useState(0);
   const [fileName, setFileName] = useState('');
   const [parsedData, setParsedData] = useState<ParsedData | null>(null);
-  
+
   const [formData, setFormData] = useState<ProjectForm>({
     asacNumber: '',
     customerNumber: '',
@@ -89,6 +89,18 @@ export function NewProject({ onNavigate, onProjectCreated }: NewProjectProps) {
     annualVolume: '',
     description: ''
   });
+
+  // 负责人默认值
+  const [owners, setOwners] = useState<ProjectOwner>({
+    sales: '张三',
+    vm: '李四',
+    ie: '王五',
+    pe: '赵六',
+    controlling: '钱七'
+  });
+
+  // 获取创建项目的 store 方法
+  const createProjectAPI = useProjectStore((state) => state.createProject);
 
   const [touched, setTouched] = useState({
     clientName: false,
