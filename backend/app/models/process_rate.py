@@ -35,12 +35,12 @@ class ProcessRate(Base):
 
     # ========== v1.3 新增：MHR 拆分字段 ==========
     # 标准费率拆分
-    std_mhr_var: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)  # 变动费率
-    std_mhr_fix: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)  # 固定费率
+    std_mhr_var: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)  # 变动费率
+    std_mhr_fix: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)  # 固定费率
 
     # VAVE 费率拆分
-    vave_mhr_var: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)  # 变动费率
-    vave_mhr_fix: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)  # 固定费率
+    vave_mhr_var: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)  # 变动费率
+    vave_mhr_fix: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)  # 固定费率
 
     # ========== 向后兼容：保留原有字段作为计算属性 ==========
     # 注意：std_mhr 和 vave_mhr 不再是数据库列，而是 @property 计算属性
