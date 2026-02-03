@@ -465,6 +465,25 @@ CREATE INDEX idx_pproc_sequence ON product_processes(project_product_id, sequenc
 
 -- quote_summaries
 CREATE INDEX idx_qs_project ON quote_summaries(project_id);
+
+-- cost_centers (新增)
+CREATE INDEX idx_cc_status ON cost_centers(status);
+
+-- investment_items (新增)
+CREATE INDEX idx_inv_project ON investment_items(project_id);
+CREATE INDEX idx_inv_product ON investment_items(product_id);
+CREATE INDEX idx_inv_type ON investment_items(item_type);
+CREATE INDEX idx_inv_shared ON investment_items(is_shared, shared_source_id);
+
+-- amortization_strategies (新增)
+CREATE INDEX idx_amort_project ON amortization_strategies(project_id);
+
+-- business_case_params (新增)
+CREATE INDEX idx_bcp_project ON business_case_params(project_id);
+
+-- business_case_years (新增)
+CREATE INDEX idx_bcy_project ON business_case_years(project_id);
+CREATE INDEX idx_bcy_year ON business_case_years(year);
 ```
 
 ---
