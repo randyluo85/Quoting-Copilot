@@ -4,18 +4,13 @@ from app.config import Settings, get_settings
 
 settings: Settings = get_settings()
 
-# 创建异步引擎 - 添加连接池配置以避免超时
+# 创建异步引擎 - 简化连接池配置
 engine = create_async_engine(
     settings.mysql_url,
     echo=settings.DEBUG,
     pool_pre_ping=True,
     pool_size=5,
-    max_overflow=10,
-    pool_recycle=3600,  # 1小时回收连接
-    connect_args={
-        "charset": "utf8mb4",
-        "connect_timeout": 60,
-    }
+    max_overflow=5,
 )
 
 # 创建异步会话工厂
