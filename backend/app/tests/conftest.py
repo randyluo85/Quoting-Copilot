@@ -193,8 +193,10 @@ async def process_rate_without_vave(clean_db: AsyncSession):
     rate = ProcessRate(
         process_code="PROC-TEST-NO-VAVE",
         process_name="无 VAVE 费率工序",
-        std_mhr=Decimal("200.00"),
-        vave_mhr=None,
+        std_mhr_var=Decimal("150.00"),
+        std_mhr_fix=Decimal("50.00"),  # std_mhr_total = 200.00
+        vave_mhr_var=None,
+        vave_mhr_fix=None,
         efficiency_factor=Decimal("1.0"),
         work_center="测试车间",
         std_hourly_rate=Decimal("200.00"),
