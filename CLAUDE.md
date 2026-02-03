@@ -19,7 +19,7 @@
   | `README.md` | **General Overview** | 项目概览与环境搭建（面向新人） |
 
 ## 🛠 Tech Stack & Style
-- **Frontend:** Next.js (App Router), TypeScript, TailwindCSS, **ShadcnUI**.
+- **Frontend:** Vite 6 + React 18 + TypeScript, TailwindCSS, **ShadcnUI** (Radix UI primitives).
   - *Rule:* 保持 B 端界面极简，优先使用 Shadcn 组件。
 - **Backend:** Python 3.10+, **FastAPI**, SQLAlchemy, Pydantic.
   - *Rule:* 所有 API 输入输出必须严格遵循 Pydantic Schema。
