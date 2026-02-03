@@ -45,7 +45,7 @@ class TestE2E:
 class TestE2EWithDatabase:
     """需要数据库的端到端测试."""
 
-    async def test_list_projects_empty(self):
+    async def test_list_projects_empty(self, cleanup_engine):
         """测试获取空项目列表."""
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
