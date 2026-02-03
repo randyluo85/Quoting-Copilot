@@ -49,6 +49,9 @@ async def list_projects(
             products=p.products,
             owners=p.owners,
             status=p.status,
+            target_margin=p.target_margin,
+            owner=p.owner,
+            remarks=p.remarks,
             created_date=p.created_at.isoformat(),
             updated_date=p.updated_at.isoformat(),
         )
