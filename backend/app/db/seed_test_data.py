@@ -162,138 +162,113 @@ async def seed_materials():
 
 
 async def seed_process_rates():
-    """插入工艺费率测试数据."""
+    """插入工艺费率测试数据.
+
+    MHR (Machine Hour Rate) = 综合工时费率（元/小时）= 机时设备费 + 人工费
+    """
 
     test_rates = [
         # 铸造工艺
         ProcessRate(
             process_name="重力铸造",
             work_center="铸造车间",
-            std_mhr=45.00,
-            std_labor=35.00,
-            vave_mhr=42.00,
-            vave_labor=32.00,
+            std_hourly_rate=80.00,  # 45机时 + 35人工
+            vave_hourly_rate=74.00,  # 42机时 + 32人工
             efficiency_factor=1.0
         ),
         ProcessRate(
             process_name="低压铸造",
             work_center="铸造车间",
-            std_mhr=55.00,
-            std_labor=40.00,
-            vave_mhr=50.00,
-            vave_labor=36.00,
+            std_hourly_rate=95.00,  # 55机时 + 40人工
+            vave_hourly_rate=86.00,  # 50机时 + 36人工
             efficiency_factor=1.1
         ),
         # 机加工艺
         ProcessRate(
             process_name="CNC精加工",
             work_center="机加车间",
-            std_mhr=180.00,
-            std_labor=80.00,
-            vave_mhr=165.00,
-            vave_labor=72.00,
+            std_hourly_rate=260.00,  # 180机时 + 80人工
+            vave_hourly_rate=237.00,  # 165机时 + 72人工
             efficiency_factor=1.0
         ),
         ProcessRate(
             process_name="车削加工",
             work_center="机加车间",
-            std_mhr=120.00,
-            std_labor=60.00,
-            vave_mhr=110.00,
-            vave_labor=52.00,
+            std_hourly_rate=180.00,  # 120机时 + 60人工
+            vave_hourly_rate=162.00,  # 110机时 + 52人工
             efficiency_factor=0.95
         ),
         ProcessRate(
             process_name="铣削加工",
             work_center="机加车间",
-            std_mhr=150.00,
-            std_labor=70.00,
-            vave_mhr=135.00,
-            vave_labor=62.00,
+            std_hourly_rate=220.00,  # 150机时 + 70人工
+            vave_hourly_rate=197.00,  # 135机时 + 62人工
             efficiency_factor=0.98
         ),
         ProcessRate(
             process_name="钻孔加工",
             work_center="机加车间",
-            std_mhr=95.00,
-            std_labor=50.00,
-            vave_mhr=85.00,
-            vave_labor=45.00,
+            std_hourly_rate=145.00,  # 95机时 + 50人工
+            vave_hourly_rate=130.00,  # 85机时 + 45人工
             efficiency_factor=0.92
         ),
         # 表面处理
         ProcessRate(
             process_name="阳极氧化",
             work_center="表面处理车间",
-            std_mhr=25.00,
-            std_labor=15.00,
-            vave_mhr=23.00,
-            vave_labor=14.00,
+            std_hourly_rate=40.00,  # 25机时 + 15人工
+            vave_hourly_rate=37.00,  # 23机时 + 14人工
             efficiency_factor=1.0
         ),
         ProcessRate(
             process_name="镀锌",
             work_center="表面处理车间",
-            std_mhr=18.00,
-            std_labor=12.00,
-            vave_mhr=16.00,
-            vave_labor=11.00,
+            std_hourly_rate=30.00,  # 18机时 + 12人工
+            vave_hourly_rate=27.00,  # 16机时 + 11人工
             efficiency_factor=1.05
         ),
         ProcessRate(
             process_name="喷涂",
             work_center="喷涂车间",
-            std_mhr=22.00,
-            std_labor=18.00,
-            vave_mhr=20.00,
-            vave_labor=16.00,
+            std_hourly_rate=40.00,  # 22机时 + 18人工
+            vave_hourly_rate=36.00,  # 20机时 + 16人工
             efficiency_factor=0.95
         ),
         # 检测工艺
         ProcessRate(
             process_name="气密性检测",
             work_center="检测中心",
-            std_mhr=8.50,
-            std_labor=15.00,
-            vave_mhr=7.80,
-            vave_labor=14.00,
+            std_hourly_rate=23.50,  # 8.5机时 + 15人工
+            vave_hourly_rate=21.80,  # 7.8机时 + 14人工
             efficiency_factor=1.0
         ),
         ProcessRate(
             process_name="X射线检测",
             work_center="检测中心",
-            std_mhr=12.00,
-            std_labor=20.00,
-            vave_mhr=11.00,
-            vave_labor=18.00,
+            std_hourly_rate=32.00,  # 12机时 + 20人工
+            vave_hourly_rate=29.00,  # 11机时 + 18人工
             efficiency_factor=1.0
         ),
         ProcessRate(
             process_name="尺寸检测",
             work_center="检测中心",
-            std_mhr=5.00,
-            std_labor=10.00,
-            vave_mhr=4.50,
-            vave_labor=9.00,
+            std_hourly_rate=15.00,  # 5机时 + 10人工
+            vave_hourly_rate=13.50,  # 4.5机时 + 9人工
             efficiency_factor=1.0
         ),
         # 装配工艺
         ProcessRate(
             process_name="总装",
             work_center="装配线",
-            std_mhr=35.00,
-            std_labor=45.00,
-            vave_mhr=32.00,
-            vave_labor=40.00,
+            std_hourly_rate=80.00,  # 35机时 + 45人工
+            vave_hourly_rate=72.00,  # 32机时 + 40人工
             efficiency_factor=1.0
         ),
         ProcessRate(
             process_name="包装",
             work_center="包装车间",
-            std_mhr=15.00,
-            std_labor=20.00,
-            vave_mhr=14.00,
-            vave_labor=18.00,
+            std_hourly_rate=35.00,  # 15机时 + 20人工
+            vave_hourly_rate=32.00,  # 14机时 + 18人工
             efficiency_factor=1.0
         ),
     ]
