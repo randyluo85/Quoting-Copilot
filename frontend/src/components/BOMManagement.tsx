@@ -215,13 +215,106 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
     }
   };
 
-  // 模拟文件上传和AI解析
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 文件上传和AI解析 - 调用真实API
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setFileName(file.name);
-    
+
+    // 设置上传状态
+    setBomData(prev => ({
+      ...prev,
+      [selectedProduct.id]: {
+        productId: selectedProduct.id,
+        isUploaded: true,
+        isParsing: true,
+        parseProgress: 0,
+        isParsed: false,
+        materials: [],
+        processes: [],
+        uploadError: undefined
+      }
+    }));
+
+    try {
+      // 调用真实API上传BOM文件
+      const response = await api.bom.upload(project.id, file);
+
+      // 模拟解析进度动画
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        progress += 20;
+        setBomData(prev => ({
+          ...prev,
+          [selectedProduct.id]: {
+            ...prev[selectedProduct.id],
+            parseProgress: Math.min(progress, 90)
+          }
+        }));
+
+        if (progress >= 90) {
+          clearInterval(progressInterval);
+        }
+      }, 100);
+
+      // 转换API响应为前端格式
+      const materials: Material[] = response.materials.map((m, idx) => ({
+        id: m.id,
+        level: '一级',
+        partNumber: m.partNumber,
+        partName: m.partName,
+        version: '1.0',
+        type: '原材料',
+        status: '可用',
+        material: m.material || '其他',
+        supplier: m.supplier || '',
+        quantity: m.quantity,
+        unit: 'kg',
+        unitPrice: m.unitPrice,
+        vavePrice: m.vavePrice,
+        comments: m.comments || '',
+        hasHistoryData: m.hasHistoryData
+      }));
+
+      const processes: Process[] = []; // TODO: 从API响应获取工艺数据
+
+      // 完成解析
+      clearInterval(progressInterval);
+      setBomData(prev => ({
+        ...prev,
+        [selectedProduct.id]: {
+          ...prev[selectedProduct.id],
+          isParsing: false,
+          isParsed: true,
+          parseProgress: 100,
+          materials,
+          processes,
+          isRoutingKnown: false,
+          needsIEReview: materials.filter(m => !m.hasHistoryData).length > 0
+        }
+      }));
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '上传失败，请重试';
+      setBomData(prev => ({
+        ...prev,
+        [selectedProduct.id]: {
+          ...prev[selectedProduct.id],
+          isParsing: false,
+          isParsed: false,
+          uploadError: errorMessage
+        }
+      }));
+    }
+  };
+
+  // 模拟数据用于演示（保留原功能作为fallback）
+  const handleFileUploadMock = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setFileName(file.name);
+
     // 设置上传状态
     setBomData(prev => ({
       ...prev,
@@ -250,10 +343,10 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
 
       if (progress >= 100) {
         clearInterval(interval);
-        
+
         // 根据产品零件号精确判断
         const isMaturedProduct = selectedProduct.partNumber === 'ENG-CB-2024';
-        
+
         // 模拟AI解析结果
         const mockMaterials: Material[] = isMaturedProduct ? [
           // 产品1：铝合金发动机缸体 - 成熟路线，所有物料有历史数据
