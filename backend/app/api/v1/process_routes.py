@@ -383,17 +383,16 @@ async def update_process_route(
             db.add(item)
 
     await db.commit()
-    await db.refresh(route)
 
-    # 重新加载工序
-    items_result = await db.execute(
-        select(ProcessRouteItem)
-        .where(ProcessRouteItem.route_id == route_id)
-        .order_by(ProcessRouteItem.sequence)
+    # 重新查询以获取更新后的完整数据
+    result = await db.execute(
+        select(ProcessRoute)
+        .options(selectinload(ProcessRoute.items))
+        .where(ProcessRoute.id == route_id)
     )
-    route.items = items_result.scalars().all()
+    updated_route = result.scalar_one_or_none()
 
-    return JSONResponse(content=_route_to_response(route).model_dump(by_alias=True))
+    return JSONResponse(content=_route_to_response(updated_route).model_dump(by_alias=True))
 
 
 @router.delete("/{route_id}")
