@@ -179,7 +179,7 @@ async def list_process_routes(
     routes = result.scalars().all()
 
     return JSONResponse(
-        content=[_route_to_list_item(r).model_dump(by_alias=True) for r in routes]
+        content=[_route_to_list_item(r).model_dump(by_alias=True, mode='json') for r in routes]
     )
 
 
