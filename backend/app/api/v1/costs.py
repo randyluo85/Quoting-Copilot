@@ -11,7 +11,7 @@ from app.schemas.common import PricePair
 router = APIRouter()
 
 
-@router.post("/calculate", response_model=CostCalculationResponse)
+@router.post("/calculate", response_model=CostCalculationResponse, response_model_by_alias=True)
 async def calculate_cost(
     project_id: str,
     product_id: str,
