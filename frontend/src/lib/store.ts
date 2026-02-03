@@ -83,11 +83,20 @@ export interface Material {
   material: string;
   supplier: string;
   quantity: number;
+  unit?: string;
   unitPrice?: number;
   vavePrice?: number;
   hasHistoryData: boolean;
   comments: string;
   status?: 'verified' | 'warning' | 'missing';
+  // 新增字段（与后端对齐）
+  level?: string; // 物料层级
+  version?: string; // 版本
+  materialType?: string; // made/bought
+  stdCost?: number;
+  vaveCost?: number;
+  confidence?: number; // 匹配置信度 0-100
+  aiSuggestion?: string;
 }
 
 export interface Process {
@@ -99,6 +108,16 @@ export interface Process {
   unitPrice?: number;
   vavePrice?: number;
   hasHistoryData: boolean;
+  // 新增字段（与后端对齐）
+  processCode?: string; // 工序编码
+  sequenceOrder?: number; // 工序顺序
+  cycleTime?: number; // 工时（秒）
+  spec?: string; // 规格要求
+  unit?: string;
+  quantity?: number;
+  isOperationKnown?: boolean; // 该工序是否在系统中已知
+  stdCost?: number;
+  vaveCost?: number;
 }
 
 interface BOMState {
