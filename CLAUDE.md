@@ -33,34 +33,19 @@
 - **Install:** `pip install -r requirements.txt` / `npm install`
 - **Redis:** `docker run -d -p 6379:6379 redis:7-alpine`
 
-## 📜 Database Schema (不可变契约)
+## 📜 数据库快速索引
 
-**MySQL Schema (请复用此结构):**
+| 表名 | 用途 | 详细定义 |
+|------|------|---------|
+| `materials` | 物料主数据 | [DATABASE_DESIGN.md §3.1](docs/DATABASE_DESIGN.md#master-data) |
+| `process_rates` | 工序费率 | [DATABASE_DESIGN.md §3.1](docs/DATABASE_DESIGN.md#master-data) |
+| `projects` | 项目表 | [DATABASE_DESIGN.md §3.2](docs/DATABASE_DESIGN.md#transaction-data) |
+| `project_products` | 项目-产品 | [DATABASE_DESIGN.md §3.2](docs/DATABASE_DESIGN.md#transaction-data) |
+| `product_materials` | BOM 行 | [DATABASE_DESIGN.md §3.2](docs/DATABASE_DESIGN.md#transaction-data) |
+| `product_processes` | 工艺路线 | [DATABASE_DESIGN.md §3.2](docs/DATABASE_DESIGN.md#transaction-data) |
+| `quote_summaries` | 报价汇总 | [DATABASE_DESIGN.md §3.2](docs/DATABASE_DESIGN.md#transaction-data) |
 
-```sql
--- 1. 物料表 (带双价格)
-CREATE TABLE materials (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    item_code VARCHAR(50) UNIQUE,
-    name VARCHAR(100),
-    spec VARCHAR(255),
-    std_price DECIMAL(10, 4),    -- 标准单价
-    vave_price DECIMAL(10, 4),   -- VAVE单价
-    supplier_tier VARCHAR(20),   -- 供应商等级
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 2. 工艺费率表 (带双费率)
-CREATE TABLE process_rates (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    process_name VARCHAR(100),
-    std_mhr DECIMAL(10, 2),      -- 标准机时费
-    std_labor DECIMAL(10, 2),    -- 标准人工费
-    vave_mhr DECIMAL(10, 2),     -- 优化机时费
-    vave_labor DECIMAL(10, 2),   -- 优化人工费
-    efficiency_factor DECIMAL(4,2) DEFAULT 1.0
-);
-```
+> 完整设计文档：[docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md)
 
 ## 📝 API Data Models (Pydantic)
 
