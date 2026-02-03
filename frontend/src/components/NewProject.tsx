@@ -358,6 +358,21 @@ export function NewProject({ onNavigate, onProjectCreated }: NewProjectProps) {
 
           {/* Manual Creation Tab */}
           <TabsContent value="manual" className="space-y-6 mt-6">
+            {/* 项目基本信息 - 必填项在前 */}
+            <Card>
+              <CardHeader>
+                <CardTitle>项目基本信息</CardTitle>
+                <CardDescription>请填写以下必填字段</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {renderFormField('clientName', '客户名称', '例如：博世汽车部件（苏州）有限公司')}
+                {renderFormField('projectName', '项目名称', '例如：发动机零部件报价项目')}
+                {renderFormField('annualVolume', '项目年量', '例如：100000', 'input', '单位：件/年')}
+                {renderFormField('description', '项目描述', '请简要描述项目内容、技术要求等', 'textarea')}
+              </CardContent>
+            </Card>
+
+            {/* 项目编号信息 - 选填项在后 */}
             <Card>
               <CardHeader>
                 <CardTitle>项目编号信息</CardTitle>
@@ -408,19 +423,6 @@ export function NewProject({ onNavigate, onProjectCreated }: NewProjectProps) {
                     <p className="text-xs text-zinc-500">客户版本</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>项目基本信息</CardTitle>
-                <CardDescription>请填写以下必填字段</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {renderFormField('clientName', '客户名称', '例如：博世汽车部件（苏州）有限公司')}
-                {renderFormField('projectName', '项目名称', '例如：发动机零部件报价项目')}
-                {renderFormField('annualVolume', '项目年量', '例如：100000', 'input', '单位：件/年')}
-                {renderFormField('description', '项目描述', '请简要描述项目内容、技术要求等', 'textarea')}
               </CardContent>
             </Card>
           </TabsContent>
