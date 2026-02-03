@@ -67,9 +67,20 @@ async def db_session(test_client):
 @pytest.fixture
 async def clean_db(db_session: AsyncSession):
     """清空所有测试数据后的数据库会话."""
-    # 清理所有表数据
+    # 清理所有表数据（按依赖关系排序）
     await db_session.execute(text("SET FOREIGN_KEY_CHECKS=0"))
+    # Business Case 相关
+    await db_session.execute(text("TRUNCATE TABLE business_case_years"))
+    await db_session.execute(text("TRUNCATE TABLE business_case_params"))
+    # 投资相关
+    await db_session.execute(text("TRUNCATE TABLE amortization_strategies"))
+    await db_session.execute(text("TRUNCATE TABLE investment_items"))
+    # 报价相关
+    await db_session.execute(text("TRUNCATE TABLE quote_summaries"))
+    await db_session.execute(text("TRUNCATE TABLE product_processes"))
+    await db_session.execute(text("TRUNCATE TABLE product_materials"))
     await db_session.execute(text("TRUNCATE TABLE project_products"))
+    # 项目和主数据
     await db_session.execute(text("TRUNCATE TABLE projects"))
     await db_session.execute(text("TRUNCATE TABLE process_rates"))
     await db_session.execute(text("TRUNCATE TABLE materials"))
