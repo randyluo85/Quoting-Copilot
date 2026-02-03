@@ -140,6 +140,26 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
     );
   }
 
+  // 检查项目是否有产品
+  if (!project.products || project.products.length === 0) {
+    return (
+      <div className="p-8">
+        <div className="max-w-7xl mx-auto">
+          <Card>
+            <CardContent className="p-12 text-center">
+              <Package className="h-12 w-12 text-zinc-300 mx-auto mb-4" />
+              <h2 className="text-lg font-medium mb-2">该项目暂无产品</h2>
+              <p className="text-zinc-500 mb-4">请先为项目添加产品信息</p>
+              <Button onClick={() => onNavigate('dashboard')}>
+                返回项目列表
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   const [selectedProduct, setSelectedProduct] = useState<Product>(project.products[0]);
   const [bomData, setBomData] = useState<Record<string, ProductBOMData>>({});
   const [fileName, setFileName] = useState('');
