@@ -102,9 +102,17 @@ class TestProjectsAPI:
             "customerVersion": test_project.customer_version,
             "clientName": test_project.client_name,
             "projectName": test_project.project_name,
-            "annualVolume": test_project.annual_volume,
-            "description": test_project.description,
-            "products": [],
+            "annualVolume": str(test_project.annual_volume),  # 转换为字符串
+            "description": test_project.description or "",
+            "products": [
+                {
+                    "id": "P-001",
+                    "name": "测试产品",
+                    "partNumber": "PART-001",
+                    "annualVolume": 10000,
+                    "description": "测试产品描述"
+                }
+            ],
             "owners": {
                 "sales": "销售",
                 "vm": "项目经理",
