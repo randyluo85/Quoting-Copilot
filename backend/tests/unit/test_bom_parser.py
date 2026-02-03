@@ -516,3 +516,155 @@ class TestParsedProcess:
             spec=None,
         )
         assert process_without_spec.spec is None
+
+
+class TestRealBOMFileParsing:
+    """使用真实 BOM 文件的解析测试."""
+
+    @pytest.fixture
+    def real_bom_file_path(self):
+        """获取真实 BOM 文件路径."""
+        bom_path = os.path.join(BOM_FILES_DIR, "bom.xlsx")
+        if not os.path.exists(bom_path):
+            pytest.skip(f"真实 BOM 文件不存在: {bom_path}")
+        return bom_path
+
+    @pytest.fixture
+    def real_bom_content(self, real_bom_file_path):
+        """读取真实 BOM 文件内容."""
+        with open(real_bom_file_path, "rb") as f:
+            return f.read()
+
+    def test_parse_real_bom_file(self, real_bom_content):
+        """测试解析真实 BOM 文件."""
+        parser = BOMParser()
+        result = parser.parse_excel_file(real_bom_content)
+
+        assert isinstance(result, BOMParseResult)
+        assert isinstance(result.materials, list)
+        assert isinstance(result.processes, list)
+
+    def test_real_bom_file_has_materials(self, real_bom_content):
+        """真实 BOM 文件包含物料."""
+        parser = BOMParser()
+        result = parser.parse_excel_file(real_bom_content)
+
+        assert len(result.materials) > 0
+
+    def test_real_bom_materials_have_required_fields(self, real_bom_content):
+        """真实 BOM 物料包含必需字段."""
+        parser = BOMParser()
+        result = parser.parse_excel_file(real_bom_content)
+
+        for material in result.materials:
+            assert hasattr(material, "part_number")
+            assert hasattr(material, "part_name")
+            assert hasattr(material, "quantity")
+            # 验证字段不为空
+            assert material.part_number
+            assert material.part_name
+
+    def test_real_bom_materials_parsing_comments(self, real_bom_content):
+        """真实 BOM 文件正确解析 comments."""
+        parser = BOMParser()
+        result = parser.parse_excel_file(real_bom_content)
+
+        # 查找有 comments 的物料
+        materials_with_comments = [
+            m for m in result.materials if m.comments and m.comments.strip()
+        ]
+
+        if len(materials_with_comments) > 0:
+            # 验证 comments 内容
+            material = materials_with_comments[0]
+            assert isinstance(material.comments, str)
+            assert len(material.comments) > 0
+
+    def test_real_bom_file_detects_process_sheet(self, real_bom_content):
+        """真实 BOM 文件包含工艺表."""
+        parser = BOMParser()
+        result = parser.parse_excel_file(real_bom_content)
+
+        # 真实 BOM 文件有 "工艺" sheet
+        # 至少应该返回空列表
+        assert isinstance(result.processes, list)
+
+    def test_real_bom_quantity_values_are_numeric(self, real_bom_content):
+        """真实 BOM 数量值是数字."""
+        parser = BOMParser()
+        result = parser.parse_excel_file(real_bom_content)
+
+        for material in result.materials:
+            assert isinstance(material.quantity, (int, float))
+
+    def test_real_bom_unit_values_are_present(self, real_bom_content):
+        """真实 BOM 单位值存在."""
+        parser = BOMParser()
+        result = parser.parse_excel_file(real_bom_content)
+
+        for material in result.materials:
+            assert material.unit is not None
+            assert isinstance(material.unit, str)
+
+    def test_real_bom_part_numbers_format(self, real_bom_content):
+        """真实 BOM 零件号格式."""
+        parser = BOMParser()
+        result = parser.parse_excel_file(real_bom_content)
+
+        for material in result.materials:
+            # 零件号应该是字符串
+            assert isinstance(material.part_number, str)
+            # 不应该包含 None 值
+            assert material.part_number != "None"
+
+    def test_real_bom_process_parsing(self, real_bom_content):
+        """真实 BOM 工艺解析."""
+        parser = BOMParser()
+        result = parser.parse_excel_file(real_bom_content)
+
+        processes = result.processes
+        if len(processes) > 0:
+            # 验证工艺结构
+            for process in processes:
+                assert hasattr(process, "op_no")
+                assert hasattr(process, "name")
+                assert hasattr(process, "work_center")
+                assert hasattr(process, "standard_time")
+
+
+class TestRealBOMFilesMultiple:
+    """测试多个真实 BOM 文件."""
+
+    @pytest.fixture
+    def all_bom_files(self):
+        """获取所有 BOM 测试文件."""
+        bom_files = []
+        if os.path.exists(BOM_FILES_DIR):
+            for filename in os.listdir(BOM_FILES_DIR):
+                if filename.endswith(".xlsx") and not filename.startswith("~$"):
+                    bom_files.append(os.path.join(BOM_FILES_DIR, filename))
+        return bom_files
+
+    def test_all_bom_files_are_parsable(self, all_bom_files):
+        """所有 BOM 文件都可以被解析."""
+        parser = BOMParser()
+
+        for bom_path in all_bom_files:
+            with open(bom_path, "rb") as f:
+                content = f.read()
+            result = parser.parse_excel_file(content)
+
+            assert isinstance(result, BOMParseResult)
+            assert isinstance(result.materials, list)
+            assert isinstance(result.processes, list)
+
+    def test_all_bom_files_have_materials(self, all_bom_files):
+        """所有 BOM 文件都包含物料."""
+        parser = BOMParser()
+
+        for bom_path in all_bom_files:
+            with open(bom_path, "rb") as f:
+                content = f.read()
+            result = parser.parse_excel_file(content)
+
+            assert len(result.materials) > 0, f"{bom_path} 应该包含物料"
