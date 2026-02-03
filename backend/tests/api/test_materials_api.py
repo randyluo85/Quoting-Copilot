@@ -108,7 +108,8 @@ class TestMaterialsAPI:
             "status": "active"
         }
 
-        response = await async_client.put(f"/api/v1/materials/{test_material.id}", json=payload)
+        # API 使用 item_code 作为路径参数
+        response = await async_client.put(f"/api/v1/materials/{test_material.item_code}", json=payload)
 
         if response.status_code == 404:
             pytest.skip("Materials API not implemented yet")
@@ -123,7 +124,8 @@ class TestMaterialsAPI:
     @pytest.mark.asyncio
     async def test_delete_material(self, async_client, test_material):
         """删除物料"""
-        response = await async_client.delete(f"/api/v1/materials/{test_material.id}")
+        # API 使用 item_code 作为路径参数
+        response = await async_client.delete(f"/api/v1/materials/{test_material.item_code}")
 
         if response.status_code == 404:
             pytest.skip("Materials API not implemented yet")
