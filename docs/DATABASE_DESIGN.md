@@ -281,7 +281,7 @@ CREATE INDEX idx_qs_project ON quote_summaries(project_id);
 
 ---
 
-## 5. 设计原则
+## 5. 设计原则 {#principles}
 
 | 原则 | 实现方式 |
 |------|----------|
