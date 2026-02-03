@@ -245,3 +245,43 @@ async def delete_project(
     await db.commit()
 
     return JSONResponse(content={"message": "Project deleted successfully"})
+
+
+@router.get("/{project_id}/products")
+async def get_project_products(
+    project_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """获取项目的所有产品.
+
+    Args:
+        project_id: 项目 ID
+        db: 数据库会话
+
+    Returns:
+        项目产品列表
+    """
+    from app.models.project_product import ProjectProduct
+    from app.schemas.bom import ProjectProductResponse
+
+    result = await db.execute(
+        select(ProjectProduct)
+        .where(ProjectProduct.project_id == project_id)
+        .order_by(ProjectProduct.created_at)
+    )
+    products = result.scalars().all()
+
+    responses = [
+        ProjectProductResponse(
+            id=p.id,
+            project_id=p.project_id,
+            product_name=p.product_name,
+            product_code=p.product_code,
+            product_version=p.product_version,
+            route_code=p.route_code,
+            bom_file_path=p.bom_file_path,
+            created_at=p.created_at.isoformat(),
+        )
+        for p in products
+    ]
+    return JSONResponse(content=[r.model_dump(by_alias=True) for r in responses])
