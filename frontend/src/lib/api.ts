@@ -122,24 +122,24 @@ export interface ProjectCreate {
 export const api = {
   // ========== 项目相关 ==========
   projects: {
-    list: () => fetch<ProjectData[]>('/projects'),
+    list: () => apiRequest<ProjectData[]>('/projects'),
 
-    get: (id: string) => fetch<ProjectData>(`/projects/${id}`),
+    get: (id: string) => apiRequest<ProjectData>(`/projects/${id}`),
 
     create: (data: ProjectCreate) =>
-      fetch<ProjectData>('/projects', {
+      apiRequest<ProjectData>('/projects', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
 
     update: (id: string, data: Partial<ProjectCreate>) =>
-      fetch<ProjectData>(`/projects/${id}`, {
+      apiRequest<ProjectData>(`/projects/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       }),
 
     delete: (id: string) =>
-      fetch<void>(`/projects/${id}`, {
+      apiRequest<void>(`/projects/${id}`, {
         method: 'DELETE',
       }),
   },
@@ -151,10 +151,9 @@ export const api = {
       formData.append('file', file);
       formData.append('project_id', projectId);
 
-      const response = await fetch(`${API_BASE}/bom/upload?project_id=${projectId}`, {
+      const response = await window.fetch(`${API_BASE}/bom/upload?project_id=${projectId}`, {
         method: 'POST',
         body: formData,
-        // 不设置 Content-Type，让浏览器自动设置 multipart/form-data boundary
       });
 
       if (!response.ok) {
@@ -165,31 +164,31 @@ export const api = {
     },
 
     getMaterials: (projectId: string) =>
-      fetch<any>(`/bom/${projectId}/materials`),
+      apiRequest<any>(`/bom/${projectId}/materials`),
 
     getProcesses: (projectId: string) =>
-      fetch<any>(`/bom/${projectId}/processes`),
+      apiRequest<any>(`/bom/${projectId}/processes`),
   },
 
   // ========== 成本计算相关 ==========
   cost: {
     calculate: (projectId: string, productId: string) =>
-      fetch<any>(`/cost/calculate?project_id=${projectId}&product_id=${productId}`),
+      apiRequest<any>(`/cost/calculate?project_id=${projectId}&product_id=${productId}`),
 
     getResult: (projectId: string) =>
-      fetch<any>(`/cost/${projectId}`),
+      apiRequest<any>(`/cost/${projectId}`),
   },
 
   // ========== 报价相关 ==========
   quotation: {
     generate: (projectId: string) =>
-      fetch<any>(`/quotation/generate`, {
+      apiRequest<any>(`/quotation/generate`, {
         method: 'POST',
         body: JSON.stringify({ projectId }),
       }),
 
     get: (projectId: string) =>
-      fetch<any>(`/quotation/${projectId}`),
+      apiRequest<any>(`/quotation/${projectId}`),
   },
 };
 
