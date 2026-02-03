@@ -51,11 +51,16 @@ erDiagram
     projects ||--o{ project_products : "1:N 包含"
     project_products ||--o{ product_materials : "1:N 使用"
     project_products ||--o{ product_processes : "1:N 工艺路线"
+    project_products ||--o{ investment_items : "1:N 投资"
+    project_products ||--o| amortization_strategies : "1:1 分摊"
 
     materials ||--o{ product_materials : "1:N 被引用"
+    cost_centers ||--o{ process_rates : "1:N 所属"
     process_rates ||--o{ product_processes : "1:N 被引用"
 
     projects ||--|| quote_summaries : "1:1 汇总"
+    projects ||--o| business_case_params : "1:1 参数"
+    business_case_params ||--o{ business_case_years : "1:N 年度"
 
     projects {
         char36 id PK
@@ -67,11 +72,15 @@ erDiagram
         decimal target_margin
     }
 
-    project_products {
-        char36 id PK
-        char36 project_id FK
-        string product_name
-        string route_code
+    cost_centers {
+        varchar20 id PK "成本中心代码"
+        string name
+        decimal net_production_hours
+        decimal efficiency_rate
+        decimal plan_fx_rate
+        decimal avg_wages_per_hour
+        int useful_life_years
+        string status
     }
 
     materials {
@@ -95,9 +104,13 @@ erDiagram
     process_rates {
         int id PK
         varchar50 process_code UK "工序编码"
+        varchar20 cost_center_id FK "成本中心"
         string process_name
-        decimal std_mhr "含人工"
-        decimal vave_mhr "含人工"
+        decimal std_mhr_var "标准变动费率"
+        decimal std_mhr_fix "标准固定费率"
+        decimal vave_mhr_var "VAVE变动费率"
+        decimal vave_mhr_fix "VAVE固定费率"
+        decimal efficiency_factor
     }
 
     product_processes {
@@ -105,9 +118,35 @@ erDiagram
         char36 project_product_id FK
         varchar50 process_code FK
         int sequence_order
-        int cycle_time "工时(秒)"
+        int cycle_time_std "标准工时(秒)"
+        int cycle_time_vave "VAVE工时(秒)"
+        decimal personnel_std
+        decimal personnel_vave
         decimal std_cost
         decimal vave_cost
+    }
+
+    investment_items {
+        char36 id PK
+        char36 project_id FK
+        char36 product_id FK
+        varchar20 item_type "MOLD/GAUGE/JIG/FIXTURE"
+        string name
+        decimal unit_cost_est
+        string currency
+        int quantity
+        int asset_lifecycle
+        boolean is_shared
+    }
+
+    amortization_strategies {
+        char36 id PK
+        char36 project_id FK
+        varchar20 mode "UPFRONT/AMORTIZED"
+        int amortization_volume
+        int duration_years
+        decimal interest_rate
+        decimal calculated_unit_add
     }
 
     quote_summaries {
@@ -115,7 +154,43 @@ erDiagram
         char36 project_id FK
         decimal total_std_cost
         decimal total_vave_cost
+        decimal total_savings
+        decimal savings_rate
         decimal quoted_price
+        decimal actual_margin
+        decimal hk_3_cost
+        decimal sk_cost
+        decimal db_1
+        decimal db_4
+    }
+
+    business_case_params {
+        char36 id PK
+        char36 project_id FK
+        decimal tooling_invest
+        decimal rnd_invest
+        decimal base_price
+        decimal exchange_rate
+        varchar20 amortization_mode
+        decimal sa_rate
+    }
+
+    business_case_years {
+        char36 id PK
+        char36 project_id FK
+        int year
+        int volume
+        decimal reduction_rate
+        decimal gross_sales
+        decimal net_sales
+        decimal net_price
+        decimal hk_3_cost
+        decimal recovery_tooling
+        decimal recovery_rnd
+        decimal overhead_sa
+        decimal sk_cost
+        decimal db_1
+        decimal db_4
     }
 ```
 
