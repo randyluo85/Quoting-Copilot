@@ -50,7 +50,7 @@ async def upload_bom(
                 vave_price=None,
                 has_history_data=False,
                 comments=m.comments,
-                status=StatusLight.MISSING,
+                status=StatusLight.RED,
             )
         )
 
