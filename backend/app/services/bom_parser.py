@@ -281,13 +281,27 @@ class BOMParser:
             if not op_no or op_no.lower() in ["", "none", "op no", "工序号"]:
                 continue
 
+            # 安全获取各列数据，处理行数据不完整的情况
+            name = str(row[1]) if len(row) > 1 and row[1] else ""
+            work_center = str(row[2]) if len(row) > 2 and row[2] else ""
+
+            # 标准工时可能是分钟或小时，存储为分钟数
+            standard_time = 0
+            if len(row) > 3 and row[3] is not None:
+                try:
+                    standard_time = float(row[3])
+                except (ValueError, TypeError):
+                    standard_time = 0
+
+            spec = str(row[4]) if len(row) > 4 and row[4] else None
+
             processes.append(
                 ParsedProcess(
                     op_no=op_no,
-                    name=str(row[1] or ""),
-                    work_center=str(row[2] or ""),
-                    standard_time=float(row[3] or 0),
-                    spec=str(row[4]) if len(row) > 4 and row[4] else None,
+                    name=name,
+                    work_center=work_center,
+                    standard_time=standard_time,
+                    spec=spec,
                 )
             )
 
