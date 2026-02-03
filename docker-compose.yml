@@ -44,7 +44,7 @@ services:
     image: redis:7-alpine
     container_name: doha-redis
     ports:
-      - "6380:6379"
+      - "6379:6379"
     volumes:
       - doha_redis_data:/data
     networks:
