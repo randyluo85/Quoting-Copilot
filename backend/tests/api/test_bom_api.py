@@ -7,6 +7,7 @@
 """
 
 import pytest
+import os
 from httpx import AsyncClient, ASGITransport
 from io import BytesIO
 from openpyxl import Workbook
@@ -18,6 +19,10 @@ from sqlalchemy.pool import NullPool
 from sqlalchemy import text
 from app.config import get_settings
 from decimal import Decimal
+
+# 获取项目根目录（用于访问测试文件）
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+BOM_FILES_DIR = os.path.join(PROJECT_ROOT, "tests", "files")
 
 
 @pytest.fixture
