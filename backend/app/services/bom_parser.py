@@ -37,8 +37,54 @@ class BOMParseResult(NamedTuple):
     processes: list[ParsedProcess]
 
 
+class ColumnMapping(NamedTuple):
+    """列映射配置."""
+
+    level: int
+    part_number: int
+    part_name: int
+    version: int
+    type: int
+    status: int
+    material: int
+    supplier: int
+    quantity: int
+    unit: int
+    comments: int
+
+
 class BOMParser:
-    """BOM 文件解析器."""
+    """BOM 文件解析器 - 支持智能列检测."""
+
+    # 默认列映射（原始格式）
+    DEFAULT_MAPPING = ColumnMapping(
+        level=0,
+        part_number=1,
+        part_name=2,
+        version=3,
+        type=4,
+        status=5,
+        material=6,
+        supplier=7,
+        quantity=8,
+        unit=9,
+        comments=12,
+    )
+
+    # 实际 BOM 文件列映射（基于 tests/files/bom.xlsx）
+    ACTUAL_BOM_MAPPING = ColumnMapping(
+        level=0,
+        part_number=4,
+        part_name=5,
+        version=6,
+        type=7,
+        status=8,
+        material=9,
+        supplier=10,
+        quantity=11,
+        unit=12,
+        comments=13,
+    )
 
     def parse_excel_file(self, file_content: bytes) -> BOMParseResult:
         """解析 Excel BOM 文件（从内存）.
@@ -61,7 +107,9 @@ class BOMParser:
             sheet_type = self._detect_sheet_type(ws)
 
             if sheet_type == "material":
-                materials.extend(self._parse_material_sheet(ws))
+                # 智能检测列映射
+                header_row, mapping = self._detect_column_mapping(ws)
+                materials.extend(self._parse_material_sheet(ws, header_row, mapping))
             elif sheet_type == "process":
                 processes.extend(self._parse_process_sheet(ws))
 
@@ -72,10 +120,10 @@ class BOMParser:
 
         通过关键字检测工作表包含物料还是工艺数据。
         """
-        keywords_material = ["物料", "material", "bom", "item", "零件"]
+        keywords_material = ["物料", "material", "bom", "item", "零件", "bill of material"]
         keywords_process = ["工艺", "process", "operation", "工序", "op"]
 
-        for row in worksheet.iter_rows(min_row=1, max_row=5, values_only=True):
+        for row in worksheet.iter_rows(min_row=1, max_row=10, values_only=True):
             if not row:
                 continue
             row_text = " ".join(str(cell).lower() for cell in row if cell)
@@ -90,46 +138,119 @@ class BOMParser:
 
         return "unknown"
 
-    def _parse_material_sheet(self, worksheet) -> list[ParsedMaterial]:
+    def _detect_column_mapping(self, worksheet) -> tuple[int, ColumnMapping]:
+        """智能检测列映射和表头行位置.
+
+        Returns:
+            (header_row, column_mapping): 表头行号和列映射
+        """
+        # 查找表头行（包含 "Part Number" 或 "零件号" 的行）
+        header_row = 1
+        for i, row in enumerate(worksheet.iter_rows(min_row=1, max_row=10, values_only=True), 1):
+            row_text = " ".join(str(cell).lower() for cell in row if cell)
+            if "part number" in row_text or "零件号" in row_text:
+                header_row = i
+                break
+
+        # 检测列位置
+        col_map = {}
+        for col_idx, cell in enumerate(worksheet[header_row]):
+            if cell.value is None:
+                continue
+            cell_lower = str(cell.value).lower()
+
+            if "part number" in cell_lower or "零件号" in cell_lower:
+                col_map["part_number"] = col_idx
+            elif "part name" in cell_lower or "零件名称" in cell_lower:
+                col_map["part_name"] = col_idx
+            elif "ver" in cell_lower and "version" not in cell_lower:
+                col_map["version"] = col_idx
+            elif "qty" in cell_lower or "quantity" in cell_lower or "数量" in cell_lower:
+                col_map["quantity"] = col_idx
+            elif "unit" in cell_lower or "单位" in cell_lower:
+                col_map["unit"] = col_idx
+            elif "comments" in cell_lower or "备注" in cell_lower or "comment" in cell_lower:
+                col_map["comments"] = col_idx
+            elif "material" in cell_lower and "supplier" not in cell_lower:
+                col_map["material"] = col_idx
+            elif "supplier" in cell_lower or "供应商" in cell_lower:
+                col_map["supplier"] = col_idx
+            elif "typ" in cell_lower and "part" not in cell_lower:
+                col_map["type"] = col_idx
+            elif "st" in cell_lower and len(cell_lower) <= 3:
+                col_map["status"] = col_idx
+            elif "level" in cell_lower or "层级" in cell_lower:
+                col_map["level"] = col_idx
+
+        # 如果检测到足够的关键列，使用检测到的映射
+        if len(col_map) >= 5:
+            return header_row, ColumnMapping(
+                level=col_map.get("level", 0),
+                part_number=col_map.get("part_number", 1),
+                part_name=col_map.get("part_name", 2),
+                version=col_map.get("version", 3),
+                type=col_map.get("type", 4),
+                status=col_map.get("status", 5),
+                material=col_map.get("material", 6),
+                supplier=col_map.get("supplier", 7),
+                quantity=col_map.get("quantity", 8),
+                unit=col_map.get("unit", 9),
+                comments=col_map.get("comments", 10),
+            )
+
+        # 否则使用默认映射
+        return header_row, self.DEFAULT_MAPPING
+
+    def _parse_material_sheet(
+        self, worksheet, header_row: int, mapping: ColumnMapping
+    ) -> list[ParsedMaterial]:
         """解析物料工作表.
 
-        默认列映射:
-        - Col 0: Level (层级)
-        - Col 1: Part Number (零件号)
-        - Col 2: Part Name (零件名称)
-        - Col 3: Version (版本)
-        - Col 4: Type (类型)
-        - Col 5: Status (状态)
-        - Col 6: Material (材质)
-        - Col 7: Supplier (供应商)
-        - Col 8: Quantity (数量)
-        - Col 9: Unit (单位)
-        - Col 12: Comments (备注)
+        Args:
+            worksheet: 工作表对象
+            header_row: 表头行号
+            mapping: 列映射配置
         """
         materials = []
 
-        for row in worksheet.iter_rows(min_row=2, values_only=True):
-            if not row or not row[1]:
+        for row in worksheet.iter_rows(min_row=header_row + 1, values_only=True):
+            if not row or len(row) <= max(mapping.part_number, mapping.quantity):
                 continue
 
-            # 跳过空行或标题行
-            part_number = str(row[1]).strip()
-            if not part_number or part_number.lower() in ["", "none", "part number", "零件号"]:
+            # 获取零件号
+            part_number_cell = row[mapping.part_number] if mapping.part_number < len(row) else None
+            if not part_number_cell:
                 continue
+
+            part_number = str(part_number_cell).strip()
+            if (
+                not part_number
+                or part_number.lower() in ["", "none", "part number", "零件号"]
+                or part_number.isdigit()
+            ):
+                continue
+
+            # 获取数量
+            quantity = 0
+            if mapping.quantity < len(row) and row[mapping.quantity] is not None:
+                try:
+                    quantity = float(row[mapping.quantity])
+                except (ValueError, TypeError):
+                    quantity = 0
 
             materials.append(
                 ParsedMaterial(
-                    level=str(row[0] or ""),
+                    level=str(row[mapping.level] or "") if mapping.level < len(row) else "1",
                     part_number=part_number,
-                    part_name=str(row[2] or ""),
-                    version=str(row[3] or "1.0"),
-                    type=str(row[4] or "原材料"),
-                    status=str(row[5] or "可用"),
-                    material=str(row[6] or ""),
-                    supplier=str(row[7] or ""),
-                    quantity=float(row[8] or 0),
-                    unit=str(row[9] or "个"),
-                    comments=str(row[12] if len(row) > 12 else ""),
+                    part_name=str(row[mapping.part_name] or "") if mapping.part_name < len(row) else "",
+                    version=str(row[mapping.version] or "1.0") if mapping.version < len(row) else "1.0",
+                    type=str(row[mapping.type] or "I") if mapping.type < len(row) else "I",
+                    status=str(row[mapping.status] or "N") if mapping.status < len(row) else "N",
+                    material=str(row[mapping.material] or "") if mapping.material < len(row) else "",
+                    supplier=str(row[mapping.supplier] or "") if mapping.supplier < len(row) else "",
+                    quantity=quantity,
+                    unit=str(row[mapping.unit] or "PC") if mapping.unit < len(row) else "PC",
+                    comments=str(row[mapping.comments] or "") if mapping.comments < len(row) else "",
                 )
             )
 
@@ -147,7 +268,15 @@ class BOMParser:
         """
         processes = []
 
-        for row in worksheet.iter_rows(min_row=2, values_only=True):
+        # 查找表头行
+        header_row = 1
+        for i, row in enumerate(worksheet.iter_rows(min_row=1, max_row=10, values_only=True), 1):
+            row_text = " ".join(str(cell).lower() for cell in row if cell)
+            if "op no" in row_text or "工序号" in row_text or "operation" in row_text:
+                header_row = i
+                break
+
+        for row in worksheet.iter_rows(min_row=header_row + 1, values_only=True):
             if not row or not row[0]:
                 continue
 
