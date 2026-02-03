@@ -366,7 +366,7 @@ stateDiagram-v2
 
 ---
 
-## 7. 业务概念详解
+## 6. 业务概念详解
 
 ### 7.1 双轨计价 (Dual-Track Pricing)
 
