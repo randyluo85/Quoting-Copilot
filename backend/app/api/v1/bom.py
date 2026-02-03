@@ -56,9 +56,11 @@ async def upload_bom(
 
     # TODO: 转换工艺数据
 
-    return JSONResponse(content={
-        "parseId": f"parse-{project_id}",
-        "status": "completed",
-        "materials": [m.model_dump(by_alias=True) for m in materials],
-        "processes": [],
-    })
+    return JSONResponse(
+        content={
+            "parseId": f"parse-{project_id}",
+            "status": "completed",
+            "materials": [m.model_dump(by_alias=True) for m in materials],
+            "processes": [],
+        }
+    )

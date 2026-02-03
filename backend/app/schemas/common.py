@@ -16,6 +16,7 @@ class PricePair(BaseModel):
 
 class StatusLight(str, Enum):
     """红绿灯状态"""
+
     GREEN = "verified"
     YELLOW = "warning"
     RED = "missing"

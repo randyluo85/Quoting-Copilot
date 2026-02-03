@@ -3,7 +3,6 @@
 import pytest
 from decimal import Decimal
 from unittest.mock import AsyncMock, MagicMock, patch
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.calculation import DualTrackCalculator
 
@@ -30,16 +29,13 @@ class TestDualTrackCalculation:
         assert result.std == Decimal("0.00")
         assert result.vave == Decimal("0.00")
 
-    @pytest.mark.asyncio
     async def test_material_not_found(self):
         """测试物料不存在."""
-        # Mock execute 返回标量为 None 的结果
-        with patch("app.services.calculation.select") as mock_select:
-            mock_result = AsyncMock()
-            mock_result.scalar_one_or_none = MagicMock(return_value=None)
-
-            mock_execute = AsyncMock()
-            mock_execute.return_value = mock_result
+        with patch("app.services.calculation.select"):
+            async def mock_execute(*args, **kwargs):
+                mock_result = AsyncMock()
+                mock_result.scalar_one_or_none = MagicMock(return_value=None)
+                return mock_result
 
             db = AsyncMock()
             db.execute = mock_execute
@@ -52,17 +48,15 @@ class TestDualTrackCalculation:
 
     async def test_material_cost_calculation(self):
         """测试物料成本计算."""
-        # 创建模拟物料数据
         mock_material = MagicMock()
         mock_material.std_price = Decimal("100.00")
         mock_material.vave_price = Decimal("85.00")
 
-        with patch("app.services.calculation.select") as mock_select:
-            mock_result = AsyncMock()
-            mock_result.scalar_one_or_none = MagicMock(return_value=mock_material)
-
-            mock_execute = AsyncMock()
-            mock_execute.return_value = mock_result
+        with patch("app.services.calculation.select"):
+            async def mock_execute(*args, **kwargs):
+                mock_result = AsyncMock()
+                mock_result.scalar_one_or_none = MagicMock(return_value=mock_material)
+                return mock_result
 
             db = AsyncMock()
             db.execute = mock_execute
@@ -77,12 +71,12 @@ class TestDualTrackCalculation:
 
     async def test_material_cost_no_vave_price(self):
         """测试物料成本计算 - 无 VAVE 价格."""
-        # VAVE 价格为空时使用标准价格
         mock_material = MagicMock()
         mock_material.std_price = Decimal("100.00")
         mock_material.vave_price = None
 
         with patch("app.services.calculation.select"):
+
             async def mock_execute(*args, **kwargs):
                 mock_result = AsyncMock()
                 mock_result.scalar_one_or_none = MagicMock(return_value=mock_material)
@@ -101,7 +95,6 @@ class TestDualTrackCalculation:
 
     async def test_process_cost_calculation(self):
         """测试工艺成本计算."""
-        # 创建模拟工艺费率数据
         mock_rate = MagicMock()
         mock_rate.std_mhr = Decimal("45.00")
         mock_rate.std_labor = Decimal("30.00")
@@ -110,6 +103,7 @@ class TestDualTrackCalculation:
         mock_rate.efficiency_factor = Decimal("0.95")
 
         with patch("app.services.calculation.select"):
+
             async def mock_execute(*args, **kwargs):
                 mock_result = AsyncMock()
                 mock_result.scalar_one_or_none = MagicMock(return_value=mock_rate)
@@ -128,7 +122,6 @@ class TestDualTrackCalculation:
             assert result.savings == Decimal("21.25")
 
     def test_savings_calculation(self):
-        """测试节省率计算."""
         """测试节省率计算."""
         std = Decimal("100.00")
         vave = Decimal("85.00")

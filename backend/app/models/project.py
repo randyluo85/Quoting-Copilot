@@ -13,6 +13,7 @@ class ProjectStatus(str, enum.Enum):
 
 class Project(Base):
     """项目表"""
+
     __tablename__ = "projects"
 
     id: Mapped[str] = mapped_column(String(50), primary_key=True)
@@ -28,6 +29,10 @@ class Project(Base):
     products: Mapped[dict] = mapped_column(JSON)
     owners: Mapped[dict] = mapped_column(JSON)
 
-    status: Mapped[ProjectStatus] = mapped_column(SQLEnum(ProjectStatus), default=ProjectStatus.DRAFT)
+    status: Mapped[ProjectStatus] = mapped_column(
+        SQLEnum(ProjectStatus), default=ProjectStatus.DRAFT
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )

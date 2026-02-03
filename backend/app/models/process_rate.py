@@ -6,6 +6,7 @@ from app.db.session import Base
 
 class ProcessRate(Base):
     """工艺费率表 - 带双费率"""
+
     __tablename__ = "process_rates"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -23,4 +24,6 @@ class ProcessRate(Base):
     efficiency_factor: Mapped[float] = mapped_column(Numeric(4, 2), default=1.0)
 
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
