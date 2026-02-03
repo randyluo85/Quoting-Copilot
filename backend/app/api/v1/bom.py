@@ -137,7 +137,7 @@ async def upload_bom(
     processes = []
     for idx, (proc_name, rate_data) in enumerate(sorted(processes_with_rate.items())):
         processes.append(
-            ProcessResponse(
+            BOMProcessResponse(
                 id=f"P-{idx + 1:03d}",
                 op_no=f"{idx + 1:03d}",
                 name=proc_name,
