@@ -127,11 +127,11 @@ async def test_material(db_session):
 
 @pytest.fixture
 async def test_process_rate(db_session):
-    """创建测试工序费率"""
+    """创建测试工序费率（使用唯一编码避免冲突）"""
+    suffix = uuid.uuid4().hex[:6].upper()
     process_rate = ProcessRate(
-        id=1,
-        process_code="PROC-001",
-        process_name="测试工序",
+        process_code=f"PROC-{suffix}",
+        process_name=f"测试工序-{suffix}",
         equipment="设备A",
         std_mhr=Decimal("100.00"),
         vave_mhr=Decimal("90.00"),
