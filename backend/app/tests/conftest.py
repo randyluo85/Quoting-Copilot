@@ -9,7 +9,7 @@ from app.main import app
 from app.db.session import get_db
 
 
-@pytest.fixture
+@pytest.fixture(scope="class")
 async def test_client():
     """创建测试用的 HTTP 客户端.
 
