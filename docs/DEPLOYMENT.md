@@ -210,7 +210,7 @@ VITE_API_BASE_URL=http://localhost:8000/api/v1
 VITE_WS_URL=ws://localhost:8000/ws
 
 # 应用配置
-VITE_APP_NAME=SmartQuote
+VITE_APP_NAME=Dr.aiVOSS
 VITE_APP_VERSION=2.0.0
 ```
 
