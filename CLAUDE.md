@@ -1,11 +1,11 @@
-# CLAUDE.md - SmartQuote 协作指南
+# CLAUDE.md - Dr.aiVOSS 协作指南
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.2   | 2026-02-02 | 2026-02-03 | SmartQuote AI 协作指南 | Randy Luo |
+| v1.3   | 2026-02-02 | 2026-02-03 | Dr.aiVOSS AI 协作指南 | Randy Luo |
 
 ## 🧠 Memory Bank (核心记忆)
-**Project:** SmartQuote MVP (Dual-Price Edition) v2.0
+**Project:** Dr.aiVOSS 智能快速报价助手 (Quoting-Copilot) v2.0
 **Context:** 这是一个 AI 辅助的制造业报价系统，核心逻辑是"双轨计价"（标准价 vs VAVE 优化价）。
 
 - **👉 CRITICAL RULE:** Before writing any code or answering logic questions, you MUST read `PROJECT_CONTEXT.md`. It is the "Single Source of Truth" for business logic and database schema.

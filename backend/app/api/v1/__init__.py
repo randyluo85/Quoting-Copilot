@@ -1,5 +1,21 @@
 """API v1 package."""
 
-from app.api.v1 import projects, bom, costs, project_products, materials
+from app.api.v1 import (
+    projects,
+    bom,
+    costs,
+    project_products,
+    materials,
+    investments,
+    business_case,
+)
 
-__all__ = ["projects", "bom", "costs", "project_products", "materials"]
+__all__ = [
+    "projects",
+    "bom",
+    "costs",
+    "project_products",
+    "materials",
+    "investments",
+    "business_case",
+]

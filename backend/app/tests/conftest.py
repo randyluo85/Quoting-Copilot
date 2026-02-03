@@ -67,12 +67,24 @@ async def db_session(test_client):
 @pytest.fixture
 async def clean_db(db_session: AsyncSession):
     """清空所有测试数据后的数据库会话."""
-    # 清理所有表数据
+    # 清理所有表数据（按依赖关系排序）
     await db_session.execute(text("SET FOREIGN_KEY_CHECKS=0"))
+    # Business Case 相关
+    await db_session.execute(text("TRUNCATE TABLE business_case_years"))
+    await db_session.execute(text("TRUNCATE TABLE business_case_params"))
+    # 投资相关
+    await db_session.execute(text("TRUNCATE TABLE amortization_strategies"))
+    await db_session.execute(text("TRUNCATE TABLE investment_items"))
+    # 报价相关
+    await db_session.execute(text("TRUNCATE TABLE quote_summaries"))
+    await db_session.execute(text("TRUNCATE TABLE product_processes"))
+    await db_session.execute(text("TRUNCATE TABLE product_materials"))
     await db_session.execute(text("TRUNCATE TABLE project_products"))
+    # 项目和主数据
     await db_session.execute(text("TRUNCATE TABLE projects"))
     await db_session.execute(text("TRUNCATE TABLE process_rates"))
     await db_session.execute(text("TRUNCATE TABLE materials"))
+    await db_session.execute(text("TRUNCATE TABLE cost_centers"))
     await db_session.execute(text("SET FOREIGN_KEY_CHECKS=1"))
     await db_session.commit()
     yield db_session
@@ -171,8 +183,10 @@ async def process_rate_with_dual_rate(clean_db: AsyncSession):
     rate = ProcessRate(
         process_code="PROC-TEST-DUAL",
         process_name="双轨费率测试工序",
-        std_mhr=Decimal("260.00"),
-        vave_mhr=Decimal("237.00"),
+        std_mhr_var=Decimal("200.00"),
+        std_mhr_fix=Decimal("60.00"),  # std_mhr_total = 260.00
+        vave_mhr_var=Decimal("180.00"),
+        vave_mhr_fix=Decimal("57.00"),  # vave_mhr_total = 237.00
         efficiency_factor=Decimal("1.0"),
         work_center="测试车间",
         std_hourly_rate=Decimal("260.00"),
@@ -190,8 +204,10 @@ async def process_rate_without_vave(clean_db: AsyncSession):
     rate = ProcessRate(
         process_code="PROC-TEST-NO-VAVE",
         process_name="无 VAVE 费率工序",
-        std_mhr=Decimal("200.00"),
-        vave_mhr=None,
+        std_mhr_var=Decimal("150.00"),
+        std_mhr_fix=Decimal("50.00"),  # std_mhr_total = 200.00
+        vave_mhr_var=None,
+        vave_mhr_fix=None,
         efficiency_factor=Decimal("1.0"),
         work_center="测试车间",
         std_hourly_rate=Decimal("200.00"),

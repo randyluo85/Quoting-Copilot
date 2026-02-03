@@ -2,13 +2,13 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.0   | 2026-02-03 | 2026-02-03 | NRE 投资成本计算逻辑 | Randy Luo |
+| v1.1   | 2026-02-03 | 2026-02-03 | NRE 投资成本计算逻辑 | Randy Luo |
 
 ---
 
 ## 1. 核心定义与分类
 
-**NRE (Non-Recurring Engineering)** 费用是指为了生产特定产品而发生的一次性投入。在 SmartQuote 系统中，NRE 不随订单数量线性增加，而是作为**"资产"**进行管理。
+**NRE (Non-Recurring Engineering)** 费用是指为了生产特定产品而发生的一次性投入。在 Dr.aiVOSS 系统中，NRE 不随订单数量线性增加，而是作为**"资产"**进行管理。
 
 系统将 NRE 分为四大类（Enum: `InvestmentType`）：
 
@@ -243,7 +243,7 @@ class InvestmentCalculationResult(BaseModel):
 ```mermaid
 sequenceDiagram
     participant IE as IE/PE (工程师)
-    participant SYS as SmartQuote 系统
+    participant SYS as Dr.aiVOSS 系统
     participant DB as 历史价格库
     participant SALES as Sales (销售)
 

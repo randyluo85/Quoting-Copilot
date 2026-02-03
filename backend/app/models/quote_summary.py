@@ -33,6 +33,15 @@ class QuoteSummary(Base):
     quoted_price: Mapped[float | None] = mapped_column(Numeric(14, 4))
     # 实际利润率 (%)
     actual_margin: Mapped[float | None] = mapped_column(Numeric(5, 2))
+    # Business Case 扩展字段
+    # HK III 制造成本
+    hk_3_cost: Mapped[float | None] = mapped_column(Numeric(14, 4))
+    # SK 完全成本
+    sk_cost: Mapped[float | None] = mapped_column(Numeric(14, 4))
+    # DB I 边际贡献 I
+    db_1: Mapped[float | None] = mapped_column(Numeric(14, 4))
+    # DB IV 净利润
+    db_4: Mapped[float | None] = mapped_column(Numeric(14, 4))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
