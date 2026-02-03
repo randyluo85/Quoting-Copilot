@@ -360,9 +360,9 @@ class TestBOMParserSheetTypeDetection:
         ws.title = "Material BOM"
 
         # 表头包含物料关键字
-        headers = ["Bill of Material", "Item", "Part Number"]
+        headers = ["Bill of Material", "Item", "Part Number", "Qty", "Material"]
         ws.append(headers)
-        ws.append(["", "100", "MAT-001"])
+        ws.append(["", "100", "MAT-001", 1.0, "铝"])
 
         output = BytesIO()
         wb.save(output)
@@ -382,9 +382,9 @@ class TestBOMParserSheetTypeDetection:
         ws = wb.active
         ws.title = "Process Sheet"
 
-        headers = ["Operation", "Op No", "Name", "Work Center", "Standard Time"]
+        headers = ["Operation", "Op No", "Name", "Work Center", "Standard Time", "Description"]
         ws.append(headers)
-        ws.append(["", "010", "焊接", "焊接车间", 2.5])
+        ws.append(["", "010", "焊接", "焊接车间", 2.5, "对接焊"])
 
         output = BytesIO()
         wb.save(output)
@@ -405,9 +405,9 @@ class TestBOMParserSheetTypeDetection:
         ws = wb.active
         ws.title = "物料表"
 
-        headers = ["零件号", "零件名称", "数量"]
+        headers = ["零件号", "零件名称", "数量", "单位", "备注"]
         ws.append(headers)
-        ws.append(["MAT-CN", "中文物料", 10])
+        ws.append(["MAT-CN", "中文物料", 10, "kg", "备注"])
 
         output = BytesIO()
         wb.save(output)
