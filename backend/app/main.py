@@ -25,6 +25,7 @@ app.include_router(projects.router, prefix="/api/v1/projects", tags=["projects"]
 app.include_router(project_products.router, prefix="/api/v1/project-products", tags=["project-products"])
 app.include_router(bom.router, prefix="/api/v1/bom", tags=["bom"])
 app.include_router(costs.router, prefix="/api/v1/cost", tags=["costs"])
+app.include_router(materials.router, prefix="/api/v1/materials", tags=["materials"])
 
 
 @app.get("/health")
