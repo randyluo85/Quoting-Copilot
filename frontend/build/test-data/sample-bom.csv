@@ -1,0 +1,6 @@
+Line,Item Code,Part Name,Material,Spec,Quantity,Unit,Supplier,Process,OP No,Work Center,Std Time,Comments
+1,MAT-A356,A356铝合金,A356,T6,3.5,kg,供应商A,铸造,010,铸造车间,2.5,铸造级材料 符合GB/T 1173
+2,MAT-AL6061,6061铝棒,AL6061,T6,1.2,kg,供应商B,切割,020,机加车间,0.8,标准铝棒
+3,MAT-STEEL,不锈钢螺丝,304,M5,8,pcs,供应商C,装配,030,装配线,0.2,标准件
+4,MAT-PA66,PA66塑料,PA66,GF30,0.5,kg,供应商D,注塑,040,注塑车间,1.5,含30%玻纤
+5,MAT-RUBBER,橡胶密封圈,NBR,Standard,4,pcs,供应商E,装配,050,装配线,0.1,耐油密封圈

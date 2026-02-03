@@ -1,0 +1,63 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: doha-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: smartquote
+      MYSQL_USER: smartquote
+      MYSQL_PASSWORD: smartpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - doha_mysql_data:/var/lib/mysql
+    networks:
+      - doha-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: doha-postgres
+    environment:
+      POSTGRES_DB: smartquote_vector
+      POSTGRES_USER: smartquote
+      POSTGRES_PASSWORD: smartpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - doha_postgres_data:/var/lib/postgresql/data
+    networks:
+      - doha-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartquote"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: doha-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - doha_redis_data:/data
+    networks:
+      - doha-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  doha_mysql_data:
+  doha_postgres_data:
+  doha_redis_data:
+
+networks:
+  doha-net:
+    driver: bridge
