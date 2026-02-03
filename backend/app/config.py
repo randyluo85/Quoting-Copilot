@@ -31,12 +31,12 @@ class Settings(BaseSettings):
     REDIS_PASSWORD: str = ""
 
     # 阿里云 DashScope
-    DASHSCOPE_API_KEY: str
+    DASHSCOPE_API_KEY: str = "sk-test-key"
     DASHSCOPE_MODEL: str = "qwen-plus"
     DASHSCOPE_BASE_URL: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 
     # JWT
-    SECRET_KEY: str
+    SECRET_KEY: str = "test-secret-key-for-development-only"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
