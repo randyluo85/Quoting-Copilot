@@ -64,7 +64,22 @@ $$ \sum (Qty \times P_{std}) + \sum (CycleTime_{std} \times (MHR_{std} + Labor_{
 **VAVE Cost (目标成本):**
 $$ \sum (Qty \times P_{vave}) + \sum (CycleTime_{opt} \times (MHR_{vave} + Labor_{vave})) $$
 
-## 6. 设计文档
+## 6. 🚀 快速找到你要的文档
+
+| 我想... | 查看文档 |
+|---------|----------|
+| 了解项目全貌 | [README.md](README.md) ← 当前文档 |
+| 理解业务逻辑 | [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) |
+| 开始开发 | [CLAUDE.md](CLAUDE.md) |
+| 理解产品需求 | [docs/PRD.md](docs/PRD.md) |
+| 查看数据库设计 | [docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md) |
+| 查找术语定义 | [docs/GLOSSARY.md](docs/GLOSSARY.md) |
+| 部署系统 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
+| 测试指南 | [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) |
+| API 参考 | [docs/API_REFERENCE.md](docs/API_REFERENCE.md) |
+| 文档变更记录 | [docs/CHANGELOG.md](docs/CHANGELOG.md) |
+
+### 完整文档索引
 
 | 文档 | 用途 | 目标读者 |
 |------|------|---------|
