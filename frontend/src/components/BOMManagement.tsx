@@ -1293,6 +1293,117 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
           )}
         </div>
       </div>
+
+      {/* 新增产品对话框 */}
+      <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              新增产品
+            </DialogTitle>
+            <DialogDescription>
+              为项目 {project.id} 添加新产品，带 * 的字段为必填项
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* 产品名称 - 必填 */}
+            <div className="space-y-2">
+              <Label htmlFor="productName">
+                产品名称 <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="productName"
+                value={newProduct.name}
+                onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                placeholder="例如：发动机缸体"
+                disabled={isAddingProduct}
+              />
+            </div>
+
+            {/* 产品编码 - 必填 */}
+            <div className="space-y-2">
+              <Label htmlFor="productCode">
+                产品编码 <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="productCode"
+                value={newProduct.code}
+                onChange={(e) => setNewProduct({ ...newProduct, code: e.target.value })}
+                placeholder="例如：PRT-2024-001"
+                disabled={isAddingProduct}
+              />
+            </div>
+
+            {/* 工艺路线编码 - 非必填 */}
+            <div className="space-y-2">
+              <Label htmlFor="routeCode">工艺路线编码</Label>
+              <Input
+                id="routeCode"
+                value={newProduct.routeCode}
+                onChange={(e) => setNewProduct({ ...newProduct, routeCode: e.target.value })}
+                placeholder="例如：RT-AL-CASTING（可选）"
+                disabled={isAddingProduct}
+              />
+              <p className="text-xs text-zinc-500">
+                如果已知工艺路线编码，请填写以自动关联工艺路线
+              </p>
+            </div>
+
+            {/* 年产量 */}
+            <div className="space-y-2">
+              <Label htmlFor="annualVolume">年产量</Label>
+              <Input
+                id="annualVolume"
+                type="number"
+                value={newProduct.annualVolume}
+                onChange={(e) => setNewProduct({ ...newProduct, annualVolume: e.target.value })}
+                placeholder="默认使用项目年产量"
+                disabled={isAddingProduct}
+              />
+            </div>
+
+            {/* 描述 */}
+            <div className="space-y-2">
+              <Label htmlFor="description">产品描述</Label>
+              <Input
+                id="description"
+                value={newProduct.description}
+                onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+                placeholder="产品的简要描述（可选）"
+                disabled={isAddingProduct}
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button
+              variant="outline"
+              onClick={() => setIsAddProductOpen(false)}
+              disabled={isAddingProduct}
+            >
+              取消
+            </Button>
+            <Button
+              onClick={handleAddProduct}
+              disabled={isAddingProduct || !newProduct.name.trim() || !newProduct.code.trim()}
+            >
+              {isAddingProduct ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  创建中...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4 mr-2" />
+                  创建产品
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
