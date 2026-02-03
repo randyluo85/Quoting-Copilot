@@ -1,15 +1,26 @@
 """添加测试数据 - 物料、工序费率、工艺路线.
 
-运行方式: python scripts/add_test_data.py
+运行方式: PYTHONPATH=backend python -m scripts.add_test_data
 """
 import asyncio
+import sys
+import os
 from decimal import Decimal
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.session import get_db
+# 添加项目路径
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
+
 from app.models.material import Material
 from app.models.process_rate import ProcessRate
-from app.models.process_route import ProcessRoute, ProcessRouteItem, ProcessRouteStatus
+from app.core.config import settings
+
+
+# 创建异步引擎和会话
+engine = create_async_engine(settings.DATABASE_URL, echo=False)
+async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
 # 测试物料数据
@@ -127,7 +138,7 @@ TEST_PROCESS_RATES = [
 
 async def add_test_data():
     """添加测试数据到数据库."""
-    async with async_session_maker() as db:
+    async with async_session() as db:
         # 添加物料数据
         print("添加物料数据...")
         for material_data in TEST_MATERIALS:
@@ -163,6 +174,8 @@ async def add_test_data():
 
         await db.commit()
         print("\n测试数据添加完成！")
+
+    await engine.dispose()
 
 
 if __name__ == "__main__":
