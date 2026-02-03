@@ -35,59 +35,61 @@ class TestE2E:
 
 @pytest.mark.asyncio
 class TestE2EWithDatabase:
-    """需要数据库的端到端测试 (需要 MySQL 运行)."""
+    """需要数据库的端到端测试."""
 
     async def test_list_projects_empty(self):
         """测试获取空项目列表."""
-        try:
-            transport = ASGITransport(app=app)
-            async with AsyncClient(transport=transport, base_url="http://test") as client:
-                response = await client.get("/api/v1/projects")
-                assert response.status_code == 200
-                assert response.json() == []
-        except Exception as e:
-            pytest.skip(f"Database not available: {e}")
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.get("/api/v1/projects")
+            assert response.status_code == 200
+            # 验证 camelCase 响应
+            data = response.json()
+            assert isinstance(data, list)
 
     async def test_create_and_get_project(self):
         """测试创建和获取项目."""
-        try:
-            transport = ASGITransport(app=app)
-            async with AsyncClient(transport=transport, base_url="http://test") as client:
-                # 创建项目
-                create_data = {
-                    "asacNumber": "AS-TEST-001",
-                    "customerNumber": "TEST-001",
-                    "productVersion": "V1.0",
-                    "customerVersion": "C1.0",
-                    "clientName": "测试客户",
-                    "projectName": "测试项目",
-                    "annualVolume": "10000",
-                    "description": "测试描述",
-                    "products": [
-                        {
-                            "id": "P-001",
-                            "name": "测试产品",
-                            "partNumber": "TEST-001",
-                            "annualVolume": 10000,
-                            "description": "测试产品描述",
-                        }
-                    ],
-                    "owners": {
-                        "sales": "张三",
-                        "vm": "李四",
-                        "ie": "王五",
-                        "pe": "赵六",
-                        "controlling": "钱七",
-                    },
-                }
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            # 创建项目
+            create_data = {
+                "asacNumber": "AS-TEST-001",
+                "customerNumber": "TEST-001",
+                "productVersion": "V1.0",
+                "customerVersion": "C1.0",
+                "clientName": "测试客户",
+                "projectName": "测试项目",
+                "annualVolume": "10000",
+                "description": "测试描述",
+                "products": [
+                    {
+                        "id": "P-001",
+                        "name": "测试产品",
+                        "partNumber": "TEST-001",
+                        "annualVolume": 10000,
+                        "description": "测试产品描述",
+                    }
+                ],
+                "owners": {
+                    "sales": "张三",
+                    "vm": "李四",
+                    "ie": "王五",
+                    "pe": "赵六",
+                    "controlling": "钱七",
+                },
+            }
 
-                response = await client.post("/api/v1/projects", json=create_data)
-                assert response.status_code == 201
-                project_id = response.json()["id"]
+            response = await client.post("/api/v1/projects", json=create_data)
+            assert response.status_code == 201
+            data = response.json()
+            project_id = data["id"]
 
-                # 获取项目
-                response = await client.get(f"/api/v1/projects/{project_id}")
-                assert response.status_code == 200
-                assert response.json()["projectName"] == "测试项目"
-        except Exception as e:
-            pytest.skip(f"Database not available: {e}")
+            # 验证 camelCase 响应
+            assert "projectName" in data
+            assert data["projectName"] == "测试项目"
+
+            # 获取项目
+            response = await client.get(f"/api/v1/projects/{project_id}")
+            assert response.status_code == 200
+            data = response.json()
+            assert data["projectName"] == "测试项目"
