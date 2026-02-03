@@ -167,35 +167,37 @@ export function ProcessAssessment({ onNavigate }: ProcessAssessmentProps) {
   // 编辑工艺路线
   const handleEdit = async (routeId: string) => {
     try {
-      // TODO: 实际应调用 API
-      // const response = await fetch(`/api/v1/process-routes/${routeId}`);
-      // const data = await response.json();
+      const response = await fetch(`http://localhost:8000/api/v1/process-routes/${routeId}`);
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      const data = await response.json();
 
-      // 模拟数据
+      // 转换 API 响应为编辑类型
       const routeDetail: ProcessRouteEdit = {
-        id: routeId,
-        name: '铝合金缸体标准工艺',
-        status: 'active',
-        version: 1,
-        items: [
-          {
-            id: 'item-1',
-            operationNo: 'OP010',
-            processCode: 'CAST-001',
-            processName: '重力铸造',
-            equipment: '铸造车间-A线',
-            sequence: 0,
-            cycleTimeStd: 120,
-            cycleTimeVave: 110,
-            personnelStd: 1.0,
-            personnelVave: 1.0,
-            stdMhrVar: 30,
-            stdMhrFix: 15,
-            vaveMhrVar: 28,
-            vaveMhrFix: 14,
-            efficiencyFactor: 1.0,
-          },
-        ],
+        id: data.id,
+        name: data.name,
+        status: data.status,
+        version: data.version,
+        remarks: data.remarks,
+        items: data.items.map((item: any) => ({
+          id: item.id,
+          operationNo: item.operation_no,
+          processCode: item.process_code,
+          processName: item.process_name,
+          equipment: item.equipment,
+          sequence: item.sequence,
+          cycleTimeStd: item.cycle_time_std,
+          cycleTimeVave: item.cycle_time_vave,
+          personnelStd: parseFloat(item.personnel_std) || 1.0,
+          personnelVave: item.personnel_vave ? parseFloat(item.personnel_vave) : undefined,
+          stdMhrVar: parseFloat(item.std_mhr_var) || 0,
+          stdMhrFix: parseFloat(item.std_mhr_fix) || 0,
+          vaveMhrVar: parseFloat(item.vave_mhr_var) || 0,
+          vaveMhrFix: parseFloat(item.vave_mhr_fix) || 0,
+          efficiencyFactor: parseFloat(item.efficiency_factor) || 1.0,
+          remarks: item.remarks,
+        })),
       };
 
       setEditingRoute(routeDetail);
