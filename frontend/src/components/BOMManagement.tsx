@@ -682,21 +682,51 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
 
     setIsAddingProduct(true);
     try {
-      const response = await api.post(`/project-products`, {
+      // 使用新的 api.products.create
+      const result = await api.products.create({
         projectId: project.id,
         productName: newProduct.name,
         productCode: newProduct.code,
         routeCode: newProduct.routeCode || undefined,
-        annualVolume: newProduct.annualVolume,
-        description: newProduct.description,
       });
 
-      if (response.error) {
-        alert(`创建产品失败：${response.error}`);
-        return;
+      // 创建成功，添加到产品列表
+      const newProductData: Product = {
+        id: result.id,
+        name: result.productName,
+        partNumber: result.productCode,
+        annualVolume: parseInt(newProduct.annualVolume) || 0,
+        description: newProduct.description,
+      };
+
+      // 更新当前项目的 products 数组
+      const updatedProject: ProjectData = {
+        ...project,
+        products: [...project.products, newProductData],
+        updatedDate: new Date().toISOString(),
+      };
+
+      // 通知父组件更新项目数据
+      if (onProjectUpdate) {
+        onProjectUpdate(updatedProject);
       }
 
-      // 创建成功，关闭对话框并刷新页面
+      // 更新本地产品和 BOM 数据
+      setSelectedProduct(newProductData);
+      setBomData(prev => ({
+        ...prev,
+        [newProductData.id]: {
+          productId: newProductData.id,
+          isUploaded: false,
+          isParsing: false,
+          parseProgress: 0,
+          isParsed: false,
+          materials: [],
+          processes: [],
+        },
+      }));
+
+      // 关闭对话框并重置表单
       setIsAddProductOpen(false);
       setNewProduct({
         name: '',
@@ -706,11 +736,11 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
         description: '',
       });
 
-      // 提示用户刷新页面
-      alert('产品创建成功！请刷新页面查看新产品列表。');
+      // 成功提示
+      alert('产品创建成功！');
     } catch (error) {
-      console.error('创建产品失败：', error);
-      alert('创建产品失败，请稍后重试');
+      const message = error instanceof Error ? error.message : '创建产品失败';
+      alert(`创建产品失败：${message}`);
     } finally {
       setIsAddingProduct(false);
     }
