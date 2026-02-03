@@ -108,7 +108,7 @@ async def create_project(
     )
 
 
-@router.get("/{project_id}", response_model=ProjectResponse)
+@router.get("/{project_id}", response_model=ProjectResponse, response_model_by_alias=True)
 async def get_project(
     project_id: str,
     db: AsyncSession = Depends(get_db),
