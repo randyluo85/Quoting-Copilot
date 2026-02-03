@@ -80,10 +80,10 @@ async def upload_bom(
             status = StatusLight.RED
 
         materials.append(
-            MaterialResponse(
+            BOMMaterialResponse(
                 id=f"M-{idx + 1:03d}",
-                part_number=m.part_number,
-                part_name=m.part_name,
+                part_number=m.part_number or "",
+                part_name=m.part_name or "",
                 material=m.material or price_data.get("material", ""),
                 supplier=m.supplier or price_data.get("supplier", ""),
                 quantity=m.quantity,
