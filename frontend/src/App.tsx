@@ -60,16 +60,23 @@ export default function App() {
   // 使用 Zustand store 管理全局状态
   const currentView = useUIStore((state) => state.currentView);
   const setCurrentView = useUIStore((state) => state.setCurrentView);
-  const projects = useProjectStore((state) => state.projects);
-  const selectedProject = useProjectStore((state) => state.selectedProject);
-  const fetchProjects = useProjectStore((state) => state.fetchProjects);
-  const selectProject = useProjectStore((state) => state.selectProject);
-  const loading = useProjectStore((state) => state.loading);
 
-  // 启动时获取项目列表
+  // 使用同一个 selector 获取多个值，避免多次订阅
+  const { projects, selectedProject, loading, fetchProjects, selectProject } = useProjectStore(
+    (state) => ({
+      projects: state.projects,
+      selectedProject: state.selectedProject,
+      loading: state.loading,
+      fetchProjects: state.fetchProjects,
+      selectProject: state.selectProject,
+    })
+  );
+
+  // 启动时获取项目列表 - 只执行一次
   useEffect(() => {
     fetchProjects();
-  }, [fetchProjects]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSyncFromPM = (newProject: ProjectData) => {
     // PM 同步暂时使用本地状态（后续可接入真实 PM API）
