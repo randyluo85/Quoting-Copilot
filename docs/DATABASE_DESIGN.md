@@ -294,7 +294,7 @@ calculated → sales_review → controlling_review → approved
 | remarks | TEXT | | 备注（BOM Comments） |
 | created_at | DATETIME | DEFAULT NOW() | |
 
-#### product_processes（产品工艺路线）
+#### product_processes（产品工艺路线）- 已扩展
 
 | 字段 | 类型 | 约束 | 说明 |
 |------|------|------|------|
@@ -302,18 +302,21 @@ calculated → sales_review → controlling_review → approved
 | project_product_id | CHAR(36) | FK, NOT NULL | 关联产品 |
 | process_code | VARCHAR(50) | FK, NOT NULL | 工序编码 |
 | sequence_order | INT | NOT NULL | 工序顺序 |
-| cycle_time | INT | | 工时（秒） |
-| std_mhr | DECIMAL(10,2) | | MHR 快照 |
-| vave_mhr | DECIMAL(10,2) | | MHR 快照 |
-| std_cost | DECIMAL(12,4) | | = cycle_time/3600 * std_mhr |
+| **cycle_time_std** | INT | | **🔴 新增：标准工时（秒）** |
+| **cycle_time_vave** | INT | | **🔴 新增：VAVE 工时（秒）** |
+| **personnel_std** | DECIMAL(4,2) | DEFAULT 1.0 | **🔴 新增：标准人工配置（人/机）** |
+| **personnel_vave** | DECIMAL(4,2) | | **🔴 新增：VAVE 人工配置** |
+| std_mhr | DECIMAL(10,2) | | MHR 快照（保留兼容） |
+| vave_mhr | DECIMAL(10,2) | | MHR 快照（保留兼容） |
+| std_cost | DECIMAL(12,4) | | 标准成本 |
 | vave_cost | DECIMAL(12,4) | | VAVE 成本 |
 | remarks | TEXT | | 备注 |
 | created_at | DATETIME | DEFAULT NOW() | |
 
-**成本计算公式:**
+**扩展成本计算公式:**
 ```
-std_cost = cycle_time / 3600 * std_mhr
-vave_cost = cycle_time / 3600 * vave_mhr
+std_cost = (cycle_time_std / 3600) × (std_mhr_var + std_mhr_fix + personnel_std × labor_rate)
+vave_cost = (cycle_time_vave / 3600) × (vave_mhr_var + vave_mhr_fix + personnel_vave × labor_rate)
 ```
 
 #### quote_summaries（报价汇总）
