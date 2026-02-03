@@ -1333,6 +1333,8 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
       {/* 新增产品对话框 */}
       <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
         <DialogContent className="sm:max-w-[500px]">
+          {/* 调试信息 */}
+          {isAddProductOpen && console.log('Dialog should be visible, isAddProductOpen:', isAddProductOpen)}
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5" />
