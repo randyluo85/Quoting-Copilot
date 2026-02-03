@@ -325,16 +325,23 @@ export function ProcessAssessment({ onNavigate }: ProcessAssessmentProps) {
     if (!editingRoute?.id) return;
 
     try {
-      // TODO: 实际应调用 API
-      // await fetch(`/api/v1/process-routes/${editingRoute.id}/submit`, {
-      //   method: 'POST',
-      //   body: JSON.stringify({ remarks: '' }),
-      // });
+      const response = await fetch(`http://localhost:8000/api/v1/process-routes/${editingRoute.id}/submit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ remarks: '' }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
 
       await loadRoutes();
       setIsEditorOpen(false);
     } catch (error) {
       console.error('Failed to submit route:', error);
+      alert('提交失败，请检查后端服务');
     }
   };
 
