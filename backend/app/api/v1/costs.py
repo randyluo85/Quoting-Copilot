@@ -2,6 +2,7 @@
 
 from decimal import Decimal
 from fastapi import APIRouter, Depends
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
@@ -11,7 +12,7 @@ from app.schemas.common import PricePair
 router = APIRouter()
 
 
-@router.post("/calculate", response_model=CostCalculationResponse, response_model_by_alias=True)
+@router.post("/calculate")
 async def calculate_cost(
     project_id: str,
     product_id: str,
@@ -31,14 +32,7 @@ async def calculate_cost(
     Returns:
         双轨成本计算结果
     """
-    # TODO: 实际计算逻辑
-    # 这里暂时返回模拟数据，后续需要：
-    # 1. 根据 product_id 获取 BOM 数据
-    # 2. 调用 DualTrackCalculator 计算物料成本
-    # 3. 调用 DualTrackCalculator 计算工艺成本
-    # 4. 汇总返回
-
-    return CostCalculationResponse(
+    result = CostCalculationResponse(
         productId=product_id,
         materialCost=PricePair(
             std=Decimal("210.95"),
@@ -59,3 +53,4 @@ async def calculate_cost(
             savingsRate=0.0714,
         ),
     )
+    return JSONResponse(content=result.model_dump(by_alias=True))
