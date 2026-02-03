@@ -17,4 +17,4 @@ class MaterialResponse(BaseModel):
     comments: str
     status: StatusLight = StatusLight.GREEN
 
-    model_config = {"populate_by_name": True}
+    model_config = {"populate_by_name": True, "by_alias": True}
