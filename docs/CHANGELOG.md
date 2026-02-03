@@ -18,6 +18,7 @@
 | 2026-02-03 | docs/TESTING_STRATEGY.md | v1.0 → v1.1 | 新增：测试策略指南 | 测试团队 | Randy Luo |
 | 2026-02-03 | docs/DEPLOYMENT.md | v1.0 → v1.1 | 新增：部署运维指南 | DevOps | Randy Luo |
 | 2026-02-03 | docs/API_REFERENCE.md | v1.0 → v1.1 | 新增：API 完整参考 | 后端开发 | Randy Luo |
+| 2026-02-03 | docs/PRD.md | v1.4 → v1.5 | 精简业务概念章节：移除计算公式（改为引用逻辑文档），明确文档职责分离 | 全部 | Randy Luo |
 
 ---
 
