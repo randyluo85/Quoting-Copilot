@@ -77,7 +77,7 @@ class TestProjectsAPI:
 
         response = await async_client.post("/api/v1/projects", json=payload)
 
-        assert response.status_code == 200
+        assert response.status_code == 201  # POST 正确返回 201
         data = response.json()
         assert data["targetMargin"] == 15.5
         assert data["asacNumber"] == "TEST-001"
