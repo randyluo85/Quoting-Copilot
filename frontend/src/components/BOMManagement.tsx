@@ -326,7 +326,18 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
         hasHistoryData: m.hasHistoryData
       }));
 
-      const processes: Process[] = []; // TODO: 从API响应获取工艺数据
+      // 从 API 响应获取工艺数据
+      const processes: Process[] = (response.processes || []).map((p, idx) => ({
+        id: p.id,
+        opNo: p.opNo,
+        name: p.name,
+        workCenter: p.workCenter || '',
+        standardTime: p.standardTime || 0,
+        unitPrice: p.unitPrice,
+        vavePrice: p.vavePrice,
+        hasHistoryData: p.hasHistoryData || false,
+        isOperationKnown: p.hasHistoryData || false
+      }));
 
       // 完成解析
       clearInterval(progressInterval);
