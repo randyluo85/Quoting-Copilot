@@ -291,7 +291,7 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
         material: m.material || '其他',
         supplier: m.supplier || '',
         quantity: m.quantity,
-        unit: 'kg',
+        unit: m.unit || 'PC',  // 使用 API 返回的单位，默认为 PC
         unitPrice: m.unitPrice,
         vavePrice: m.vavePrice,
         comments: m.comments || '',
