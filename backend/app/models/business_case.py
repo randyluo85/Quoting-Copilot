@@ -57,6 +57,9 @@ class BusinessCaseYears(Base):
     """
 
     __tablename__ = "business_case_years"
+    __table_args__ = (
+        UniqueConstraint("project_id", "year", name="uq_business_case_years_project_year"),
+    )
 
     id: Mapped[str] = mapped_column(
         String(36), primary_key=True, default=lambda: str(uuid.uuid4())
