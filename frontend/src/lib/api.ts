@@ -114,6 +114,59 @@ export interface ProjectCreate {
   description: string;
   products: Product[];
   owners: ProjectOwner;
+  targetMargin?: number; // 目标利润率(%)
+}
+
+// 项目数据（扩展）
+export interface ProjectDataExtended extends ProjectData {
+  targetMargin?: number; // 目标利润率(%)
+  owner?: string; // 负责人（简化字段）
+  remarks?: string; // 备注
+}
+
+// 双轨价格封装
+export interface PricePair {
+  std: number; // 标准成本
+  vave: number; // VAVE 目标成本
+  savings: number; // 节省金额
+  savingsRate: number; // 节省率
+}
+
+// 状态灯
+export type StatusLight = 'verified' | 'warning' | 'missing';
+
+// 物料详情（扩展）
+export interface MaterialDetail {
+  id: number;
+  itemCode: string;
+  name: string;
+  spec?: string;
+  version?: string;
+  materialType?: string; // made/bought
+  status?: string; // active/inactive
+  material?: string; // 材料描述
+  supplier?: string;
+  remarks?: string;
+  stdPrice?: number;
+  vavePrice?: number;
+  supplierTier?: string;
+  category?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 报价汇总
+export interface QuoteSummary {
+  id: string;
+  projectId: string;
+  totalStdCost?: number;
+  totalVaveCost?: number;
+  totalSavings?: number;
+  savingsRate?: number;
+  quotedPrice?: number;
+  actualMargin?: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /**
