@@ -46,25 +46,27 @@
 }
 ```
 
-### 2.2 数据库实体 (Database Entities - MySQL)
+### 2.2 数据库结构
 
-**Table: `materials` (物料主数据)**
+> ⚠️ **数据库 Schema 的唯一权威来源** 是 `docs/DATABASE_DESIGN.md`。
+> 本节仅列出与业务逻辑密切相关的关键字段引用。
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `item_code` | PK, String | 唯一物料号 (e.g., "100-200-300") |
-| `std_price` | Decimal | 标准采购/生产价 |
-| `vave_price` | Decimal | VAVE 优化后的目标价 |
-| `supplier_tier` | String | 供应商等级 |
+**核心实体映射：**
 
-**Table: `process_rates` (工艺费率)**
+| 业务概念 | 对应表 | 关键字段 |
+|---------|--------|---------|
+| 物料主数据 | `materials` | `id` (物料编码), `std_price`, `vave_price` |
+| 工序费率 | `process_rates` | `process_code`, `std_mhr`, `vave_mhr` |
+| 项目 | `projects` | `id`, `project_code`, `status`, `annual_volume` |
+| BOM 行 | `product_materials` | `std_cost`, `vave_cost`, `confidence` |
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `process_name` | PK, String | 工艺名称 (e.g., "激光切割", "折弯") |
-| `std_mhr`, `std_labor` | Decimal | 标准费率 |
-| `vave_mhr`, `vave_labor` | Decimal | 优化费率 (用于模拟高效率设备/产线) |
-| `efficiency_factor` | Decimal | 效率系数 (Default 1.0) |
+**状态流转（projects.status）：**
+```
+draft → parsing → (waiting_price | waiting_ie) → waiting_mhr →
+calculated → sales_review → controlling_review → approved
+```
+
+完整表结构、索引、约束请参考 [`docs/DATABASE_DESIGN.md`](docs/DATABASE_DESIGN.md)。
 
 ### 2.3 业务实体 (Transaction Entities)
 
