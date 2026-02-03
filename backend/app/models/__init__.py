@@ -5,6 +5,7 @@
 from app.models.project import Project, ProjectStatus
 from app.models.material import Material
 from app.models.process_rate import ProcessRate
+from app.models.process_route import ProcessRoute, ProcessRouteItem
 from app.models.cost_center import CostCenter
 from app.models.project_product import ProjectProduct
 from app.models.product_material import ProductMaterial
@@ -18,6 +19,8 @@ __all__ = [
     # 主数据表
     "Material",
     "ProcessRate",
+    "ProcessRoute",
+    "ProcessRouteItem",
     "CostCenter",
     # 交易数据表
     "Project",
