@@ -5,7 +5,6 @@ from __future__ import annotations
 import pytest
 import uuid
 from decimal import Decimal
-from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.amortization_strategy import AmortizationStrategy, AmortizationMode
@@ -18,11 +17,6 @@ class TestAmortizationStrategy:
 
     async def test_create_amortized_strategy(self, clean_db: AsyncSession):
         """测试创建分摊策略."""
-        # 清理表
-        await clean_db.execute(text("TRUNCATE TABLE amortization_strategies"))
-        await clean_db.execute(text("TRUNCATE TABLE projects"))
-        await clean_db.commit()
-
         # 创建项目
         project = Project(
             id=str(uuid.uuid4()),
@@ -62,11 +56,6 @@ class TestAmortizationStrategy:
 
     async def test_upfront_mode_zero_amortization(self, clean_db: AsyncSession):
         """测试一次性支付模式不计算分摊."""
-        # 清理表
-        await clean_db.execute(text("TRUNCATE TABLE amortization_strategies"))
-        await clean_db.execute(text("TRUNCATE TABLE projects"))
-        await clean_db.commit()
-
         # 创建项目
         project = Project(
             id=str(uuid.uuid4()),
@@ -105,11 +94,6 @@ class TestAmortizationStrategy:
 
     async def test_default_values(self, clean_db: AsyncSession):
         """测试默认值."""
-        # 清理表
-        await clean_db.execute(text("TRUNCATE TABLE amortization_strategies"))
-        await clean_db.execute(text("TRUNCATE TABLE projects"))
-        await clean_db.commit()
-
         # 创建项目
         project = Project(
             id=str(uuid.uuid4()),
@@ -143,11 +127,6 @@ class TestAmortizationStrategy:
 
     async def test_project_unique_constraint(self, clean_db: AsyncSession):
         """测试项目唯一约束（一个项目只能有一个分摊策略）."""
-        # 清理表
-        await clean_db.execute(text("TRUNCATE TABLE amortization_strategies"))
-        await clean_db.execute(text("TRUNCATE TABLE projects"))
-        await clean_db.commit()
-
         # 创建项目
         project_id = str(uuid.uuid4())
         project = Project(
@@ -189,11 +168,6 @@ class TestAmortizationStrategy:
 
     async def test_foreign_key_to_project(self, clean_db: AsyncSession):
         """测试项目外键约束."""
-        # 清理表
-        await clean_db.execute(text("TRUNCATE TABLE amortization_strategies"))
-        await clean_db.execute(text("TRUNCATE TABLE projects"))
-        await clean_db.commit()
-
         # 创建项目
         project = Project(
             id=str(uuid.uuid4()),
