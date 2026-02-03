@@ -113,9 +113,9 @@ export default function App() {
         return (
           <NewProject
             onNavigate={setCurrentView}
-            onProjectCreated={(data) => {
+            onProjectCreated={(projectId) => {
               // 创建成功后导航到成功页面
-              selectProject(data.id || 'new');
+              selectProject(projectId);
               setCurrentView('project-success');
             }}
           />
