@@ -143,6 +143,39 @@ class QuoteSummaryResponse(BaseModel):
     model_config = {"populate_by_name": True, "by_alias": True}
 
 
+# ==================== BOM Upload Response ====================
+
+class BOMMaterialResponse(BaseModel):
+    """BOM 上传返回的物料响应（用于前端显示）."""
+    id: str  # 格式: M-001
+    part_number: str = Field(..., alias="partNumber")
+    part_name: str = Field(..., alias="partName")
+    material: Optional[str] = None
+    supplier: Optional[str] = None
+    quantity: Optional[float] = None
+    unit_price: Optional[float] = Field(None, alias="unitPrice")
+    vave_price: Optional[float] = Field(None, alias="vavePrice")
+    has_history_data: bool = Field(False, alias="hasHistoryData")
+    comments: Optional[str] = None
+    status: StatusLight = StatusLight.RED
+
+    model_config = {"populate_by_name": True, "by_alias": True}
+
+
+class BOMProcessResponse(BaseModel):
+    """BOM 上传返回的工艺响应（用于前端显示）."""
+    id: str  # 格式: P-001
+    op_no: str = Field(..., alias="opNo")
+    name: str
+    work_center: Optional[str] = Field(None, alias="workCenter")
+    standard_time: Optional[float] = Field(None, alias="standardTime")
+    unit_price: Optional[float] = Field(None, alias="unitPrice")
+    vave_price: Optional[float] = Field(None, alias="vavePrice")
+    has_history_data: bool = Field(False, alias="hasHistoryData")
+
+    model_config = {"populate_by_name": True, "by_alias": True}
+
+
 # ==================== 扩展的 Material Response ====================
 
 class MaterialDetailResponse(BaseModel):
