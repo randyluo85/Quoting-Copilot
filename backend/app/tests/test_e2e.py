@@ -3,14 +3,7 @@
 import pytest
 from httpx import AsyncClient, ASGITransport
 from app.main import app
-from app.db.session import engine
-
-
-@pytest.fixture(scope="class")
-async def cleanup_engine():
-    """在每个测试类后清理数据库引擎."""
-    yield
-    await engine.dispose()
+from app.db.session import get_db
 
 
 @pytest.mark.asyncio
@@ -41,64 +34,79 @@ class TestE2E:
             assert "savings" in data["totalCost"]
 
 
-@pytest.mark.usefixtures("cleanup_engine")
 @pytest.mark.asyncio
 class TestE2EWithDatabase:
     """需要数据库的端到端测试."""
 
-    async def test_list_projects_empty(self):
+    async def test_list_projects_empty(self, test_db_session):
         """测试获取空项目列表."""
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
-            response = await client.get("/api/v1/projects")
-            assert response.status_code == 200
-            # 验证 camelCase 响应
-            data = response.json()
-            assert isinstance(data, list)
+        # 覆盖依赖注入
+        async def override_get_db():
+            yield test_db_session
 
-    async def test_create_and_get_project(self):
+        app.dependency_overrides[get_db] = override_get_db
+        try:
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                response = await client.get("/api/v1/projects")
+                assert response.status_code == 200
+                # 验证 camelCase 响应
+                data = response.json()
+                assert isinstance(data, list)
+        finally:
+            app.dependency_overrides.clear()
+
+    async def test_create_and_get_project(self, test_db_session):
         """测试创建和获取项目."""
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
-            # 创建项目
-            create_data = {
-                "asacNumber": "AS-TEST-001",
-                "customerNumber": "TEST-001",
-                "productVersion": "V1.0",
-                "customerVersion": "C1.0",
-                "clientName": "测试客户",
-                "projectName": "测试项目",
-                "annualVolume": "10000",
-                "description": "测试描述",
-                "products": [
-                    {
-                        "id": "P-001",
-                        "name": "测试产品",
-                        "partNumber": "TEST-001",
-                        "annualVolume": 10000,
-                        "description": "测试产品描述",
-                    }
-                ],
-                "owners": {
-                    "sales": "张三",
-                    "vm": "李四",
-                    "ie": "王五",
-                    "pe": "赵六",
-                    "controlling": "钱七",
-                },
-            }
+        # 覆盖依赖注入
+        async def override_get_db():
+            yield test_db_session
 
-            response = await client.post("/api/v1/projects", json=create_data)
-            assert response.status_code == 201
-            data = response.json()
-            project_id = data["id"]
+        app.dependency_overrides[get_db] = override_get_db
+        try:
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                # 创建项目
+                create_data = {
+                    "asacNumber": "AS-TEST-001",
+                    "customerNumber": "TEST-001",
+                    "productVersion": "V1.0",
+                    "customerVersion": "C1.0",
+                    "clientName": "测试客户",
+                    "projectName": "测试项目",
+                    "annualVolume": "10000",
+                    "description": "测试描述",
+                    "products": [
+                        {
+                            "id": "P-001",
+                            "name": "测试产品",
+                            "partNumber": "TEST-001",
+                            "annualVolume": 10000,
+                            "description": "测试产品描述",
+                        }
+                    ],
+                    "owners": {
+                        "sales": "张三",
+                        "vm": "李四",
+                        "ie": "王五",
+                        "pe": "赵六",
+                        "controlling": "钱七",
+                    },
+                }
 
-            # 验证 camelCase 响应
-            assert "projectName" in data
-            assert data["projectName"] == "测试项目"
+                response = await client.post("/api/v1/projects", json=create_data)
+                assert response.status_code == 201
+                data = response.json()
+                project_id = data["id"]
 
-            # 获取项目
-            response = await client.get(f"/api/v1/projects/{project_id}")
-            assert response.status_code == 200
-            data = response.json()
-            assert data["projectName"] == "测试项目"
+                # 验证 camelCase 响应
+                assert "projectName" in data
+                assert data["projectName"] == "测试项目"
+
+                # 获取项目
+                response = await client.get(f"/api/v1/projects/{project_id}")
+                assert response.status_code == 200
+                data = response.json()
+                assert data["projectName"] == "测试项目"
+        finally:
+            app.dependency_overrides.clear()
