@@ -3,9 +3,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine
 from app.config import get_settings
 from app.db.session import Base
-from app.models.material import Material
-from app.models.process_rate import ProcessRate
-from app.models.project import Project
 
 
 async def init_db() -> None:

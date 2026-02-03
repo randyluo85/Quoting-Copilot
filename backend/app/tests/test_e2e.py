@@ -1,7 +1,6 @@
 """端到端测试."""
 
 import pytest
-from decimal import Decimal
 from httpx import AsyncClient, ASGITransport
 from app.main import app
 
@@ -71,9 +70,7 @@ class TestE2E:
         """测试成本计算端点."""
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
-            response = await client.post(
-                "/api/v1/cost/calculate?project_id=test&product_id=P-001"
-            )
+            response = await client.post("/api/v1/cost/calculate?project_id=test&product_id=P-001")
             assert response.status_code == 200
             data = response.json()
             assert "materialCost" in data

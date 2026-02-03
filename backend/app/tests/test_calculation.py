@@ -18,7 +18,6 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 @pytest.fixture
 async def engine():
     """创建测试数据库引擎."""
-    from sqlalchemy.ext.asyncio import create_async_engine
 
     engine = create_async_engine(TEST_DATABASE_URL, echo=False)
     async with engine.begin() as conn:
@@ -30,9 +29,7 @@ async def engine():
 @pytest.fixture
 async def db_session(engine) -> AsyncSession:
     """创建测试会话."""
-    async_session = sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
+    async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with async_session() as session:
         yield session
 
