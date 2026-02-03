@@ -64,7 +64,18 @@ $$ \sum (Qty \times P_{std}) + \sum (CycleTime_{std} \times (MHR_{std} + Labor_{
 **VAVE Cost (目标成本):**
 $$ \sum (Qty \times P_{vave}) + \sum (CycleTime_{opt} \times (MHR_{vave} + Labor_{vave})) $$
 
-## 6. 目录结构
+## 6. 设计文档
+
+| 文档 | 用途 | 目标读者 |
+|------|------|---------|
+| [docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md) | 数据库结构唯一真理源 | 后端开发、DBA |
+| [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) | 业务逻辑与 API 契约 | 全体开发者 |
+| [CLAUDE.md](CLAUDE.md) | AI 编码协作指南 | AI 助手、开发者 |
+| [README.md](README.md) | 项目概览与入门 | 新成员 |
+
+> 💡 **规则：** 当数据库结构需要变更时，仅更新 `docs/DATABASE_DESIGN.md`，其他文档引用即可。
+
+## 7. 目录结构
 
 ```
 smartquote/
