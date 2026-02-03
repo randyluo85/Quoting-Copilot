@@ -632,7 +632,7 @@ def calculate_dual_track_cost(bom_line_item):
 
 ---
 
-## 10. 风险与依赖
+## 9. 风险与依赖
 
 ### 10.1 技术风险
 
