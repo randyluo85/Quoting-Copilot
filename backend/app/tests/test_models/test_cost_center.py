@@ -1,7 +1,9 @@
 # backend/app/tests/test_models/test_cost_center.py
-import pytest
 from decimal import Decimal
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.cost_center import CostCenter
 
 
