@@ -2,7 +2,7 @@
 
 import asyncio
 from sqlalchemy import select
-from app.db.session import async_session_maker
+from app.db.session import AsyncSessionLocal
 from app.models.material import Material
 from app.models.process_rate import ProcessRate
 
