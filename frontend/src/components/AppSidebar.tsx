@@ -89,6 +89,13 @@ export function AppSidebar({ currentView, onNavigate }: AppSidebarProps) {
       status: getStepStatus('dashboard'),
     },
     {
+      id: 'new-project',
+      title: '新建项目',
+      icon: FileText,
+      view: 'new-project',
+      status: getStepStatus('new-project'),
+    },
+    {
       id: 'create-project',
       title: '创建项目',
       icon: FileText,
