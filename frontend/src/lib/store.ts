@@ -160,7 +160,12 @@ interface CostState {
   calculating: boolean;
   error: string | null;
 
-  calculate: (projectId: string, productId: string) => Promise<void>;
+  calculate: (
+    projectId: string,
+    productId: string,
+    materials: Array<{ code: string; quantity: number }>,
+    processes: Array<{ name: string; cycle_time: number }>
+  ) => Promise<void>;
   clearResult: () => void;
 }
 
@@ -169,10 +174,10 @@ export const useCostStore = create<CostState>((set) => ({
   calculating: false,
   error: null,
 
-  calculate: async (projectId, productId) => {
+  calculate: async (projectId, productId, materials, processes) => {
     set({ calculating: true, error: null });
     try {
-      const result = await api.cost.calculate(projectId, productId);
+      const result = await api.cost.calculate(projectId, productId, { materials, processes });
       set({ result, calculating: false });
     } catch (err) {
       const message = err instanceof Error ? err.message : '成本计算失败';
