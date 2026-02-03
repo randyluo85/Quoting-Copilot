@@ -39,8 +39,8 @@ SmartQuote 是一个专为制造业成本工程师和销售经理设计的 AI �
 ```bash
 cd frontend
 npm install
-npm run dev
-# 访问: http://localhost:3000
+npm run dev      # 开发模式: http://localhost:5173
+npm run build    # 生产构建
 ```
 
 ### 后端 (Server)
