@@ -8,6 +8,7 @@ from app.api.v1 import (
     materials,
     investments,
     business_case,
+    process_routes,  # 新增：工艺路线 API
 )
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     "materials",
     "investments",
     "business_case",
+    "process_routes",
 ]
