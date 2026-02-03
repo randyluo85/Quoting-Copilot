@@ -535,17 +535,17 @@ Total Cost（总成本）
 
 **定义：** 销售与管理费用的分摊
 
-**计算方式：**
-```
-S&A = Net Sales × S&A_Rate
-```
-其中 S&A_Rate 通常为 2% - 3%
+**参数说明：**
+- S&A Rate 通常为 2% - 3%
+- 基数为净销售额（Net Sales）
 
 **包含内容：**
 - 销售人员工资
 - 管理费用分摊
 - 办公场地租金
 - 其他运营费用
+
+> **详细计算逻辑：** [docs/BUSINESS_CASE_LOGIC.md](BUSINESS_CASE_LOGIC.md) §6 S&A 计算
 
 ---
 
