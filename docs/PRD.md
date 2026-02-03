@@ -607,16 +607,19 @@ def calculate_dual_track_cost(bom_line_item):
 
 ### 11.1 术语表
 
-| 术语 | 英文全称 | 解释 |
-|------|----------|------|
+> 完整的项目术语表请参考：**[docs/GLOSSARY.md](docs/GLOSSARY.md)**
+
+| 术语 | 英文全称 | 简要说明 |
+|------|----------|----------|
 | BOM | Bill of Materials | 物料清单 |
 | VAVE | Value Analysis/Value Engineering | 价值工程/价值分析 |
 | QS | Quote Summary | 报价摘要 |
 | BC | Breakdown | 成本分解 |
 | MHR | Machine Hour Rate | 机时费率 |
-| VM | Value Management | 价值管理（部门） |
-| IE | Industrial Engineering | 工业工程（部门） |
-| PE | Product Engineering | 产品工程（部门） |
+| HK III | Herstellkosten III | 制造成本（工厂大门成本） |
+| SK | Selbstkosten | 完全成本（含所有分摊） |
+| DB I | Deckungsbeitrag I | 边际贡献 I（生产毛利） |
+| DB IV | Deckungsbeitrag IV | 净利润（扣除所有投入） |
 
 ### 11.2 参考资料
 
