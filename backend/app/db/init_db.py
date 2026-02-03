@@ -16,6 +16,12 @@ from app.models import (
     ProductMaterial,
     ProductProcess,
     QuoteSummary,
+    InvestmentItem,
+    InvestmentType,
+    AmortizationStrategy,
+    AmortizationMode,
+    BusinessCaseParams,
+    BusinessCaseYears,
 )
 
 
