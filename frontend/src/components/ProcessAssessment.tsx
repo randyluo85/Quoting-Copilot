@@ -94,48 +94,37 @@ export function ProcessAssessment({ onNavigate }: ProcessAssessmentProps) {
   const loadRoutes = async () => {
     setIsLoading(true);
     try {
-      // TODO: 实际应调用 API
-      // const response = await fetch('/api/v1/process-routes?status=${statusFilter}&keyword=${keyword}');
-      // const data = await response.json();
-
-      // 模拟数据
-      const mockData: ProcessRouteListItem[] = [
-        {
-          id: 'PR-2024-001',
-          name: '铝合金缸体标准工艺',
-          status: 'active',
-          version: 1,
-          itemCount: 5,
-          totalStdCost: 105.00,
-          totalVaveCost: 98.00,
-          updatedAt: '2024-02-03T10:00:00Z',
-        },
-        {
-          id: 'PR-2024-002',
-          name: '新产品试制工艺',
-          status: 'draft',
-          version: 1,
-          itemCount: 3,
-          totalStdCost: 45.50,
-          totalVaveCost: 42.00,
-          updatedAt: '2024-02-02T15:30:00Z',
-        },
-      ];
-
-      // 应用筛选
-      let filtered = mockData;
+      // 构建查询参数
+      const params = new URLSearchParams();
       if (statusFilter !== 'all') {
-        filtered = filtered.filter((r) => r.status === statusFilter);
+        params.append('status', statusFilter);
       }
       if (keyword) {
-        filtered = filtered.filter(
-          (r) => r.id.includes(keyword) || r.name.includes(keyword)
-        );
+        params.append('keyword', keyword);
       }
 
-      setRoutes(filtered);
+      const response = await fetch(`http://localhost:8000/api/v1/process-routes?${params}`);
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      const data = await response.json();
+
+      // 转换 API 响应为前端类型
+      const routesData: ProcessRouteListItem[] = data.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        status: item.status,
+        version: item.version,
+        itemCount: item.item_count,
+        totalStdCost: parseFloat(item.total_std_cost) || 0,
+        totalVaveCost: parseFloat(item.total_vave_cost) || 0,
+        updatedAt: item.updated_at,
+      }));
+
+      setRoutes(routesData);
     } catch (error) {
       console.error('Failed to load process routes:', error);
+      setRoutes([]);
     } finally {
       setIsLoading(false);
     }
