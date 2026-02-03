@@ -2,8 +2,8 @@
 
 设计规范: docs/DATABASE_DESIGN.md
 """
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, field_serializer
+from typing import Optional, Any
 from decimal import Decimal
 from datetime import datetime
 
@@ -45,7 +45,19 @@ class MaterialUpdate(BaseModel):
     model_config = {"populate_by_name": True, "by_alias": True}
 
 
-class MaterialResponse(BaseModel):
+class _DecimalMixin(BaseModel):
+    """Decimal 序列化混入类 - 自动将 Decimal 转换为 float."""
+
+    def model_dump(self, **kwargs: Any) -> dict[str, Any]:
+        """重写 model_dump 以支持 Decimal 序列化."""
+        data = super().model_dump(**kwargs)
+        for key, value in data.items():
+            if isinstance(value, Decimal):
+                data[key] = float(value)
+        return data
+
+
+class MaterialResponse(_DecimalMixin):
     """物料响应模型（包含双轨价格）."""
     id: int
     itemCode: str
@@ -93,7 +105,7 @@ class ProcessRateUpdate(BaseModel):
     model_config = {"populate_by_name": True, "by_alias": True}
 
 
-class ProcessRateResponse(BaseModel):
+class ProcessRateResponse(_DecimalMixin):
     """工序费率响应模型（包含双轨费率）."""
     id: int
     processCode: str
