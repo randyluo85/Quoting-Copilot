@@ -17,7 +17,9 @@ import {
   ThumbsUp,
   DollarSign,
   ArrowRight,
-  ChevronRight
+  ChevronRight,
+  Plus,
+  X,
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
