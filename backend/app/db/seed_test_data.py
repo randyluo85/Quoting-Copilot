@@ -145,7 +145,7 @@ async def seed_materials():
         ),
     ]
 
-    async with async_session_maker() as session:
+    async with AsyncSessionLocal() as session:
         # 检查是否已有数据
         result = await session.execute(select(Material).limit(1))
         existing = result.scalars().first()
@@ -273,7 +273,7 @@ async def seed_process_rates():
         ),
     ]
 
-    async with async_session_maker() as session:
+    async with AsyncSessionLocal() as session:
         # 检查是否已有数据
         result = await session.execute(select(ProcessRate).limit(1))
         existing = result.scalars().first()
