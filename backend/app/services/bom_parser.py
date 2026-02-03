@@ -1,7 +1,7 @@
 """BOM 文件解析服务."""
 
+from typing import NamedTuple
 from openpyxl import load_workbook
-from typing import NamedNamedTuple
 
 
 class ParsedMaterial(NamedTuple):

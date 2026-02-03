@@ -2,7 +2,6 @@
 
 import httpx
 import json
-from typing import Optional
 from app.config import Settings, get_settings
 
 

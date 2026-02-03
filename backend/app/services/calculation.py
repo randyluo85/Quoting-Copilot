@@ -36,9 +36,7 @@ class DualTrackCalculator:
         if not material_code:
             return self._zero_price_pair()
 
-        result = await self.db.execute(
-            select(Material).where(Material.item_code == material_code)
-        )
+        result = await self.db.execute(select(Material).where(Material.item_code == material_code))
         material = result.scalar_one_or_none()
 
         if material is None:
