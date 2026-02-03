@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
-from app.api.v1 import projects, bom, costs, project_products, materials, investments
+from app.api.v1 import projects, bom, costs, project_products, materials, investments, business_case
 
 settings = get_settings()
 
