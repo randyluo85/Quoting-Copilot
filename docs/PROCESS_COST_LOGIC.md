@@ -77,7 +77,7 @@ $$Cost_{process} = (MHR_{var} + MHR_{fix} + Rate_{labor}) \times \frac{Cycle\ Ti
 
 ## 3. 双轨计价逻辑 (Dual-Track Logic)
 
-SmartQuote 的核心竞争力在于同时计算 Standard (当前) 和 VAVE (优化) 两套工艺成本。
+Dr.aiVOSS 的核心竞争力在于同时计算 Standard (当前) 和 VAVE (优化) 两套工艺成本。
 
 ### 3.1 双轨对比矩阵
 
