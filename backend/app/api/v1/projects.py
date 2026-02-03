@@ -158,3 +158,90 @@ async def get_project(
         updated_date=project.updated_at.isoformat(),
     )
     return JSONResponse(content=response.model_dump(by_alias=True))
+
+
+@router.put("/{project_id}")
+async def update_project(
+    project_id: str,
+    data: ProjectCreate,
+    db: AsyncSession = Depends(get_db),
+):
+    """更新项目.
+
+    Args:
+        project_id: 项目 ID
+        data: 更新数据
+        db: 数据库会话
+
+    Returns:
+        更新后的项目
+    """
+    result = await db.execute(select(Project).where(Project.id == project_id))
+    project = result.scalar_one_or_none()
+
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    # 更新字段
+    project.asac_number = data.asac_number
+    project.customer_number = data.customer_number
+    project.product_version = data.product_version
+    project.customer_version = data.customer_version
+    project.client_name = data.client_name
+    project.project_name = data.project_name
+    project.annual_volume = int(data.annual_volume)
+    project.description = data.description
+    project.products = [p.model_dump(by_alias=False) for p in data.products]
+    project.owners = data.owners.model_dump(by_alias=False)
+    project.target_margin = data.target_margin
+    project.updated_at = datetime.utcnow()
+
+    await db.commit()
+    await db.refresh(project)
+
+    response = ProjectResponse(
+        id=project.id,
+        asac_number=project.asac_number,
+        customer_number=project.customer_number,
+        product_version=project.product_version,
+        customer_version=project.customer_version,
+        client_name=project.client_name,
+        project_name=project.project_name,
+        annual_volume=str(project.annual_volume),
+        description=project.description or "",
+        products=project.products,
+        owners=project.owners,
+        status=project.status,
+        target_margin=project.target_margin,
+        owner=project.owner,
+        remarks=project.remarks,
+        created_date=project.created_at.isoformat(),
+        updated_date=project.updated_at.isoformat(),
+    )
+    return JSONResponse(content=response.model_dump(by_alias=True))
+
+
+@router.delete("/{project_id}")
+async def delete_project(
+    project_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """删除项目.
+
+    Args:
+        project_id: 项目 ID
+        db: 数据库会话
+
+    Returns:
+        成功消息
+    """
+    result = await db.execute(select(Project).where(Project.id == project_id))
+    project = result.scalar_one_or_none()
+
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    await db.delete(project)
+    await db.commit()
+
+    return JSONResponse(content={"message": "Project deleted successfully"})
