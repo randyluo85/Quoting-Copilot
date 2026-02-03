@@ -2,7 +2,7 @@
 from datetime import datetime
 
 from sqlalchemy import DateTime, Integer, Numeric, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
 
@@ -26,4 +26,9 @@ class CostCenter(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    # 反向关系：一个成本中心可以关联多个工序费率
+    process_rates: Mapped[list["ProcessRate"]] = relationship(
+        "ProcessRate", back_populates="cost_center"
     )
