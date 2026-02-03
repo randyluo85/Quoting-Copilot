@@ -1,12 +1,15 @@
 """ProductProcess 扩展字段测试."""
+from __future__ import annotations
+
 import pytest
-from decimal import Decimal
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import text
-from app.models.product_process import ProductProcess
-from app.models.project_product import ProjectProduct
-from app.models.project import Project, ProjectStatus
 import uuid
+from decimal import Decimal
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models.product_process import ProductProcess
+from app.models.project import Project, ProjectStatus
+from app.models.project_product import ProjectProduct
 
 
 @pytest.mark.asyncio
