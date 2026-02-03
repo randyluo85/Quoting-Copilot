@@ -56,12 +56,13 @@ async def upload_bom(
         )
         db_materials = result.scalars().all()
 
-        # 构建价格查询映射
+        # 构建价格查询映射（Decimal 转 float）
         for db_mat in db_materials:
             materials_with_price[db_mat.item_code] = {
                 "unit_price": float(db_mat.std_price) if db_mat.std_price else None,
                 "vave_price": float(db_mat.vave_price) if db_mat.vave_price else None,
                 "supplier": db_mat.supplier_tier or "",
+                "material": db_mat.category or "",
                 "has_history_data": True,
             }
 
