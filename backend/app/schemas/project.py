@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
+from decimal import Decimal
 from app.models.project import ProjectStatus
 
 
@@ -34,6 +35,7 @@ class ProjectCreate(BaseModel):
     description: str
     products: List["ProductSchema"]
     owners: ProjectOwnerSchema
+    target_margin: Optional[float] = Field(None, alias="targetMargin")  # 目标利润率(%)
 
     model_config = {"populate_by_name": True, "by_alias": True}
 
@@ -51,6 +53,9 @@ class ProjectResponse(BaseModel):
     products: List["ProductSchema"]
     owners: ProjectOwnerSchema
     status: ProjectStatus
+    target_margin: Optional[float] = Field(None, alias="targetMargin")  # 目标利润率(%)
+    owner: Optional[str] = None  # 负责人（简化字段）
+    remarks: Optional[str] = None  # 备注
     created_date: str = Field(..., alias="createdDate")
     updated_date: str = Field(..., alias="updatedDate")
 
