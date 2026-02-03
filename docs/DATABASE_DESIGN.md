@@ -119,9 +119,9 @@ erDiagram
 
 ---
 
-## 3. 表结构详解
+## 3. 表结构详解 {#table-structure}
 
-### 3.1 主数据表
+### 3.1 主数据表 {#master-data}
 
 #### materials（物料主数据）
 
