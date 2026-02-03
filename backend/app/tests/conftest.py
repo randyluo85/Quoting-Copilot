@@ -172,8 +172,10 @@ async def process_rate_with_dual_rate(clean_db: AsyncSession):
     rate = ProcessRate(
         process_code="PROC-TEST-DUAL",
         process_name="双轨费率测试工序",
-        std_mhr=Decimal("260.00"),
-        vave_mhr=Decimal("237.00"),
+        std_mhr_var=Decimal("200.00"),
+        std_mhr_fix=Decimal("60.00"),  # std_mhr_total = 260.00
+        vave_mhr_var=Decimal("180.00"),
+        vave_mhr_fix=Decimal("57.00"),  # vave_mhr_total = 237.00
         efficiency_factor=Decimal("1.0"),
         work_center="测试车间",
         std_hourly_rate=Decimal("260.00"),
