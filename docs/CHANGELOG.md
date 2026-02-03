@@ -10,13 +10,14 @@
 
 | 日期 | 文档 | 版本 | 变更内容 | 影响范围 | 责任人 |
 |------|------|------|----------|----------|--------|
-| 2026-02-03 | PROJECT_CONTEXT.md | v2.0 → v2.1 | 修复前端技术栈描述：Next.js → Vite + React | 前端开发 | Randy Luo |
+| 2026-02-03 | 全部文档 | - | 统一产品名称为 Dr.aiVOSS 智能快速报价助手 (Quoting-Copilot) | 全部 | Randy Luo |
+| 2026-02-03 | PROJECT_CONTEXT.md | v2.0 → v2.2 | 修复前端技术栈描述：Next.js → Vite + React；更新产品名称 | 前端开发 | Randy Luo |
 | 2026-02-03 | 全部业务逻辑文档 | v1.0 → v1.1 | 统一版本号，同步更新时间戳 | 全部 | Randy Luo |
-| 2026-02-03 | docs/CHANGELOG.md | v1.0 | 新增：文档变更日志 | 全部 | Randy Luo |
-| 2026-02-03 | docs/GLOSSARY.md | v1.0 | 新增：项目术语表 | 全部 | Randy Luo |
-| 2026-02-03 | docs/TESTING_STRATEGY.md | v1.0 | 新增：测试策略指南 | 测试团队 | Randy Luo |
-| 2026-02-03 | docs/DEPLOYMENT.md | v1.0 | 新增：部署运维指南 | DevOps | Randy Luo |
-| 2026-02-03 | docs/API_REFERENCE.md | v1.0 | 新增：API 完整参考 | 后端开发 | Randy Luo |
+| 2026-02-03 | docs/CHANGELOG.md | v1.0 → v1.1 | 新增：文档变更日志 | 全部 | Randy Luo |
+| 2026-02-03 | docs/GLOSSARY.md | v1.0 → v1.1 | 新增：项目术语表 | 全部 | Randy Luo |
+| 2026-02-03 | docs/TESTING_STRATEGY.md | v1.0 → v1.1 | 新增：测试策略指南 | 测试团队 | Randy Luo |
+| 2026-02-03 | docs/DEPLOYMENT.md | v1.0 → v1.1 | 新增：部署运维指南 | DevOps | Randy Luo |
+| 2026-02-03 | docs/API_REFERENCE.md | v1.0 → v1.1 | 新增：API 完整参考 | 后端开发 | Randy Luo |
 
 ---
 
