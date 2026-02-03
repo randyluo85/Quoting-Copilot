@@ -59,9 +59,10 @@ export function AppSidebar({ currentView, onNavigate }: AppSidebarProps) {
   // 根据当前视图动态计算流程状态
   const getStepStatus = (view: View | undefined): 'completed' | 'active' | 'pending' => {
     if (!view) return 'pending';
-    
+
     const viewOrder: View[] = [
       'dashboard',
+      'new-project',
       'project-success',
       'bom',
       'process',
