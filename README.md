@@ -94,3 +94,31 @@ smartquote/
 ├── PROJECT_CONTEXT.md    # 业务逻辑唯一真理源
 └── README.md             # 本文件
 ```
+
+## 7. 前端组件说明
+
+| 组件 | 功能 | 对应视图 |
+|------|------|---------|
+| Dashboard | 项目列表仪表板 | dashboard |
+| NewProject | 创建新项目 | - |
+| ProjectCreationSuccess | 项目创建成功页 | project-success |
+| BOMManagement | BOM 管理（物料/工艺清单） | bom |
+| ProcessAssessment | 新工艺评估（条件触发） | process |
+| CostCalculation | 成本核算 | cost-calc |
+| QuoteSummary | QS/BC 报价摘要 | quotation |
+| InvestmentRecovery | Payback 投资回收 | investment |
+| QuotationOutput | 报价输出 | output |
+| AppSidebar | 侧边栏流程导航 | - |
+| QualityAssessment | 质量评估 | - |
+| InvestmentAnalysis | 投资分析 | - |
+| WorkflowGuide | 工作流指南 | - |
+| QuotationGeneration | 报价生成 | - |
+
+**视图流程顺序：**
+```
+dashboard → project-success → bom → process → cost-calc → quotation → investment → output
+```
+
+**分支流程（条件触发）：**
+- `process` - 当识别到新工艺路线时触发，需 IE 工程师评估
+- 采购询价 - 当物料无历史数据时触发
