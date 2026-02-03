@@ -331,8 +331,111 @@ vave_cost = (cycle_time_vave / 3600) × (vave_mhr_var + vave_mhr_fix + personnel
 | savings_rate | DECIMAL(5,2) | | 节省率(%) |
 | quoted_price | DECIMAL(14,4) | | 报价 |
 | actual_margin | DECIMAL(5,2) | | 实际利润率(%) |
+| **hk_3_cost** | DECIMAL(14,4) | | **🔴 新增：HK III 制造成本** |
+| **sk_cost** | DECIMAL(14,4) | | **🔴 新增：SK 完全成本** |
+| **db_1** | DECIMAL(14,4) | | **🔴 新增：DB I 边际贡献 I** |
+| **db_4** | DECIMAL(14,4) | | **🔴 新增：DB IV 净利润** |
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
+
+---
+
+### 3.3 主数据扩展表 {#master-data-extension}
+
+#### cost_centers（成本中心主数据）🔴 新增
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | VARCHAR(20) | PK | 成本中心代码 |
+| name | VARCHAR(100) | NOT NULL | 成本中心名称 |
+| net_production_hours | DECIMAL(8,2) | | 年度额定生产小时数 |
+| efficiency_rate | DECIMAL(5,4) | | 稼动率 0-1 |
+| plan_fx_rate | DECIMAL(10,6) | | 计划汇率 |
+| avg_wages_per_hour | DECIMAL(10,2) | | 平均时薪 |
+| useful_life_years | INT | DEFAULT 8 | 折旧年限 |
+| status | VARCHAR(20) | DEFAULT 'ACTIVE' | ACTIVE/INACTIVE |
+| created_at | DATETIME | DEFAULT NOW() | |
+| updated_at | DATETIME | ON UPDATE NOW() | |
+
+---
+
+### 3.4 NRE 投资相关表 {#nre-tables}
+
+#### investment_items（投资项明细）🔴 新增
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | CHAR(36) | PK | UUID |
+| project_id | CHAR(36) | FK, NOT NULL | 关联项目 |
+| product_id | CHAR(36) | FK | 关联产品 |
+| item_type | VARCHAR(20) | | MOLD/GAUGE/JIG/FIXTURE |
+| name | VARCHAR(200) | | 投资项名称 |
+| unit_cost_est | DECIMAL(12,2) | | 预估单价 |
+| currency | VARCHAR(10) | DEFAULT 'CNY' | 币种 |
+| quantity | INT | DEFAULT 1 | 数量 |
+| asset_lifecycle | INT | | 设计寿命(模次) |
+| is_shared | BOOLEAN | DEFAULT FALSE | 是否共享资产 |
+| shared_source_id | CHAR(36) | | 共享源 ID |
+| status | VARCHAR(20) | DEFAULT 'DRAFT' | DRAFT/CONFIRMED |
+| created_at | DATETIME | DEFAULT NOW() | |
+| updated_at | DATETIME | ON UPDATE NOW() | |
+
+#### amortization_strategies（分摊策略）🔴 新增
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | CHAR(36) | PK | UUID |
+| project_id | CHAR(36) | FK, NOT NULL, UNIQUE | 关联项目 |
+| mode | VARCHAR(20) | | UPFRONT/AMORTIZED |
+| amortization_volume | INT | | 分摊基数销量 |
+| duration_years | INT | DEFAULT 2 | 分摊年限 |
+| interest_rate | DECIMAL(5,4) | DEFAULT 0.0600 | 年利率 |
+| calculated_unit_add | DECIMAL(10,4) | | 单件分摊额(计算结果) |
+| created_at | DATETIME | DEFAULT NOW() | |
+| updated_at | DATETIME | ON UPDATE NOW() | |
+
+---
+
+### 3.5 Business Case 相关表 {#business-case-tables}
+
+#### business_case_params（Business Case 参数）🔴 新增
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | CHAR(36) | PK | UUID |
+| project_id | CHAR(36) | FK, NOT NULL, UNIQUE | 关联项目 |
+| tooling_invest | DECIMAL(14,4) | | 模具投入总额 |
+| rnd_invest | DECIMAL(14,4) | | 研发投入总额 |
+| base_price | DECIMAL(10,4) | | 基础单价 |
+| exchange_rate | DECIMAL(8,4) | | 汇率 |
+| amortization_mode | VARCHAR(50) | | total_volume_based/fixed_3_years |
+| sa_rate | DECIMAL(5,4) | DEFAULT 0.0210 | 管销费用率 ~2.1% |
+| created_at | DATETIME | DEFAULT NOW() | |
+| updated_at | DATETIME | ON UPDATE NOW() | |
+
+#### business_case_years（Business Case 年度数据）🔴 新增
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | CHAR(36) | PK | UUID |
+| project_id | CHAR(36) | FK, NOT NULL | 关联项目 |
+| year | INT | NOT NULL | 年份 |
+| volume | INT | NOT NULL | 销量 |
+| reduction_rate | DECIMAL(5,4) | | 年降比例 |
+| gross_sales | DECIMAL(14,4) | | 毛销售额 |
+| net_sales | DECIMAL(14,4) | | 净销售额 |
+| net_price | DECIMAL(10,4) | | 净单价 |
+| hk_3_cost | DECIMAL(14,4) | | HK III 制造成本 |
+| recovery_tooling | DECIMAL(14,4) | | 模具摊销 |
+| recovery_rnd | DECIMAL(14,4) | | 研发摊销 |
+| overhead_sa | DECIMAL(14,4) | | S&A 管销费用 |
+| sk_cost | DECIMAL(14,4) | | SK 完全成本 |
+| db_1 | DECIMAL(14,4) | | DB I 边际贡献 I |
+| db_4 | DECIMAL(14,4) | | DB IV 净利润 |
+| created_at | DATETIME | DEFAULT NOW() | |
+| updated_at | DATETIME | ON UPDATE NOW() | |
+
+**唯一索引:** UNIQUE KEY (project_id, year)
 
 ---
 
