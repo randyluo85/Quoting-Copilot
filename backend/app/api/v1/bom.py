@@ -15,6 +15,44 @@ from app.models.process_rate import ProcessRate
 router = APIRouter()
 
 
+@router.post("/parse-test")
+async def parse_bom_test(
+    file: UploadFile = File(...),
+):
+    """测试BOM解析（不查询数据库）"""
+    content = await file.read()
+
+    parser = BOMParser()
+    parse_result = parser.parse_excel_file(content)
+
+    materials = []
+    for idx, m in enumerate(parse_result.materials):
+        materials.append({
+            "partNumber": m.part_number,
+            "partName": m.part_name,
+            "quantity": m.quantity,
+            "comments": m.comments
+        })
+
+    processes = []
+    for idx, p in enumerate(parse_result.processes):
+        processes.append({
+            "opNo": p.op_no,
+            "name": p.name,
+            "workCenter": p.work_center,
+            "standardTime": p.standard_time
+        })
+
+    return JSONResponse(content={
+        "materials": materials,
+        "processes": processes,
+        "summary": {
+            "total_materials": len(materials),
+            "total_processes": len(processes)
+        }
+    })
+
+
 @router.post("/upload")
 async def upload_bom(
     file: UploadFile = File(...),
