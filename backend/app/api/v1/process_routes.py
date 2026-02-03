@@ -305,14 +305,6 @@ async def get_process_route_by_code(
             status_code=status.HTTP_404_NOT_FOUND, detail="Active process route not found"
         )
 
-    # 加载工序明细
-    items_result = await db.execute(
-        select(ProcessRouteItem)
-        .where(ProcessRouteItem.route_id == code)
-        .order_by(ProcessRouteItem.sequence)
-    )
-    route.items = items_result.scalars().all()
-
     return JSONResponse(content=_route_to_response(route).model_dump(by_alias=True))
 
 
