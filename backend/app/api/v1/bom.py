@@ -62,7 +62,12 @@ def _query_materials_sync(material_codes: list[str]) -> dict:
 
 
 def _query_processes_sync(process_names: list[str]) -> dict:
-    """同步查询工艺费率（在线程池中执行）."""
+    """同步查询工艺费率（在线程池中执行）.
+
+    使用新的 MHR 拆分费率结构：
+    - 单价 = (std_mhr_var + std_mhr_fix) × standard_time
+    - VAVE单价 = (vave_mhr_var + vave_mhr_fix) × standard_time
+    """
     processes_with_rate = {}
     if not process_names:
         return processes_with_rate
@@ -80,19 +85,39 @@ def _query_processes_sync(process_names: list[str]) -> dict:
     try:
         with conn.cursor() as cursor:
             placeholders = ','.join(['%s'] * len(process_names))
+            # 使用新的 MHR 拆分字段，同时支持按工艺名称或编码匹配
             query = f"""
-                SELECT process_name, std_hourly_rate, vave_hourly_rate, work_center
+                SELECT process_code, process_name, equipment, work_center,
+                       std_mhr_var, std_mhr_fix, vave_mhr_var, vave_mhr_fix,
+                       std_hourly_rate, vave_hourly_rate, efficiency_factor
                 FROM process_rates
-                WHERE process_name IN ({placeholders})
+                WHERE process_name IN ({placeholders}) OR process_code IN ({placeholders})
             """
-            cursor.execute(query, process_names)
+            cursor.execute(query, process_names + process_names)
             results = cursor.fetchall()
 
             for row in results:
+                # 优先使用新的 MHR 拆分费率
+                if row['std_mhr_var'] is not None and row['std_mhr_fix'] is not None:
+                    std_rate = float(row['std_mhr_var']) + float(row['std_mhr_fix'])
+                else:
+                    std_rate = float(row['std_hourly_rate']) if row['std_hourly_rate'] else None
+
+                if row['vave_mhr_var'] is not None and row['vave_mhr_fix'] is not None:
+                    vave_rate = float(row['vave_mhr_var']) + float(row['vave_mhr_fix'])
+                else:
+                    vave_rate = float(row['vave_hourly_rate']) if row['vave_hourly_rate'] else None
+
                 processes_with_rate[row['process_name']] = {
-                    "unit_price": float(row['std_hourly_rate']) if row['std_hourly_rate'] else None,
-                    "vave_price": float(row['vave_hourly_rate']) if row['vave_hourly_rate'] else None,
+                    "process_code": row['process_code'],
+                    "equipment": row['equipment'] or "",
                     "work_center": row['work_center'] or "",
+                    "std_mhr_var": float(row['std_mhr_var']) if row['std_mhr_var'] else None,
+                    "std_mhr_fix": float(row['std_mhr_fix']) if row['std_mhr_fix'] else None,
+                    "vave_mhr_var": float(row['vave_mhr_var']) if row['vave_mhr_var'] else None,
+                    "vave_mhr_fix": float(row['vave_mhr_fix']) if row['vave_mhr_fix'] else None,
+                    "unit_price": std_rate,
+                    "vave_price": vave_rate,
                     "has_history_data": True,
                 }
     finally:
