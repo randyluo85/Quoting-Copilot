@@ -700,6 +700,7 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
       setNewProduct({
         name: '',
         code: '',
+        routeCode: '',
         annualVolume: project.annualVolume || '0',
         description: '',
       });
