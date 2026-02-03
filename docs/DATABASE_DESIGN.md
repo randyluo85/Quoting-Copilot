@@ -217,20 +217,25 @@ erDiagram
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
 
-#### process_rates（工序费率主数据）
+#### process_rates（工序费率主数据）- 已扩展
 
 | 字段 | 类型 | 约束 | 说明 |
 |------|------|------|------|
 | id | INT | PK, AUTO_INCREMENT | |
 | process_code | VARCHAR(50) | UNIQUE | 工序编码 |
+| **cost_center_id** | **VARCHAR(20)** | **FK** | **🔴 新增：关联成本中心** |
 | process_name | VARCHAR(100) | NOT NULL | 工序名称 |
 | equipment | VARCHAR(100) | | 设备 |
-| std_mhr | DECIMAL(10,2) | | 标准 MHR（含人工） |
-| vave_mhr | DECIMAL(10,2) | | VAVE MHR（含人工） |
+| **std_mhr_var** | DECIMAL(10,2) | | **🔴 新增：标准变动费率** |
+| **std_mhr_fix** | DECIMAL(10,2) | | **🔴 新增：标准固定费率** |
+| **vave_mhr_var** | DECIMAL(10,2) | | **🔴 新增：VAVE变动费率** |
+| **vave_mhr_fix** | DECIMAL(10,2) | | **🔴 新增：VAVE固定费率** |
 | efficiency_factor | DECIMAL(4,2) | DEFAULT 1.0 | 效率系数 |
 | remarks | TEXT | | 备注 |
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
+
+> **兼容性说明：** `std_mhr_var + std_mhr_fix` 等同于原 `std_mhr`，前端可通过计算显示"总费率"
 
 ### 3.2 交易数据表 {#transaction-data}
 
