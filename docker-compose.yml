@@ -29,7 +29,7 @@ services:
       POSTGRES_USER: smartquote
       POSTGRES_PASSWORD: smartpassword
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - doha_postgres_data:/var/lib/postgresql/data
     networks:
