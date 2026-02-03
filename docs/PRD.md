@@ -545,7 +545,7 @@ Payback (Months) = Investment / Monthly Savings
 
 | 层级 | 技术选型 | 说明 |
 |------|----------|------|
-| **前端** | Next.js + TypeScript + ShadcnUI | B 端极简 UI |
+| **前端** | Vite + React 18 + TypeScript + ShadcnUI | B 端极简 UI |
 | **后端** | Python + FastAPI | 高性能异步 API |
 | **数据库** | MySQL（主库）+ PostgreSQL（向量库） | 关系型 + 向量搜索 |
 | **缓存** | Redis | 会话管理 + 计算缓存 |
