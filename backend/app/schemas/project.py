@@ -6,8 +6,8 @@ from app.models.project import ProjectStatus
 class ProductSchema(BaseModel):
     id: str
     name: str
-    partNumber: str = Field(..., alias="part_number")
-    annualVolume: int = Field(..., alias="annual_volume")
+    part_number: str = Field(..., alias="partNumber")
+    annual_volume: int = Field(..., alias="annualVolume")
     description: str
 
     model_config = {"populate_by_name": True, "by_alias": True}
@@ -24,15 +24,15 @@ class ProjectOwnerSchema(BaseModel):
 
 
 class ProjectCreate(BaseModel):
-    asacNumber: str = Field(..., alias="asac_number")
-    customerNumber: str = Field(..., alias="customer_number")
-    productVersion: str = Field(..., alias="product_version")
-    customerVersion: str = Field(..., alias="customer_version")
-    clientName: str = Field(..., alias="client_name")
-    projectName: str = Field(..., alias="project_name")
-    annualVolume: str = Field(..., alias="annual_volume")
+    asac_number: str = Field(..., alias="asacNumber")
+    customer_number: str = Field(..., alias="customerNumber")
+    product_version: str = Field(..., alias="productVersion")
+    customer_version: str = Field(..., alias="customerVersion")
+    client_name: str = Field(..., alias="clientName")
+    project_name: str = Field(..., alias="projectName")
+    annual_volume: str = Field(..., alias="annualVolume")
     description: str
-    products: List[ProductSchema]
+    products: List["ProductSchema"]
     owners: ProjectOwnerSchema
 
     model_config = {"populate_by_name": True, "by_alias": True}
@@ -40,18 +40,18 @@ class ProjectCreate(BaseModel):
 
 class ProjectResponse(BaseModel):
     id: str
-    asacNumber: str = Field(..., alias="asac_number")
-    customerNumber: str = Field(..., alias="customer_number")
-    productVersion: str = Field(..., alias="product_version")
-    customerVersion: str = Field(..., alias="customer_version")
-    clientName: str = Field(..., alias="client_name")
-    projectName: str = Field(..., alias="project_name")
-    annualVolume: str = Field(..., alias="annual_volume")
+    asac_number: str = Field(..., alias="asacNumber")
+    customer_number: str = Field(..., alias="customerNumber")
+    product_version: str = Field(..., alias="productVersion")
+    customer_version: str = Field(..., alias="customerVersion")
+    client_name: str = Field(..., alias="clientName")
+    project_name: str = Field(..., alias="projectName")
+    annual_volume: str = Field(..., alias="annualVolume")
     description: str
-    products: List[ProductSchema]
+    products: List["ProductSchema"]
     owners: ProjectOwnerSchema
     status: ProjectStatus
-    createdDate: str = Field(..., alias="created_date")
-    updatedDate: str = Field(..., alias="updated_date")
+    created_date: str = Field(..., alias="createdDate")
+    updated_date: str = Field(..., alias="updatedDate")
 
     model_config = {"populate_by_name": True, "by_alias": True}
