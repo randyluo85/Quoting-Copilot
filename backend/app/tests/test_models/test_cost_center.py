@@ -1,5 +1,6 @@
 # backend/app/tests/test_models/test_cost_center.py
 import pytest
+from decimal import Decimal
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.cost_center import CostCenter
 
@@ -26,7 +27,7 @@ class TestCostCenterModel:
 
         assert center.id == "CC001"
         assert center.name == "铸造车间"
-        assert center.efficiency_rate == 0.85
+        assert center.efficiency_rate == Decimal("0.85")
 
     async def test_cost_center_unique_id(self, clean_db: AsyncSession):
         """测试 ID 唯一约束."""
