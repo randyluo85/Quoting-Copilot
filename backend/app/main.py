@@ -29,6 +29,7 @@ app.include_router(materials.router, prefix="/api/v1/materials", tags=["material
 app.include_router(investments.router, prefix="/api/v1", tags=["investments"])
 app.include_router(business_case.router, prefix="/api/v1", tags=["business-case"])
 app.include_router(process_routes.router, prefix="/api/v1/process-routes", tags=["process-routes"])  # 新增
+app.include_router(process_rates.router, prefix="/api/v1/process-rates", tags=["process-rates"])  # 新增
 
 
 @app.get("/health")
