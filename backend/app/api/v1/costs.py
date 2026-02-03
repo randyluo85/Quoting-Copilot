@@ -33,20 +33,20 @@ async def calculate_cost(
         双轨成本计算结果
     """
     result = CostCalculationResponse(
-        productId=product_id,
-        materialCost=PricePair(
+        product_id=product_id,
+        material_cost=PricePair(
             std=Decimal("210.95"),
             vave=Decimal("198.25"),
             savings=Decimal("12.70"),
             savingsRate=0.0602,
         ),
-        processCost=PricePair(
+        process_cost=PricePair(
             std=Decimal("264.00"),
             vave=Decimal("242.80"),
             savings=Decimal("21.20"),
             savingsRate=0.0803,
         ),
-        totalCost=PricePair(
+        total_cost=PricePair(
             std=Decimal("474.95"),
             vave=Decimal("441.05"),
             savings=Decimal("33.90"),
