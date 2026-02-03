@@ -96,10 +96,8 @@ def _query_processes_sync(process_names: list[str]) -> dict:
                 WHERE process_name IN ({name_placeholders}) OR process_code IN ({code_placeholders})
             """
             all_params = process_names + process_names
-            print(f"[DEBUG] Executing query with params: {all_params}")
             cursor.execute(query, all_params)
             results = cursor.fetchall()
-            print(f"[DEBUG] Query returned {len(results)} rows")
 
             for row in results:
                 # 优先使用新的 MHR 拆分费率
