@@ -180,6 +180,7 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
   const [newProduct, setNewProduct] = useState({
     name: '',
     code: '',
+    routeCode: '',
     annualVolume: project.annualVolume || '0',
     description: '',
   });
