@@ -41,11 +41,12 @@ class TestE2E:
             assert "savings" in data["totalCost"]
 
 
+@pytest.mark.usefixtures("cleanup_engine")
 @pytest.mark.asyncio
 class TestE2EWithDatabase:
     """需要数据库的端到端测试."""
 
-    async def test_list_projects_empty(self, cleanup_engine):
+    async def test_list_projects_empty(self):
         """测试获取空项目列表."""
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
