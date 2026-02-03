@@ -195,6 +195,24 @@ export interface QuoteSummary {
  * API Client
  */
 export const api = {
+  // ========== 产品相关 ==========
+  products: {
+    create: (data: ProductCreate) =>
+      apiRequest<ProductResponse>('/project-products', {
+        method: 'POST',
+        body: JSON.stringify({
+          projectId: data.projectId,
+          productName: data.productName,
+          productCode: data.productCode,
+          ...(data.routeCode && { routeCode: data.routeCode }),
+          ...(data.productVersion && { productVersion: data.productVersion }),
+        }),
+      }),
+
+    list: (projectId: string) =>
+      apiRequest<ProductResponse[]>(`/project-products/${projectId}`),
+  },
+
   // ========== 项目相关 ==========
   projects: {
     list: () => apiRequest<ProjectData[]>('/projects'),
