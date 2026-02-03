@@ -34,6 +34,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog';
 import type { View, ProjectData, Product } from '../App';
 import { api } from '../lib/api';
 
