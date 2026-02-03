@@ -3,7 +3,10 @@
 from sqlalchemy import select
 from fastapi import APIRouter, Depends, UploadFile, File, Form
 from fastapi.responses import JSONResponse
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker, Session
+from asyncio import to_thread
+import pymysql
 
 from app.db.session import get_db
 from app.services.bom_parser import BOMParser
@@ -11,8 +14,91 @@ from app.schemas.bom import BOMMaterialResponse, BOMProcessResponse
 from app.schemas.common import StatusLight
 from app.models.material import Material
 from app.models.process_rate import ProcessRate
+from app.config import get_settings
 
 router = APIRouter()
+settings = get_settings()
+
+
+def _query_materials_sync(material_codes: list[str]) -> dict:
+    """同步查询物料价格（在线程池中执行）."""
+    materials_with_price = {}
+    if not material_codes:
+        return materials_with_price
+
+    conn = pymysql.connect(
+        host=settings.MYSQL_HOST,
+        port=settings.MYSQL_PORT,
+        user=settings.MYSQL_USER,
+        password=settings.MYSQL_PASSWORD,
+        database=settings.MYSQL_DATABASE,
+        charset='utf8mb4',
+        cursorclass=pymysql.cursors.DictCursor
+    )
+
+    try:
+        with conn.cursor() as cursor:
+            placeholders = ','.join(['%s'] * len(material_codes))
+            query = f"""
+                SELECT item_code, std_price, vave_price, supplier_tier, category
+                FROM materials
+                WHERE item_code IN ({placeholders})
+            """
+            cursor.execute(query, material_codes)
+            results = cursor.fetchall()
+
+            for row in results:
+                materials_with_price[row['item_code']] = {
+                    "unit_price": float(row['std_price']) if row['std_price'] else None,
+                    "vave_price": float(row['vave_price']) if row['vave_price'] else None,
+                    "supplier": row['supplier_tier'] or "",
+                    "material": row['category'] or "",
+                    "has_history_data": True,
+                }
+    finally:
+        conn.close()
+
+    return materials_with_price
+
+
+def _query_processes_sync(process_names: list[str]) -> dict:
+    """同步查询工艺费率（在线程池中执行）."""
+    processes_with_rate = {}
+    if not process_names:
+        return processes_with_rate
+
+    conn = pymysql.connect(
+        host=settings.MYSQL_HOST,
+        port=settings.MYSQL_PORT,
+        user=settings.MYSQL_USER,
+        password=settings.MYSQL_PASSWORD,
+        database=settings.MYSQL_DATABASE,
+        charset='utf8mb4',
+        cursorclass=pymysql.cursors.DictCursor
+    )
+
+    try:
+        with conn.cursor() as cursor:
+            placeholders = ','.join(['%s'] * len(process_names))
+            query = f"""
+                SELECT process_name, std_hourly_rate, vave_hourly_rate, work_center
+                FROM process_rates
+                WHERE process_name IN ({placeholders})
+            """
+            cursor.execute(query, process_names)
+            results = cursor.fetchall()
+
+            for row in results:
+                processes_with_rate[row['process_name']] = {
+                    "unit_price": float(row['std_hourly_rate']) if row['std_hourly_rate'] else None,
+                    "vave_price": float(row['vave_hourly_rate']) if row['vave_hourly_rate'] else None,
+                    "work_center": row['work_center'] or "",
+                    "has_history_data": True,
+                }
+    finally:
+        conn.close()
+
+    return processes_with_rate
 
 
 @router.post("/parse-test")
@@ -91,33 +177,24 @@ async def upload_bom(
     Returns:
         解析结果，包含物料和工艺列表（含价格）
     """
+    import time
+    start_time = time.time()
+
     # 读取文件内容
     content = await file.read()
+    print(f"[DEBUG] File read time: {time.time() - start_time:.3f}s")
 
     # 解析 Excel
     parser = BOMParser()
     parse_result = parser.parse_excel_file(content)
+    print(f"[DEBUG] Parse Excel time: {time.time() - start_time:.3f}s")
 
-    # 批量查询物料历史价格
+    # 批量查询物料历史价格（使用同步方式在线程池执行）
     material_codes = [m.part_number for m in parse_result.materials if m.part_number]
-    materials_with_price = {}
+    print(f"[DEBUG] Querying materials: {material_codes}")
 
-    if material_codes:
-        # 查询所有匹配的物料
-        result = await db.execute(
-            select(Material).where(Material.item_code.in_(material_codes))
-        )
-        db_materials = result.scalars().all()
-
-        # 构建价格查询映射（Decimal 转 float）
-        for db_mat in db_materials:
-            materials_with_price[db_mat.item_code] = {
-                "unit_price": float(db_mat.std_price) if db_mat.std_price else None,
-                "vave_price": float(db_mat.vave_price) if db_mat.vave_price else None,
-                "supplier": db_mat.supplier_tier or "",
-                "material": db_mat.category or "",
-                "has_history_data": True,
-            }
+    materials_with_price = await to_thread(_query_materials_sync, material_codes)
+    print(f"[DEBUG] Materials query time: {time.time() - start_time:.3f}s, found: {len(materials_with_price)}")
 
     # 转换物料响应，自动填充价格
     materials = []
@@ -149,59 +226,38 @@ async def upload_bom(
             )
         )
 
-    # 解析工艺数据（从 comments 中提取或根据物料推断）
-    # 简化版：根据物料 comments 提取工艺关键词
-    process_keywords = {
-        "折弯": "CNC精加工",
-        "弯曲": "CNC精加工",
-        "焊接": "焊接",
-        "机加": "CNC精加工",
-        "铸造": "重力铸造",
-        "表面": "喷涂",
-        "阳极": "阳极氧化",
-        "镀锌": "镀锌",
-        "检测": "尺寸检测",
-    }
+    # 获取解析后的工艺数据（从Excel的工艺工作表）
+    print(f"[DEBUG] Parsed processes from Excel: {len(parse_result.processes)}")
+    for p in parse_result.processes:
+        print(f"[DEBUG]   - {p.op_no}: {p.name} @ {p.work_center}, {p.standard_time}h")
 
-    # 收集所有可能的工艺名称
-    detected_processes = set()
-    for m in parse_result.materials:
-        if m.comments:
-            for keyword, process_name in process_keywords.items():
-                if keyword in m.comments:
-                    detected_processes.add(process_name)
+    # 直接使用解析出的工艺数据查询费率
+    process_names = [p.name for p in parse_result.processes if p.name]
+    print(f"[DEBUG] Querying processes: {process_names}")
 
-    # 查询工艺费率
-    processes_with_rate = {}
-    if detected_processes:
-        result = await db.execute(
-            select(ProcessRate).where(ProcessRate.process_name.in_(list(detected_processes)))
-        )
-        db_processes = result.scalars().all()
+    processes_with_rate = await to_thread(_query_processes_sync, process_names)
+    print(f"[DEBUG] Processes query time: {time.time() - start_time:.3f}s, found: {len(processes_with_rate)}")
 
-        for db_proc in db_processes:
-            processes_with_rate[db_proc.process_name] = {
-                "unit_price": float(db_proc.std_hourly_rate) if db_proc.std_hourly_rate else None,
-                "vave_price": float(db_proc.vave_hourly_rate) if db_proc.vave_hourly_rate else None,
-                "work_center": db_proc.work_center or "",
-                "has_history_data": True,
-            }
-
-    # 构建工艺响应
+    # 构建工艺响应 - 使用 Excel 解析的数据
     processes = []
-    for idx, (proc_name, rate_data) in enumerate(sorted(processes_with_rate.items())):
+    for idx, p in enumerate(parse_result.processes):
+        rate_data = processes_with_rate.get(p.name, {})
+        print(f"[DEBUG] Process {p.name}: rate_data={rate_data}")
+
         processes.append(
             BOMProcessResponse(
                 id=f"P-{idx + 1:03d}",
-                op_no=f"{idx + 1:03d}",
-                name=proc_name,
-                work_center=rate_data.get("work_center", ""),
-                standard_time=1.0,  # 默认工时，需要AI或人工调整
+                op_no=p.op_no or f"{idx + 1:03d}",
+                name=p.name,
+                work_center=p.work_center or rate_data.get("work_center", ""),
+                standard_time=p.standard_time or 1.0,
                 unit_price=rate_data.get("unit_price"),
                 vave_price=rate_data.get("vave_price"),
                 has_history_data=rate_data.get("has_history_data", False),
             )
         )
+
+    print(f"[DEBUG] Total time: {time.time() - start_time:.3f}s")
 
     return JSONResponse(
         content={
