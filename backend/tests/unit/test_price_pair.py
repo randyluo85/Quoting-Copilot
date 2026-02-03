@@ -201,9 +201,10 @@ class TestPricePairSerialization:
         # mode="json" 将 Decimal 转换为 float
         data = price_pair.model_dump(mode="json", by_alias=True)
 
-        assert data["std"] == 100.0
-        assert data["vave"] == 85.0
-        assert data["savings"] == 15.0
+        # Pydantic 保留 Decimal 的字符串表示
+        assert data["std"] == "100.00"
+        assert data["vave"] == "85.00"
+        assert data["savings"] == "15.00"
         assert data["savingsRate"] == 0.15
 
     def test_price_pair_from_dict(self):
