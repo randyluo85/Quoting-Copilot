@@ -9,4 +9,4 @@ class CostCalculationResponse(BaseModel):
     processCost: PricePair = Field(..., alias="process_cost")
     totalCost: PricePair = Field(..., alias="total_cost")
 
-    model_config = {"populate_by_name": True}
+    model_config = {"populate_by_name": True, "by_alias": True}
