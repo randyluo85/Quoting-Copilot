@@ -83,11 +83,13 @@ class TestDualTrackCalculation:
         mock_material.vave_price = None
 
         with patch("app.services.calculation.select"):
-            mock_result = AsyncMock()
-            mock_result.scalar_one_or_none = MagicMock(return_value=mock_material)
+            async def mock_execute(*args, **kwargs):
+                mock_result = AsyncMock()
+                mock_result.scalar_one_or_none = MagicMock(return_value=mock_material)
+                return mock_result
 
             db = AsyncMock()
-            db.execute = MagicMock(return_value=mock_result)
+            db.execute = mock_execute
 
             calc = DualTrackCalculator(db)
             result = await calc.calculate_material_cost("TEST-001", 10)
@@ -108,11 +110,13 @@ class TestDualTrackCalculation:
         mock_rate.efficiency_factor = Decimal("0.95")
 
         with patch("app.services.calculation.select"):
-            mock_result = AsyncMock()
-            mock_result.scalar_one_or_none = MagicMock(return_value=mock_rate)
+            async def mock_execute(*args, **kwargs):
+                mock_result = AsyncMock()
+                mock_result.scalar_one_or_none = MagicMock(return_value=mock_rate)
+                return mock_result
 
             db = AsyncMock()
-            db.execute = MagicMock(return_value=mock_result)
+            db.execute = mock_execute
 
             calc = DualTrackCalculator(db)
             result = await calc.calculate_process_cost("重力铸造", 2.5)
