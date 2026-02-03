@@ -25,12 +25,12 @@ SmartQuote 是一个专为制造业成本工程师和销售经理设计的 AI �
 
 ## 3. 技术栈 (Tech Stack)
 
-* **Frontend:** Next.js (App Router), React, TailwindCSS, ShadcnUI
+* **Frontend:** Vite 6 + React 18 + TypeScript, TailwindCSS, ShadcnUI (Radix UI primitives)
 * **Backend:** Python FastAPI (AI Native)
 * **Database:**
     * **MySQL:** 结构化主数据 (物料、费率)
     * **PostgreSQL (pgvector):** 非结构化历史报价 & 向量检索 (RAG)
-* **AI:** LLM Service (用于语义清洗与 VAVE 建议)
+* **AI:** 通义千问 Qwen-Plus (阿里云 DashScope)
 
 ## 4. 环境搭建 (Setup)
 
