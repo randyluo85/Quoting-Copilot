@@ -476,13 +476,9 @@ Total Cost（总成本）
 - 物料成本（Raw Materials + Purchased Parts）
 - 工艺成本（Machine Cost + Labor Cost）
 
-**计算公式：**
-```
-HK III = Material Cost + Process Cost
-Process Cost = Σ(Cycle Time / 3600 × MHR)
-```
-
 **业务意义：** 衡量工厂生产这个产品是否赚钱的核心指标
+
+> **详细计算逻辑：** [docs/BUSINESS_CASE_LOGIC.md](BUSINESS_CASE_LOGIC.md) §3 HK III 计算
 
 ---
 
