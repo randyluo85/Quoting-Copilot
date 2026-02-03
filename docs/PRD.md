@@ -586,34 +586,17 @@ Total Cost（总成本）
 | **缓存** | Redis | 会话管理 + 计算缓存 |
 | **部署** | Docker + Nginx | 容器化部署 |
 
-### 9.2 核心算法
+### 9.2 核心算法概述
 
-**双轨计价算法（伪代码）：**
-```python
-def calculate_dual_track_cost(bom_line_item):
-    # 1. 获取物料价格
-    material_std = get_material_price(bom_line_item.material_code, price_type='std')
-    material_vave = get_material_price(bom_line_item.material_code, price_type='vave')
+**双轨计价机制：** 系统对所有物料和工艺同时计算 Standard 和 VAVE 两套成本，自动输出节省空间（Savings）和节省率（Savings Rate）。
 
-    # 2. 获取工艺费率
-    process_std = get_process_rate(bom_line_item.process_name, rate_type='std')
-    process_vave = get_process_rate(bom_line_item.process_name, rate_type='vave')
+**计算模块：**
+- 物料成本双轨计算
+- 工艺成本双轨计算（MHR 费率 × Cycle Time）
+- HK III / SK / DB 汇总计算
+- Payback 投资回收期计算
 
-    # 3. 计算总成本
-    total_std = (material_std * bom_line_item.qty) + (process_std.mhr * bom_line_item.hours)
-    total_vave = (material_vave * bom_line_item.qty) + (process_vave.mhr * bom_line_item.hours)
-
-    # 4. 计算节省空间
-    savings = total_std - total_vave
-    savings_rate = (savings / total_std) * 100
-
-    return {
-        'standard': total_std,
-        'vave': total_vave,
-        'savings': savings,
-        'savings_rate': savings_rate
-    }
-```
+> **详细算法实现：** 参考各业务逻辑文档（见附录 11.2）
 
 ---
 
