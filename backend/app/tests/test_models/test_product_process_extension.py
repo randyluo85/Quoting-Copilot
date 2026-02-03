@@ -8,6 +8,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.product_process import ProductProcess
+from app.models.process_rate import ProcessRate
 from app.models.project import Project, ProjectStatus
 from app.models.project_product import ProjectProduct
 
@@ -20,6 +21,22 @@ class TestProductProcessExtension:
         """测试标准工时和 VAVE 工时."""
         # 清理 product_processes 表
         await clean_db.execute(text("TRUNCATE TABLE product_processes"))
+        await clean_db.commit()
+
+        # 创建工序费率（外键依赖）
+        rate = ProcessRate(
+            process_code="PROC-001",
+            process_name="测试工序001",
+            std_mhr_var=Decimal("100.00"),
+            std_mhr_fix=Decimal("50.00"),
+            vave_mhr_var=Decimal("90.00"),
+            vave_mhr_fix=Decimal("45.00"),
+            efficiency_factor=Decimal("1.0"),
+            work_center="测试车间",
+            std_hourly_rate=Decimal("150.00"),
+            vave_hourly_rate=Decimal("135.00"),
+        )
+        clean_db.add(rate)
         await clean_db.commit()
 
         # 创建项目
@@ -79,6 +96,22 @@ class TestProductProcessExtension:
         await clean_db.execute(text("TRUNCATE TABLE product_processes"))
         await clean_db.commit()
 
+        # 创建工序费率（外键依赖）
+        rate = ProcessRate(
+            process_code="PROC-002",
+            process_name="测试工序002",
+            std_mhr_var=Decimal("100.00"),
+            std_mhr_fix=Decimal("50.00"),
+            vave_mhr_var=Decimal("90.00"),
+            vave_mhr_fix=Decimal("45.00"),
+            efficiency_factor=Decimal("1.0"),
+            work_center="测试车间",
+            std_hourly_rate=Decimal("150.00"),
+            vave_hourly_rate=Decimal("135.00"),
+        )
+        clean_db.add(rate)
+        await clean_db.commit()
+
         # 创建项目
         project = Project(
             id=str(uuid.uuid4()),
@@ -129,6 +162,22 @@ class TestProductProcessExtension:
         await clean_db.execute(text("TRUNCATE TABLE product_processes"))
         await clean_db.commit()
 
+        # 创建工序费率（外键依赖）
+        rate = ProcessRate(
+            process_code="PROC-003",
+            process_name="测试工序003",
+            std_mhr_var=Decimal("100.00"),
+            std_mhr_fix=Decimal("50.00"),
+            vave_mhr_var=Decimal("90.00"),
+            vave_mhr_fix=Decimal("45.00"),
+            efficiency_factor=Decimal("1.0"),
+            work_center="测试车间",
+            std_hourly_rate=Decimal("150.00"),
+            vave_hourly_rate=Decimal("135.00"),
+        )
+        clean_db.add(rate)
+        await clean_db.commit()
+
         # 创建项目
         project = Project(
             id=str(uuid.uuid4()),
@@ -169,5 +218,6 @@ class TestProductProcessExtension:
         # 验证默认值
         assert process.cycle_time_std == 90
         assert process.cycle_time_vave is None
+        # personnel_std 有默认值 1.0
         assert process.personnel_std == Decimal("1.0")
         assert process.personnel_vave is None
