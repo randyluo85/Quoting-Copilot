@@ -8,9 +8,20 @@
 import pytest
 from httpx import AsyncClient, ASGITransport
 from decimal import Decimal
+import uuid
 
 from app.main import app
 from app.models.material import Material
+
+
+def _generate_item_code(prefix: str) -> str:
+    """生成唯一的物料编码."""
+    return f"{prefix}-{uuid.uuid4().hex[:8].upper()}"
+
+
+def _generate_process_code(prefix: str) -> str:
+    """生成唯一的工序编码."""
+    return f"{prefix}-{uuid.uuid4().hex[:8].upper()}"
 
 
 class TestMaterialsAPI:
@@ -19,19 +30,22 @@ class TestMaterialsAPI:
     @pytest.mark.asyncio
     async def test_list_materials_returns_empty_array_when_no_materials(self, async_client):
         """当没有物料时，返回空数组"""
-        # 首先清空表
         response = await async_client.get("/api/v1/materials")
-        # 注意：如果 API 不存在，返回 404
+
         if response.status_code == 404:
             pytest.skip("Materials API not implemented yet")
-        else:
-            assert response.status_code == 200
+
+        assert response.status_code == 200
+        # 应该返回列表，可能为空或有数据
+        data = response.json()
+        assert isinstance(data, list)
 
     @pytest.mark.asyncio
     async def test_create_material_with_dual_pricing(self, async_client):
         """创建物料时包含双轨价格"""
+        item_code = _generate_item_code("MAT-TEST")
         payload = {
-            "itemCode": "MAT-TEST-001",
+            "itemCode": item_code,
             "name": "测试物料",
             "spec": "规格描述",
             "stdPrice": 100.50,
@@ -42,22 +56,21 @@ class TestMaterialsAPI:
 
         response = await async_client.post("/api/v1/materials", json=payload)
 
-        # 如果 API 未实现，跳过测试
         if response.status_code == 404:
             pytest.skip("Materials API not implemented yet")
 
         assert response.status_code == 201
         data = response.json()
-        assert data["itemCode"] == "MAT-TEST-001"
+        assert data["itemCode"] == item_code
         assert data["stdPrice"] == 100.50
         assert data["vavePrice"] == 90.25
 
     @pytest.mark.asyncio
     async def test_material_savings_calculation(self, async_client):
         """验证物料节省金额计算"""
-        # 创建测试物料
+        item_code = _generate_item_code("MAT-SAVE")
         payload = {
-            "itemCode": "MAT-SAVE-001",
+            "itemCode": item_code,
             "name": "节省测试物料",
             "stdPrice": 100.00,
             "vavePrice": 80.00,
@@ -134,8 +147,8 @@ class TestMaterialsAPI:
 
         assert response.status_code == 200
 
-        # 验证物料已删除
-        get_response = await async_client.get(f"/api/v1/materials/{test_material.id}")
+        # 验证物料已删除（使用 item_code）
+        get_response = await async_client.get(f"/api/v1/materials/{test_material.item_code}")
         assert get_response.status_code == 404
 
 
@@ -145,7 +158,7 @@ class TestProcessRatesAPI:
     @pytest.mark.asyncio
     async def test_list_process_rates(self, async_client):
         """获取工序费率列表"""
-        response = await async_client.get("/api/v1/process-rates")
+        response = await async_client.get("/api/v1/materials/process-rates")
 
         if response.status_code == 404:
             pytest.skip("ProcessRates API not implemented yet")
@@ -157,8 +170,9 @@ class TestProcessRatesAPI:
     @pytest.mark.asyncio
     async def test_create_process_rate_with_dual_mhr(self, async_client):
         """创建工序费率时包含双轨 MHR"""
+        process_code = _generate_process_code("PROC-TEST")
         payload = {
-            "processCode": "PROC-TEST-001",
+            "processCode": process_code,
             "processName": "测试工序",
             "equipment": "设备A",
             "stdMhr": 120.50,
@@ -166,28 +180,29 @@ class TestProcessRatesAPI:
             "efficiencyFactor": 1.0
         }
 
-        response = await async_client.post("/api/v1/process-rates", json=payload)
+        response = await async_client.post("/api/v1/materials/process-rates", json=payload)
 
         if response.status_code == 404:
             pytest.skip("ProcessRates API not implemented yet")
 
         assert response.status_code == 201
         data = response.json()
-        assert data["processCode"] == "PROC-TEST-001"
+        assert data["processCode"] == process_code
         assert data["stdMhr"] == 120.50
         assert data["vaveMhr"] == 105.00
 
     @pytest.mark.asyncio
     async def test_process_rate_savings_calculation(self, async_client):
         """验证工序费率节省计算"""
+        process_code = _generate_process_code("PROC-SAVE")
         payload = {
-            "processCode": "PROC-SAVE-001",
+            "processCode": process_code,
             "processName": "节省测试工序",
             "stdMhr": 100.00,
             "vaveMhr": 85.00
         }
 
-        response = await async_client.post("/api/v1/process-rates", json=payload)
+        response = await async_client.post("/api/v1/materials/process-rates", json=payload)
 
         if response.status_code == 404:
             pytest.skip("ProcessRates API not implemented yet")
@@ -199,3 +214,7 @@ class TestProcessRatesAPI:
         expected_savings = 100.00 - 85.00
         assert data["stdMhr"] == 100.00
         assert data["vaveMhr"] == 85.00
+        # 如果 API 返回 savings，验证计算
+        if "savings" in data:
+            assert data["savings"] == expected_savings
+
