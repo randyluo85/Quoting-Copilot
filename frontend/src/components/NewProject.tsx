@@ -223,6 +223,7 @@ export function NewProject({ onNavigate, onProjectCreated }: NewProjectProps) {
           projectName: formData.projectName,
           annualVolume: formData.annualVolume,
           description: formData.description,
+          owners: owners,  // 添加负责人字段
           products: parsedData?.products?.map(p => ({
             id: p.id,
             name: p.name,
