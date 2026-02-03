@@ -709,4 +709,4 @@ def calculate_dual_track_cost(bom_line_item):
 
 **文档结束**
 
-*如有疑问，请联系产品团队：product@smartquote.ai*
+*如有疑问，请联系产品团队：luoxin@jshine.cc*
