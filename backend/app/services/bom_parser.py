@@ -123,10 +123,18 @@ class BOMParser:
         keywords_material = ["物料", "material", "bom", "item", "零件", "bill of material"]
         keywords_process = ["工艺", "process", "operation", "工序", "op"]
 
+        # 排除的信息类 sheet
+        exclude_keywords = ["product info", "产品信息", "产品名称"]
+
         for row in worksheet.iter_rows(min_row=1, max_row=10, values_only=True):
             if not row:
                 continue
             row_text = " ".join(str(cell).lower() for cell in row if cell)
+
+            # 先检查是否为排除的 sheet
+            for kw in exclude_keywords:
+                if kw in row_text:
+                    return "info"
 
             for kw in keywords_material:
                 if kw in row_text:
