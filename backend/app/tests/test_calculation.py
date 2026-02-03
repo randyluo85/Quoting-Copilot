@@ -129,6 +129,7 @@ class TestDualTrackCalculation:
 
     def test_savings_calculation(self):
         """测试节省率计算."""
+        """测试节省率计算."""
         std = Decimal("100.00")
         vave = Decimal("85.00")
         savings = std - vave
