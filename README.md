@@ -77,9 +77,20 @@ smartquote/
 │   │   └── main.py
 │   └── tests/
 ├── frontend/
-│   ├── app/              # Next.js Pages
-│   ├── components/       # ShadcnUI Components
-│   ├── lib/              # Utils & API Hooks
-│   └── public/
-└── docs/                 # PRD & 资源文件
+│   ├── src/              # Vite 源码目录
+│   │   ├── components/   # 业务组件
+│   │   │   ├── ui/       # ShadcnUI 基础组件
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── BOMManagement.tsx
+│   │   │   ├── CostCalculation.tsx
+│   │   │   ├── QuoteSummary.tsx
+│   │   │   └── ...       # 其他业务组件
+│   │   ├── App.tsx       # 应用入口（含类型定义）
+│   │   └── main.tsx
+│   ├── index.html
+│   ├── vite.config.ts
+│   └── package.json
+├── CLAUDE.md             # AI 协作指南
+├── PROJECT_CONTEXT.md    # 业务逻辑唯一真理源
+└── README.md             # 本文件
 ```
