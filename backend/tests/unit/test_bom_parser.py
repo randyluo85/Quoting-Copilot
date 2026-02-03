@@ -234,12 +234,12 @@ class TestBOMParserEdgeCases:
         wb = Workbook()
         ws = wb.active
 
-        headers = ["Part Number", "Part Name", "Qty"]
+        headers = ["Part Number", "Part Name", "Version", "Type", "Status", "Qty"]
         ws.append(headers)
-        ws.append(["MAT-001", "物料一", 1.0])
+        ws.append(["MAT-001", "物料一", "V1.0", "I", "N", 1.0])
         ws.append([])  # 空行
-        ws.append(["MAT-002", "物料二", 2.0])
-        ws.append([None, None, None])  # None 行
+        ws.append(["MAT-002", "物料二", "V1.0", "I", "N", 2.0])
+        ws.append([None, None, None, None, None, None])  # None 行
 
         output = BytesIO()
         wb.save(output)
@@ -258,10 +258,10 @@ class TestBOMParserEdgeCases:
         wb = Workbook()
         ws = wb.active
 
-        headers = ["Part Number", "Part Name", "Qty"]
+        headers = ["Part Number", "Part Name", "Version", "Type", "Status", "Qty"]
         ws.append(headers)
-        ws.append(["MAT-NO-QTY", "无数量物料", None])  # 数量为空
-        ws.append(["MAT-001", "正常物料", 1.0])
+        ws.append(["MAT-NO-QTY", "无数量物料", "V1.0", "I", "N", None])  # 数量为空
+        ws.append(["MAT-001", "正常物料", "V1.0", "I", "N", 1.0])
 
         output = BytesIO()
         wb.save(output)
@@ -282,9 +282,9 @@ class TestBOMParserEdgeCases:
         wb = Workbook()
         ws = wb.active
 
-        headers = ["Part Number", "Part Name", "Qty"]
+        headers = ["Part Number", "Part Name", "Version", "Type", "Status", "Qty"]
         ws.append(headers)
-        ws.append(["MAT-INVALID", "无效数量物料", "N/A"])  # 字符串数量
+        ws.append(["MAT-INVALID", "无效数量物料", "V1.0", "I", "N", "N/A"])  # 字符串数量
 
         output = BytesIO()
         wb.save(output)
@@ -304,11 +304,11 @@ class TestBOMParserEdgeCases:
         wb = Workbook()
         ws = wb.active
 
-        headers = ["Part Number", "Part Name", "Qty"]
+        headers = ["Part Number", "Part Name", "Version", "Type", "Status", "Qty"]
         ws.append(headers)
-        ws.append([None, "无零件号物料", 1.0])  # 零件号为空
-        ws.append(["", "空字符串零件号", 2.0])  # 零件号为空字符串
-        ws.append(["MAT-001", "正常物料", 3.0])
+        ws.append([None, "无零件号物料", "V1.0", "I", "N", 1.0])  # 零件号为空
+        ws.append(["", "空字符串零件号", "V1.0", "I", "N", 2.0])  # 零件号为空字符串
+        ws.append(["MAT-001", "正常物料", "V1.0", "I", "N", 3.0])
 
         output = BytesIO()
         wb.save(output)
@@ -329,9 +329,9 @@ class TestBOMParserEdgeCases:
         ws = wb.active
 
         # 只包含必要的列
-        headers = ["Part Number", "Part Name"]
+        headers = ["Part Number", "Part Name", "Version", "Type", "Status"]
         ws.append(headers)
-        ws.append(["MAT-MINIMAL", "最小字段物料"])
+        ws.append(["MAT-MINIMAL", "最小字段物料", "V1.0", "I", "N"])
 
         output = BytesIO()
         wb.save(output)
