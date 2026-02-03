@@ -73,6 +73,7 @@ async def clean_db(db_session: AsyncSession):
     await db_session.execute(text("TRUNCATE TABLE projects"))
     await db_session.execute(text("TRUNCATE TABLE process_rates"))
     await db_session.execute(text("TRUNCATE TABLE materials"))
+    await db_session.execute(text("TRUNCATE TABLE cost_centers"))
     await db_session.execute(text("SET FOREIGN_KEY_CHECKS=1"))
     await db_session.commit()
     yield db_session
