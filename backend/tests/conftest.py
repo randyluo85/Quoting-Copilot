@@ -26,14 +26,6 @@ test_engine = create_async_engine(
 
 
 @pytest.fixture(scope="session")
-def event_loop():
-    """创建事件循环"""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
-
-
-@pytest.fixture(scope="session")
 async def setup_database():
     """设置测试数据库"""
     # 创建所有表
