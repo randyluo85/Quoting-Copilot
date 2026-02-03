@@ -274,18 +274,47 @@ export function ProcessAssessment({ onNavigate }: ProcessAssessmentProps) {
   const handleSave = async (data: ProcessRouteEdit) => {
     setIsSaving(true);
     try {
-      // TODO: 实际应调用 API
-      // const method = editingRoute?.id ? 'PUT' : 'POST';
-      // const url = editingRoute?.id
-      //   ? `/api/v1/process-routes/${editingRoute.id}`
-      //   : '/api/v1/process-routes';
-      // await fetch(url, { method, body: JSON.stringify(data) });
+      const isUpdate = !!editingRoute?.id;
+      const url = isUpdate
+        ? `http://localhost:8000/api/v1/process-routes/${editingRoute.id}`
+        : 'http://localhost:8000/api/v1/process-routes';
+
+      // 转换前端数据为 API 格式
+      const apiData = {
+        name: data.name,
+        product_id: data.id ? undefined : 'PROD-TEMP', // 新建时需要临时产品ID
+        remarks: data.remarks,
+        items: data.items.map(item => ({
+          operation_no: item.operationNo,
+          process_code: item.processCode,
+          sequence: item.sequence,
+          cycle_time_std: item.cycleTimeStd,
+          cycle_time_vave: item.cycleTimeVave,
+          personnel_std: item.personnelStd,
+          personnel_vave: item.personnelVave,
+          efficiency_factor: item.efficiencyFactor,
+          remarks: item.remarks,
+        })),
+      };
+
+      const response = await fetch(url, {
+        method: isUpdate ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(apiData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
 
       // 刷新列表
       await loadRoutes();
       setIsEditorOpen(false);
     } catch (error) {
       console.error('Failed to save route:', error);
+      alert('保存失败，请检查后端服务');
     } finally {
       setIsSaving(false);
     }
