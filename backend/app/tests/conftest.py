@@ -1,14 +1,17 @@
 """测试配置和 fixtures."""
 
 import pytest
+from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.pool import NullPool
 from app.config import get_settings
+from app.main import app
+from app.db.session import get_db
 
 
 @pytest.fixture(scope="function")
-async def test_db_session():
-    """创建独立的测试数据库会话.
+async def test_client():
+    """创建测试用的 HTTP 客户端.
 
     使用 NullPool 避免连接池与事件循环的冲突问题.
     """
@@ -28,8 +31,16 @@ async def test_db_session():
         expire_on_commit=False,
     )
 
-    async with TestingSessionLocal() as session:
-        yield session
+    async def override_get_db():
+        async with TestingSessionLocal() as session:
+            yield session
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        yield client
 
     # 清理
+    app.dependency_overrides.clear()
     await test_engine.dispose()
