@@ -89,6 +89,7 @@ async def create_project(
         products=[p.model_dump(by_alias=False) for p in data.products],
         owners=data.owners.model_dump(by_alias=False),
         status=ProjectStatus.DRAFT,
+        target_margin=data.target_margin,
     )
 
     db.add(project)
