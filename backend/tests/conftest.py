@@ -10,8 +10,9 @@ from app.config import get_settings
 from app.models import Project, Material, ProcessRate
 
 
-# 测试数据库 URL（使用独立的测试数据库）
-TEST_DATABASE_URL = "mysql+aiomysql://smartquote:smartpassword@localhost:3306/smartquote_test"
+# 测试数据库 URL（使用现有数据库作为测试库）
+# 注意：生产环境应使用独立测试数据库
+TEST_DATABASE_URL = "mysql+aiomysql://smartquote:smartpassword@localhost:3306/smartquote"
 
 # 创建测试引擎
 test_engine = create_async_engine(
