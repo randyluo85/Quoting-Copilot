@@ -68,9 +68,6 @@ async def async_client(db_session):
 @pytest.fixture
 async def test_project(db_session):
     """创建测试项目"""
-    import uuid
-    from datetime import datetime
-
     project = Project(
         id=str(uuid.uuid4()),
         asac_number=f"AS-{uuid.uuid4().hex[:8].upper()}",
@@ -82,7 +79,13 @@ async def test_project(db_session):
         annual_volume="10000",
         description="测试描述",
         products=[],
-        owners={},
+        owners={
+            "sales": "张三",
+            "vm": "李四",
+            "ie": "王五",
+            "pe": "赵六",
+            "controlling": "钱七"
+        },
         status=ProjectStatus.DRAFT,
         target_margin=None,
         owner=None,
