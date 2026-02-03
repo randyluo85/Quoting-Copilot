@@ -18,11 +18,6 @@ class TestInvestmentItem:
 
     async def test_create_mold_investment(self, clean_db: AsyncSession):
         """测试创建模具投资."""
-        # 清理表
-        await clean_db.execute(text("TRUNCATE TABLE investment_items"))
-        await clean_db.execute(text("TRUNCATE TABLE projects"))
-        await clean_db.commit()
-
         # 创建关联项目
         project = Project(
             id=str(uuid.uuid4()),
