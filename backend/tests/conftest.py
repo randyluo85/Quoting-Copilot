@@ -3,11 +3,14 @@ import asyncio
 import pytest
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from datetime import datetime
+from decimal import Decimal
+import uuid
 
 from app.main import app
 from app.db.session import Base
 from app.config import get_settings
-from app.models import Project, Material, ProcessRate
+from app.models import Project, Material, ProcessRate, ProjectStatus
 
 
 # 测试数据库 URL（使用现有数据库作为测试库）
