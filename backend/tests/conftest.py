@@ -1,6 +1,6 @@
 """Pytest 配置和共享 fixtures"""
-import asyncio
 import pytest
+import asyncio
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from datetime import datetime
@@ -9,7 +9,6 @@ import uuid
 
 from app.main import app
 from app.db.session import Base
-from app.config import get_settings
 from app.models import Project, Material, ProcessRate, ProjectStatus
 
 
@@ -25,27 +24,20 @@ test_engine = create_async_engine(
 )
 
 
-@pytest.fixture(scope="session")
-async def setup_database():
-    """设置测试数据库"""
-    # 创建所有表
+@pytest.fixture
+async def db_session():
+    """创建数据库会话"""
+    # 确保表存在
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    yield
-    # 清理
-    async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
 
-
-@pytest.fixture
-async def db_session(setup_database):
-    """创建数据库会话"""
     async_session = async_sessionmaker(
         test_engine, class_=AsyncSession, expire_on_commit=False
     )
+
     async with async_session() as session:
         yield session
-        # 清理数据
+        # 清理：回滚事务但不删除表结构
         await session.rollback()
 
 
@@ -93,8 +85,7 @@ async def test_project(db_session):
 
 @pytest.fixture
 async def test_material(db_session):
-    """创建测试物料（使用唯一 ID 避免冲突）"""
-    # 使用随机后缀确保唯一性
+    """创建测试物料（使用唯一编码避免冲突）"""
     suffix = uuid.uuid4().hex[:6].upper()
     material = Material(
         item_code=f"MAT-{suffix}",
