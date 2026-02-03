@@ -7,6 +7,7 @@
 """
 
 import pytest
+import os
 from io import BytesIO
 from openpyxl import Workbook
 
@@ -16,6 +17,10 @@ from app.services.bom_parser import (
     ParsedProcess,
     BOMParseResult,
 )
+
+# 获取项目根目录
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+BOM_FILES_DIR = os.path.join(PROJECT_ROOT, "tests", "files")
 
 
 class TestBOMParserBasic:
