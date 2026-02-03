@@ -14,7 +14,6 @@ class TestProcessRateMHRSplit:
         rate = ProcessRate(
             process_code="PROC-001",
             process_name="测试工序",
-            cost_center_id="CC001",
             std_mhr_var=Decimal("100.00"),
             std_mhr_fix=Decimal("50.00"),
             vave_mhr_var=Decimal("90.00"),
