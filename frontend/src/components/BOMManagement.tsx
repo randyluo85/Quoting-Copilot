@@ -117,6 +117,7 @@ interface ProductBOMData {
   needsIEReview?: boolean; // 是否需要IE参与
   materials: Material[];
   processes: Process[];
+  uploadError?: string; // 上传错误信息
 }
 
 export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
