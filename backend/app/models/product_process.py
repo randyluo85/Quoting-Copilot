@@ -27,13 +27,23 @@ class ProductProcess(Base):
     )
     # 工序顺序
     sequence_order: Mapped[int] = mapped_column(Integer, nullable=False)
-    # 工时（秒）
-    cycle_time: Mapped[int | None] = mapped_column(Integer)
+    # 工时（秒）- 双轨
+    cycle_time_std: Mapped[int | None] = mapped_column(Integer, comment="标准工时（秒）")
+    cycle_time_vave: Mapped[int | None] = mapped_column(Integer, comment="VAVE工时（秒）")
+    # 人工配置（人/机）- 双轨
+    personnel_std: Mapped[float | None] = mapped_column(
+        Numeric(4, 2), default=1.0, comment="标准人工配置（人/机）"
+    )
+    personnel_vave: Mapped[float | None] = mapped_column(
+        Numeric(4, 2), comment="VAVE人工配置（人/机）"
+    )
+    # 兼容旧字段（保留用于现有数据）
+    cycle_time: Mapped[int | None] = mapped_column(Integer, comment="工时（秒）- 已弃用，请使用cycle_time_std")
     # MHR 快照（从费率表复制，便于审计）
     std_mhr: Mapped[float | None] = mapped_column(Numeric(10, 2))
     vave_mhr: Mapped[float | None] = mapped_column(Numeric(10, 2))
     # 双轨成本
-    # 公式: std_cost = cycle_time / 3600 * std_mhr
+    # 公式: std_cost = (cycle_time_std / 3600) * std_mhr
     std_cost: Mapped[float | None] = mapped_column(Numeric(12, 4))
     vave_cost: Mapped[float | None] = mapped_column(Numeric(12, 4))
     # 备注

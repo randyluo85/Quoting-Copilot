@@ -1,15 +1,16 @@
-# SmartQuote MVP (Dual-Price Edition) - v2.0
+# Dr.aiVOSS 智能快速报价助手 (Quoting-Copilot) - v2.0
 
+> **产品名称:** Dr.aiVOSS 智能快速报价助手 (Quoting-Copilot)
 > **项目代号:** SmartQuote MVP
 > **核心理念:** 文档驱动 | 双轨核算 | 人机协同
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.1   | 2026-02-02 | 2026-02-03 | SmartQuote MVP 项目说明 | Randy Luo |
+| v1.2   | 2026-02-02 | 2026-02-03 | Dr.aiVOSS 智能快速报价助手项目说明 | Randy Luo |
 
 ## 1. 项目简介 (Vision)
 
-SmartQuote 是一个专为制造业成本工程师和销售经理设计的 AI 智能报价系统。旨在通过简单的 Excel BOM 拖拽，自动化处理复杂的成本核算任务。
+**Dr.aiVOSS 智能快速报价助手 (Quoting-Copilot)** 是一个专为制造业成本工程师和销售经理设计的 AI 智能报价系统。旨在通过简单的 Excel BOM 拖拽，自动化处理复杂的成本核算任务。
 
 **核心差异化：** 本系统采用 **"双轨核算 (Dual-Track Calculation)"** 机制，不仅计算"当前标准成本 (Standard Cost)"，还同时计算基于最佳实践的"VAVE 目标成本 (VAVE Target Cost)"，直接量化降本潜力。
 
@@ -64,7 +65,22 @@ $$ \sum (Qty \times P_{std}) + \sum (CycleTime_{std} \times (MHR_{std} + Labor_{
 **VAVE Cost (目标成本):**
 $$ \sum (Qty \times P_{vave}) + \sum (CycleTime_{opt} \times (MHR_{vave} + Labor_{vave})) $$
 
-## 6. 设计文档
+## 6. 🚀 快速找到你要的文档
+
+| 我想... | 查看文档 |
+|---------|----------|
+| 了解项目全貌 | [README.md](README.md) ← 当前文档 |
+| 理解业务逻辑 | [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) |
+| 开始开发 | [CLAUDE.md](CLAUDE.md) |
+| 理解产品需求 | [docs/PRD.md](docs/PRD.md) |
+| 查看数据库设计 | [docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md) |
+| 查找术语定义 | [docs/GLOSSARY.md](docs/GLOSSARY.md) |
+| 部署系统 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
+| 测试指南 | [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) |
+| API 参考 | [docs/API_REFERENCE.md](docs/API_REFERENCE.md) |
+| 文档变更记录 | [docs/CHANGELOG.md](docs/CHANGELOG.md) |
+
+### 完整文档索引
 
 | 文档 | 用途 | 目标读者 |
 |------|------|---------|
