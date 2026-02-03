@@ -42,7 +42,7 @@
 
 ---
 
-## 2. ER 关系图
+## 2. ER 关系图 {#er-diagram}
 
 ```mermaid
 erDiagram
