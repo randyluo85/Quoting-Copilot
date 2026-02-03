@@ -21,9 +21,10 @@ class ProductMaterial(Base):
     project_product_id: Mapped[str] = mapped_column(
         String(36), ForeignKey("project_products.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    # 关联物料主数据（可为空，用于快照数据）
+    # 关联物料主数据（使用 item_code，因为 materials.id 是 INT）
+    # 注意：不使用外键约束，因为类型不匹配
     material_id: Mapped[str | None] = mapped_column(
-        String(50), ForeignKey("materials.id", ondelete="SET NULL"), index=True
+        String(50), index=True
     )
     # 物料层级（BOM层级）
     material_level: Mapped[int | None] = mapped_column(Integer)
