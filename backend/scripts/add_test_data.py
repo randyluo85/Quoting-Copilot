@@ -4,8 +4,9 @@
 """
 import asyncio
 from decimal import Decimal
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.session import async_session_maker
+from app.db.session import get_db
 from app.models.material import Material
 from app.models.process_rate import ProcessRate
 from app.models.process_route import ProcessRoute, ProcessRouteItem, ProcessRouteStatus
