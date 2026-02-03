@@ -376,16 +376,12 @@ stateDiagram-v2
 - **Standard Price（标准价）**：当前正常的采购成本/生产成本
 - **VAVE Price（优化价）**：通过 VAVE（Value Analysis/Value Engineering）优化后的理想成本
 
-**计算公式：**
-```
-Savings（节省空间） = Standard Price - VAVE Price
-Savings Rate（节省率） = Savings / Standard Price × 100%
-```
-
 **业务价值：**
 - 帮助企业在竞标中了解"底线价格"
 - 识别高水分的供应商/工艺
 - 持续优化成本结构
+
+> **详细计算逻辑：** [docs/PROCESS_COST_LOGIC.md](PROCESS_COST_LOGIC.md) §3 双轨计价逻辑
 
 ---
 
