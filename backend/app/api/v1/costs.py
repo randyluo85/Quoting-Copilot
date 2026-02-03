@@ -53,4 +53,4 @@ async def calculate_cost(
             savingsRate=0.0714,
         ),
     )
-    return JSONResponse(content=result.model_dump(by_alias=True))
+    return JSONResponse(content=result.model_dump(mode="json", by_alias=True))
