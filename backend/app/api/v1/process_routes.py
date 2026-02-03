@@ -254,7 +254,7 @@ async def create_process_route(
     route = result.scalar_one_or_none()
 
     response = _route_to_response(route)
-    return JSONResponse(content=response.model_dump(by_alias=True), status_code=201)
+    return JSONResponse(content=response.model_dump(by_alias=True, mode='json'), status_code=201)
 
 
 @router.get("/{route_id}")
@@ -283,7 +283,7 @@ async def get_process_route(
             status_code=status.HTTP_404_NOT_FOUND, detail="Process route not found"
         )
 
-    return JSONResponse(content=_route_to_response(route).model_dump(by_alias=True))
+    return JSONResponse(content=_route_to_response(route).model_dump(by_alias=True, mode='json'))
 
 
 @router.get("/by-code/{code}")
@@ -313,7 +313,7 @@ async def get_process_route_by_code(
             status_code=status.HTTP_404_NOT_FOUND, detail="Active process route not found"
         )
 
-    return JSONResponse(content=_route_to_response(route).model_dump(by_alias=True))
+    return JSONResponse(content=_route_to_response(route).model_dump(by_alias=True, mode='json'))
 
 
 @router.put("/{route_id}")
@@ -400,7 +400,7 @@ async def update_process_route(
     )
     updated_route = result.scalar_one_or_none()
 
-    return JSONResponse(content=_route_to_response(updated_route).model_dump(by_alias=True))
+    return JSONResponse(content=_route_to_response(updated_route).model_dump(by_alias=True, mode='json'))
 
 
 @router.delete("/{route_id}")
@@ -497,7 +497,7 @@ async def submit_process_route(
     )
     route = result.scalar_one_or_none()
 
-    return JSONResponse(content=_route_to_response(route).model_dump(by_alias=True))
+    return JSONResponse(content=_route_to_response(route).model_dump(by_alias=True, mode='json'))
 
 
 @router.post("/{route_id}/approve")
@@ -556,4 +556,4 @@ async def approve_process_route(
         approved_by=route.approved_by,
         approved_at=route.approved_at,
     )
-    return JSONResponse(content=response.model_dump(by_alias=True))
+    return JSONResponse(content=response.model_dump(by_alias=True, mode='json'))
