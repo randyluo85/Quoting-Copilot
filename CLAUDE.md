@@ -23,13 +23,15 @@
   - *Rule:* 保持 B 端界面极简，优先使用 Shadcn 组件。
 - **Backend:** Python 3.10+, **FastAPI**, SQLAlchemy, Pydantic.
   - *Rule:* 所有 API 输入输出必须严格遵循 Pydantic Schema。
-- **DB:** MySQL (Primary), PostgreSQL (Vector).
+- **DB:** MySQL (Primary), PostgreSQL (Vector), **Redis** (Cache).
+- **AI:** 通义千问 Qwen-Plus (阿里云 DashScope), 兼容 OpenAI API 格式.
 
 ## ⚙️ Build & Run Commands
 - **Frontend:** `npm run dev`
 - **Backend:** `uvicorn app.main:app --reload`
 - **Test:** `pytest`
 - **Install:** `pip install -r requirements.txt` / `npm install`
+- **Redis:** `docker run -d -p 6379:6379 redis:7-alpine`
 
 ## 📜 Database Schema (不可变契约)
 

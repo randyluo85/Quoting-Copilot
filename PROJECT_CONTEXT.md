@@ -110,8 +110,8 @@ $$ Cost_{vave} = (Qty \times MaterialPrice_{vave}) + \sum (CycleTime_{opt} \time
 |------|------|
 | **Frontend** | Next.js (App Router) + ShadcnUI + React Table (处理复杂 BOM) |
 | **Backend** | Python FastAPI (利用 Pydantic 做强类型校验) |
-| **AI Core** | **Parsing:** LLM (Claude 3.5 Sonnet / GPT-4o) 用于 Comments 列的特征提取<br>**Retrieval:** pgvector 用于非结构化历史报价检索 |
-| **Storage** | **MySQL:** 结构化主数据<br>**PostgreSQL:** 向量数据 |
+| **AI Core** | **Parsing:** 通义千问 Qwen-Plus (阿里云 DashScope) 用于 Comments 列的特征提取<br>**Retrieval:** pgvector 用于非结构化历史报价检索 |
+| **Storage** | **MySQL:** 结构化主数据<br>**PostgreSQL:** 向量数据<br>**Redis:** 缓存层 (物料价格、费率、LLM 响应) |
 
 ---
 
@@ -123,4 +123,52 @@ $$ Cost_{vave} = (Qty \times MaterialPrice_{vave}) + \sum (CycleTime_{opt} \time
 Role: "你是一个拥有 10 年经验的制造业成本工程师。"
 Task: "提取隐藏在备注中的工艺参数，并转化为标准的 JSON 键值对。"
 Constraint: "对于不确定的参数，不要猜测，直接标记为 null。"
+```
+
+### 5.1 AI 服务配置 (阿里云 DashScope)
+
+**模型选择：**
+- **主模型**: `qwen-plus` (通义千问 Plus) - 用于特征提取和语义分析
+- **备用模型**: `qwen-turbo` - 快速响应场景
+
+**API 配置：**
+```python
+# 环境变量
+DASHSCOPE_API_KEY=sk-xxx
+DASHSCOPE_MODEL=qwen-plus
+DASHSCOPE_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+```
+
+**成本优势：**
+- ✅ 国内服务，无网络延迟
+- ✅ 价格约为 Claude 3.5 的 1/5
+- ✅ 兼容 OpenAI API 格式
+
+### 5.2 Redis 缓存策略
+
+**缓存内容：**
+
+| 缓存键格式 | TTL | 说明 |
+|-----------|-----|------|
+| `material:{item_code}` | 1h | 物料主数据 |
+| `rate:{process_name}` | 1h | 工艺费率 |
+| `llm:parse:{hash}` | 24h | LLM 解析结果 (内容哈希) |
+| `vector:search:{query_hash}` | 10min | 向量检索结果 |
+
+**缓存伪代码：**
+```python
+# 物料查询优先走缓存
+material = redis.get(f"material:{item_code}")
+if not material:
+    material = db.query(Material).filter_by(item_code=item_code).first()
+    redis.setex(f"material:{item_code}", 3600, material.json())
+
+# LLM 解析结果缓存
+content_hash = hashlib.md5(comments_content.encode()).hexdigest()
+cached = redis.get(f"llm:parse:{content_hash}")
+if cached:
+    return json.loads(cached)
+
+result = call_qwen_api(prompt)
+redis.setex(f"llm:parse:{content_hash}", 86400, json.dumps(result))
 ```
