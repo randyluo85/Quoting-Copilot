@@ -279,7 +279,7 @@ flowchart TB
     class Sales,Control review
 ```
 
-### 6.2 状态流转
+### 5.2 状态流转
 
 ```mermaid
 stateDiagram-v2
