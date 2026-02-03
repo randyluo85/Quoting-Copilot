@@ -172,8 +172,14 @@ export const api = {
 
   // ========== 成本计算相关 ==========
   cost: {
-    calculate: (projectId: string, productId: string) =>
-      apiRequest<any>(`/cost/calculate?project_id=${projectId}&product_id=${productId}`),
+    calculate: (projectId: string, productId: string, data: {
+      materials: Array<{ code: string; quantity: number }>;
+      processes: Array<{ name: string; cycle_time: number }>;
+    }) =>
+      apiRequest<any>(`/cost/calculate?project_id=${projectId}&product_id=${productId}`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
 
     getResult: (projectId: string) =>
       apiRequest<any>(`/cost/${projectId}`),
