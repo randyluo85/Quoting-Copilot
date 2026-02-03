@@ -1,8 +1,21 @@
-"""数据库初始化脚本."""
+"""数据库初始化脚本.
 
+设计规范: docs/DATABASE_DESIGN.md
+"""
 from sqlalchemy.ext.asyncio import create_async_engine
 from app.config import get_settings
 from app.db.session import Base
+
+# 导入所有模型，确保 SQLAlchemy 能识别所有表
+from app.models import (
+    Project,
+    Material,
+    ProcessRate,
+    ProjectProduct,
+    ProductMaterial,
+    ProductProcess,
+    QuoteSummary,
+)
 
 
 async def init_db() -> None:
