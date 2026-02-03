@@ -1,15 +1,16 @@
-# SmartQuote MVP (Dual-Price Edition) - v2.0
+# Dr.aiVOSS 智能快速报价助手 (Quoting-Copilot) - v2.0
 
+> **产品名称:** Dr.aiVOSS 智能快速报价助手 (Quoting-Copilot)
 > **项目代号:** SmartQuote MVP
 > **核心理念:** 文档驱动 | 双轨核算 | 人机协同
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.1   | 2026-02-02 | 2026-02-03 | SmartQuote MVP 项目说明 | Randy Luo |
+| v1.2   | 2026-02-02 | 2026-02-03 | Dr.aiVOSS 智能快速报价助手项目说明 | Randy Luo |
 
 ## 1. 项目简介 (Vision)
 
-SmartQuote 是一个专为制造业成本工程师和销售经理设计的 AI 智能报价系统。旨在通过简单的 Excel BOM 拖拽，自动化处理复杂的成本核算任务。
+**Dr.aiVOSS 智能快速报价助手 (Quoting-Copilot)** 是一个专为制造业成本工程师和销售经理设计的 AI 智能报价系统。旨在通过简单的 Excel BOM 拖拽，自动化处理复杂的成本核算任务。
 
 **核心差异化：** 本系统采用 **"双轨核算 (Dual-Track Calculation)"** 机制，不仅计算"当前标准成本 (Standard Cost)"，还同时计算基于最佳实践的"VAVE 目标成本 (VAVE Target Cost)"，直接量化降本潜力。
 
