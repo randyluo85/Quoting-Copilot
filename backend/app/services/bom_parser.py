@@ -223,11 +223,8 @@ class BOMParser:
                 continue
 
             part_number = str(part_number_cell).strip()
-            if (
-                not part_number
-                or part_number.lower() in ["", "none", "part number", "零件号"]
-                or part_number.isdigit()
-            ):
+            # 跳过空值或表头行
+            if not part_number or part_number.lower() in ["", "none", "part number", "零件号"]:
                 continue
 
             # 获取数量
