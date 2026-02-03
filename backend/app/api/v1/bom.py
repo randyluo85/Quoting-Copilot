@@ -19,11 +19,20 @@ router = APIRouter()
 async def parse_bom_test(
     file: UploadFile = File(...),
 ):
-    """测试BOM解析（不查询数据库）"""
+    """测试BOM解析（包含测试价格数据）"""
     content = await file.read()
 
     parser = BOMParser()
     parse_result = parser.parse_excel_file(content)
+
+    # 测试工艺价格数据
+    test_process_prices = {
+        "重力铸造": {"unit_price": 150.0, "vave_price": 135.0},
+        "CNC精加工": {"unit_price": 200.0, "vave_price": 180.0},
+        "焊接": {"unit_price": 120.0, "vave_price": 110.0},
+        "喷涂": {"unit_price": 80.0, "vave_price": 72.0},
+        "尺寸检测": {"unit_price": 100.0, "vave_price": 90.0},
+    }
 
     materials = []
     for idx, m in enumerate(parse_result.materials):
@@ -36,19 +45,26 @@ async def parse_bom_test(
 
     processes = []
     for idx, p in enumerate(parse_result.processes):
+        price_data = test_process_prices.get(p.name, {"unit_price": 0, "vave_price": 0})
         processes.append({
+            "id": f"P-{idx + 1:03d}",
             "opNo": p.op_no,
             "name": p.name,
             "workCenter": p.work_center,
-            "standardTime": p.standard_time
+            "standardTime": p.standard_time,
+            "unitPrice": price_data["unit_price"],
+            "vavePrice": price_data["vave_price"],
+            "hasHistoryData": True
         })
 
     return JSONResponse(content={
+        "status": "completed",
         "materials": materials,
         "processes": processes,
         "summary": {
             "total_materials": len(materials),
-            "total_processes": len(processes)
+            "total_processes": len(processes),
+            "matched_processes": len(processes)
         }
     })
 
