@@ -61,20 +61,20 @@ export default function App() {
   const currentView = useUIStore((state) => state.currentView);
   const setCurrentView = useUIStore((state) => state.setCurrentView);
 
-  // 使用同一个 selector 获取多个值，避免多次订阅
-  const { projects, selectedProject, loading, fetchProjects, selectProject } = useProjectStore(
-    (state) => ({
-      projects: state.projects,
-      selectedProject: state.selectedProject,
-      loading: state.loading,
-      fetchProjects: state.fetchProjects,
-      selectProject: state.selectProject,
-    })
-  );
+  // 分别获取各个值，避免 selector 对象引用变化
+  const projects = useProjectStore((state) => state.projects);
+  const selectedProject = useProjectStore((state) => state.selectedProject);
+  const loading = useProjectStore((state) => state.loading);
+  const fetchProjects = useProjectStore((state) => state.fetchProjects);
+  const selectProject = useProjectStore((state) => state.selectProject);
 
-  // 启动时获取项目列表 - 只执行一次
+  // 启动时获取项目列表 - 使用 ref 确保只执行一次
+  const hasFetched = useRef(false);
   useEffect(() => {
-    fetchProjects();
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      fetchProjects();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
