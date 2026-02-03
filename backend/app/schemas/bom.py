@@ -12,10 +12,20 @@ from app.schemas.common import PricePair, StatusLight
 # ==================== ProjectProduct ====================
 
 class ProjectProductCreate(BaseModel):
-    """创建项目产品关联."""
+    """创建项目产品关联.
+
+    必填字段:
+    - product_name: 产品名称
+    - product_code: 产品编码
+
+    非必填字段:
+    - route_code: 工艺路线编码
+    - product_version: 产品版本
+    - bom_file_path: BOM文件路径
+    """
     project_id: str = Field(..., alias="projectId")
-    product_name: str = Field(..., alias="productName")
-    product_code: Optional[str] = Field(None, alias="productCode")
+    product_name: str = Field(..., alias="productName", min_length=1)
+    product_code: str = Field(..., alias="productCode", min_length=1)  # 改为必填
     product_version: Optional[str] = Field(None, alias="productVersion")
     route_code: Optional[str] = Field(None, alias="routeCode")
     bom_file_path: Optional[str] = Field(None, alias="bomFilePath")
