@@ -251,7 +251,7 @@ vave_cost = cycle_time / 3600 * vave_mhr
 
 ---
 
-## 4. 索引设计
+## 4. 索引设计 {#indexes}
 
 ```sql
 -- projects
