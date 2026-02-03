@@ -210,19 +210,36 @@ export function ProcessAssessment({ onNavigate }: ProcessAssessmentProps) {
   // 复制工艺路线
   const handleCopy = async (routeId: string) => {
     try {
-      // TODO: 实际应调用 API 复制
-      const response = await fetch(`/api/v1/process-routes/${routeId}`);
+      const response = await fetch(`http://localhost:8000/api/v1/process-routes/${routeId}`);
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
       const data = await response.json();
 
+      // 创建副本数据（id 为 undefined 将创建新路线）
       const newRoute: ProcessRouteEdit = {
-        ...data,
         id: undefined,
         name: `${data.name} (副本)`,
         status: 'draft',
         version: 1,
-        items: data.items.map((item: ProcessItemEdit) => ({
-          ...item,
+        remarks: data.remarks,
+        items: data.items.map((item: any) => ({
           id: `new-${Date.now()}-${item.id}`,
+          operationNo: item.operation_no,
+          processCode: item.process_code,
+          processName: item.process_name,
+          equipment: item.equipment,
+          sequence: item.sequence,
+          cycleTimeStd: item.cycle_time_std,
+          cycleTimeVave: item.cycle_time_vave,
+          personnelStd: parseFloat(item.personnel_std) || 1.0,
+          personnelVave: item.personnel_vave ? parseFloat(item.personnel_vave) : undefined,
+          stdMhrVar: parseFloat(item.std_mhr_var) || 0,
+          stdMhrFix: parseFloat(item.std_mhr_fix) || 0,
+          vaveMhrVar: parseFloat(item.vave_mhr_var) || 0,
+          vaveMhrFix: parseFloat(item.vave_mhr_fix) || 0,
+          efficiencyFactor: parseFloat(item.efficiency_factor) || 1.0,
+          remarks: item.remarks,
         })),
       };
 
