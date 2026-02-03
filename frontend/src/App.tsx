@@ -14,7 +14,7 @@ import { useProjectStore, useUIStore } from './lib/store';
 
 export type View =
   | 'dashboard'
-  | 'new-project'
+  | 'new-project'  // 复用 NewProject 组件进行手动创建
   | 'project-success'
   | 'bom'
   | 'process'
