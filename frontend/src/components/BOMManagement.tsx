@@ -708,10 +708,8 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
         updatedDate: new Date().toISOString(),
       };
 
-      // 通知父组件更新项目数据
-      if (onProjectUpdate) {
-        onProjectUpdate(updatedProject);
-      }
+      // 通知 store 更新项目数据
+      updateProject(updatedProject);
 
       // 更新本地产品和 BOM 数据
       setSelectedProduct(newProductData);
