@@ -51,6 +51,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       const project = await api.projects.create(data);
       set((state) => ({
         projects: [...state.projects, project],
+        selectedProject: project, // 自动选中新创建的项目
         loading: false,
       }));
       return project;
