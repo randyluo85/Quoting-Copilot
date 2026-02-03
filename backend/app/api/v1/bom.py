@@ -270,15 +270,27 @@ async def upload_bom(
         rate_data = processes_with_rate.get(p.name, {})
         print(f"[DEBUG] Process {p.name}: rate_data={rate_data}")
 
+        # 计算工序总成本：费率 × 标准工时
+        standard_time = p.standard_time or 1.0
+        hourly_rate = rate_data.get("unit_price")
+        vave_hourly_rate = rate_data.get("vave_price")
+
+        unit_price = None
+        vave_price = None
+        if hourly_rate is not None:
+            unit_price = round(hourly_rate * standard_time, 2)
+        if vave_hourly_rate is not None:
+            vave_price = round(vave_hourly_rate * standard_time, 2)
+
         processes.append(
             BOMProcessResponse(
                 id=f"P-{idx + 1:03d}",
                 op_no=p.op_no or f"{idx + 1:03d}",
                 name=p.name,
                 work_center=p.work_center or rate_data.get("work_center", ""),
-                standard_time=p.standard_time or 1.0,
-                unit_price=rate_data.get("unit_price"),
-                vave_price=rate_data.get("vave_price"),
+                standard_time=standard_time,
+                unit_price=unit_price,
+                vave_price=vave_price,
                 has_history_data=rate_data.get("has_history_data", False),
             )
         )
