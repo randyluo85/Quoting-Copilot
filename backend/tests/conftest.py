@@ -101,11 +101,12 @@ async def test_project(db_session):
 
 @pytest.fixture
 async def test_material(db_session):
-    """创建测试物料"""
+    """创建测试物料（使用唯一 ID 避免冲突）"""
+    # 使用随机后缀确保唯一性
+    suffix = uuid.uuid4().hex[:6].upper()
     material = Material(
-        id=1,
-        item_code="MAT-001",
-        name="测试物料",
+        item_code=f"MAT-{suffix}",
+        name=f"测试物料-{suffix}",
         spec="规格描述",
         version="V1.0",
         material_type="made",
