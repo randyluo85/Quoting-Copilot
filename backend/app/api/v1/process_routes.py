@@ -155,7 +155,7 @@ async def list_process_routes(
     Returns:
         工艺路线列表
     """
-    query = select(ProcessRoute)
+    query = select(ProcessRoute).options(selectinload(ProcessRoute.items))
 
     # 应用筛选条件
     if status_filter:
