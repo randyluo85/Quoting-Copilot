@@ -243,7 +243,14 @@ async def create_process_route(
         db.add(item)
 
     await db.commit()
-    await db.refresh(route)
+
+    # 重新查询以获取完整数据
+    result = await db.execute(
+        select(ProcessRoute)
+        .options(selectinload(ProcessRoute.items))
+        .where(ProcessRoute.id == route_id)
+    )
+    route = result.scalar_one_or_none()
 
     response = _route_to_response(route)
     return JSONResponse(content=response.model_dump(by_alias=True), status_code=201)
