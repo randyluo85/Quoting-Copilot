@@ -55,7 +55,7 @@ async def list_projects(
     ]
 
 
-@router.post("", response_model=ProjectResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=ProjectResponse, status_code=status.HTTP_201_CREATED, response_model_by_alias=True)
 async def create_project(
     data: ProjectCreate,
     db: AsyncSession = Depends(get_db),
