@@ -7,8 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
 from app.services.bom_parser import BOMParser
-from app.schemas.material import MaterialResponse
-from app.schemas.process import ProcessResponse
+from app.schemas.bom import BOMMaterialResponse, BOMProcessResponse
 from app.schemas.common import StatusLight
 from app.models.material import Material
 from app.models.process_rate import ProcessRate
