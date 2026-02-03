@@ -207,22 +207,49 @@ export function NewProject({ onNavigate, onProjectCreated }: NewProjectProps) {
     return missing;
   };
 
-  const handleCreateProject = () => {
+  const handleCreateProject = async () => {
     if (isFormValid()) {
-      // 传递项目数据
-      onProjectCreated({
-        asacNumber: formData.asacNumber,
-        customerNumber: formData.customerNumber,
-        productVersion: formData.productVersion,
-        customerVersion: formData.customerVersion,
-        clientName: formData.clientName,
-        projectName: formData.projectName,
-        annualVolume: formData.annualVolume,
-        description: formData.description,
-        products: parsedData?.products || []
-      });
-      // 跳转到项目创建成功页面
-      onNavigate('project-success');
+      setIsCreating(true);
+      setCreateError(null);
+
+      try {
+        // 调用 API 创建项目
+        const createdProject = await createProjectAPI({
+          asacNumber: formData.asacNumber || `AS-${Date.now()}`,
+          customerNumber: formData.customerNumber || `CUS-${Date.now()}`,
+          productVersion: formData.productVersion || 'V1.0',
+          customerVersion: formData.customerVersion || 'C1.0',
+          clientName: formData.clientName,
+          projectName: formData.projectName,
+          annualVolume: formData.annualVolume,
+          description: formData.description,
+          products: parsedData?.products?.map(p => ({
+            id: p.id,
+            name: p.name,
+            partNumber: p.partNumber,
+            annualVolume: p.annualVolume,
+            description: p.description
+          })) || [{
+            id: 'P-001',
+            name: formData.projectName,
+            partNumber: 'PART-' + Date.now(),
+            annualVolume: parseInt(formData.annualVolume) || 0,
+            description: formData.description
+          }]
+        });
+
+        // 创建成功，通知父组件
+        if (onProjectCreated) {
+          onProjectCreated(createdProject.id);
+        }
+
+        // 跳转到项目创建成功页面
+        onNavigate('project-success');
+      } catch (err) {
+        const message = err instanceof Error ? err.message : '创建项目失败';
+        setCreateError(message);
+        setIsCreating(false);
+      }
     }
   };
 
