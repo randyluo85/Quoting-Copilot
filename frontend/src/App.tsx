@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SidebarProvider } from './components/ui/sidebar';
 import { AppSidebar } from './components/AppSidebar';
 import { Dashboard } from './components/Dashboard';
@@ -10,15 +10,17 @@ import { CostCalculation } from './components/CostCalculation';
 import { QuoteSummary } from './components/QuoteSummary';
 import { InvestmentRecovery } from './components/InvestmentRecovery';
 import { QuotationOutput } from './components/QuotationOutput';
+import { useProjectStore, useUIStore } from './lib/store';
 
-export type View = 
-  | 'dashboard' 
+export type View =
+  | 'dashboard'
+  | 'new-project'
   | 'project-success'
-  | 'bom' 
-  | 'process' 
-  | 'cost-calc' 
-  | 'quotation' 
-  | 'investment' 
+  | 'bom'
+  | 'process'
+  | 'cost-calc'
+  | 'quotation'
+  | 'investment'
   | 'output';
 
 export interface Product {
