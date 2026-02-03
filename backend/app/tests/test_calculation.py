@@ -18,7 +18,6 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 @pytest.fixture
 async def engine():
     """创建测试数据库引擎."""
-
     engine = create_async_engine(TEST_DATABASE_URL, echo=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -27,7 +26,7 @@ async def engine():
 
 
 @pytest.fixture
-async def db_session(engine) -> AsyncSession:
+async def db_session(engine):
     """创建测试会话."""
     async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with async_session() as session:
@@ -92,7 +91,7 @@ class TestDualTrackCalculation:
         assert result.vave == Decimal("166.25")
         assert result.savings == Decimal("21.25")
 
-    async def test_savings_calculation(self):
+    def test_savings_calculation(self):
         """测试节省率计算."""
         std = Decimal("100.00")
         vave = Decimal("85.00")
