@@ -812,7 +812,11 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
                 </CardDescription>
               </div>
               <Button
-                onClick={() => setIsAddProductOpen(true)}
+                onClick={() => {
+                  console.log('新增产品按钮被点击');
+                  setIsAddProductOpen(true);
+                  console.log('isAddProductOpen 设置为 true');
+                }}
                 className="gap-2"
               >
                 <Plus className="h-4 w-4" />
