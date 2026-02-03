@@ -491,12 +491,9 @@ Total Cost（总成本）
 - 摊销（Amortization）：模具、研发
 - S&A（管销费用）：通常为净销售额的 2-3%
 
-**计算公式：**
-```
-SK = HK III + Tooling_Amortization + R&D_Amortization + (Net_Sales × S&A_Rate)
-```
-
 **业务意义：** 企业真实承担的总成本，是定价决策的底线
+
+> **详细计算逻辑：** [docs/BUSINESS_CASE_LOGIC.md](BUSINESS_CASE_LOGIC.md) §4 SK 计算
 
 ---
 
