@@ -666,6 +666,53 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   };
 
+  // 处理新增产品
+  const handleAddProduct = async () => {
+    // 验证必填字段
+    if (!newProduct.name.trim()) {
+      alert('请输入产品名称');
+      return;
+    }
+    if (!newProduct.code.trim()) {
+      alert('请输入产品编码');
+      return;
+    }
+
+    setIsAddingProduct(true);
+    try {
+      const response = await api.post(`/project-products`, {
+        projectId: project.id,
+        productName: newProduct.name,
+        productCode: newProduct.code,
+        routeCode: newProduct.routeCode || undefined,
+        annualVolume: newProduct.annualVolume,
+        description: newProduct.description,
+      });
+
+      if (response.error) {
+        alert(`创建产品失败：${response.error}`);
+        return;
+      }
+
+      // 创建成功，关闭对话框并刷新页面
+      setIsAddProductOpen(false);
+      setNewProduct({
+        name: '',
+        code: '',
+        annualVolume: project.annualVolume || '0',
+        description: '',
+      });
+
+      // 提示用户刷新页面
+      alert('产品创建成功！请刷新页面查看新产品列表。');
+    } catch (error) {
+      console.error('创建产品失败：', error);
+      alert('创建产品失败，请稍后重试');
+    } finally {
+      setIsAddingProduct(false);
+    }
+  };
+
   // 计算统计数据
   const getProductStats = () => {
     if (!currentBomData?.isParsed) {
