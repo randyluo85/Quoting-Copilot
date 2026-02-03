@@ -515,6 +515,94 @@ Payback (Months) = Investment / Monthly Savings
 
 ---
 
+### 7.6 HK III (Herstellkosten III) - 制造成本
+
+**定义：** 工厂大门的制造成本，不含研发和模具分摊
+
+**包含内容：**
+- 物料成本（Raw Materials + Purchased Parts）
+- 工艺成本（Machine Cost + Labor Cost）
+
+**计算公式：**
+```
+HK III = Material Cost + Process Cost
+Process Cost = Σ(Cycle Time / 3600 × MHR)
+```
+
+**业务意义：** 衡量工厂生产这个产品是否赚钱的核心指标
+
+---
+
+### 7.7 SK (Selbstkosten) - 完全成本
+
+**定义：** 包含一切分摊后的真实总成本
+
+**包含内容：**
+- HK III（制造成本）
+- 摊销（Amortization）：模具、研发
+- S&A（管销费用）：通常为净销售额的 2-3%
+
+**计算公式：**
+```
+SK = HK III + Tooling_Amortization + R&D_Amortization + (Net_Sales × S&A_Rate)
+```
+
+**业务意义：** 企业真实承担的总成本，是定价决策的底线
+
+---
+
+### 7.8 DB I & DB IV (Deckungsbeitrag) - 边际贡献
+
+**DB I - 边际贡献 I（生产毛利）：**
+- **公式：** `DB I = Net Sales - HK III`
+- **意义：** 衡量工厂生产这个产品赚不赚钱，不考虑研发和模具分摊
+
+**DB IV - 净利润：**
+- **公式：** `DB IV = Net Sales - SK`
+- **意义：** 衡量整个项目扣除所有投入后赚不赚钱
+
+**业务解读：**
+- 2026年亏损：因为销量还没爬坡，且前期投入摊销重
+- 2028年 DB IV 转正：典型的汽车行业"前亏后盈"模型
+
+---
+
+### 7.9 NRE (Non-Recurring Engineering) - 一次性工程费用
+
+**定义：** 项目启动时的一次性投资费用
+
+**包含内容：**
+- 模具投入（Tooling Investment）
+- 检具投入（Gauge Investment）
+- 夹具投入（Fixture Investment）
+- 研发投入（R&D Investment）
+
+**摊销方式：**
+| 模式 | 说明 | 适用场景 |
+|------|------|----------|
+| Per Piece | 全生命周期平摊 | 稳定量产项目 |
+| Fixed 3 Years | 前3年摊销 | 客户要求快速回收 |
+
+---
+
+### 7.10 S&A (Sales & Administration) - 管销费用
+
+**定义：** 销售与管理费用的分摊
+
+**计算方式：**
+```
+S&A = Net Sales × S&A_Rate
+```
+其中 S&A_Rate 通常为 2% - 3%
+
+**包含内容：**
+- 销售人员工资
+- 管理费用分摊
+- 办公场地租金
+- 其他运营费用
+
+---
+
 ## 8. 非功能性需求
 
 ### 8.1 性能要求
