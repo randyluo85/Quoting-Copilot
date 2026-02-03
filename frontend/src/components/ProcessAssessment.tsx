@@ -255,12 +255,18 @@ export function ProcessAssessment({ onNavigate }: ProcessAssessmentProps) {
     if (!confirm('确定要删除这个工艺路线吗？')) return;
 
     try {
-      // TODO: 实际应调用 API
-      // await fetch(`/api/v1/process-routes/${routeId}`, { method: 'DELETE' });
+      const response = await fetch(`http://localhost:8000/api/v1/process-routes/${routeId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
 
+      // 从列表中移除
       setRoutes(routes.filter((r) => r.id !== routeId));
     } catch (error) {
       console.error('Failed to delete route:', error);
+      alert('删除失败，请检查后端服务');
     }
   };
 
