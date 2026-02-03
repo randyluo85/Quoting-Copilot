@@ -153,6 +153,7 @@ class BOMMaterialResponse(BaseModel):
     material: Optional[str] = None
     supplier: Optional[str] = None
     quantity: Optional[float] = None
+    unit: Optional[str] = "PC"  # 单位，从 BOM 文件解析
     unit_price: Optional[float] = Field(None, alias="unitPrice")
     vave_price: Optional[float] = Field(None, alias="vavePrice")
     has_history_data: bool = Field(False, alias="hasHistoryData")
