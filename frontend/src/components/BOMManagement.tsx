@@ -133,6 +133,7 @@ interface ProductBOMData {
 }
 
 export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
+  const updateProject = useProjectStore((state) => state.updateProject);
   // 添加空值检查
   if (!project) {
     return (
