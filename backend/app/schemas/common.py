@@ -11,7 +11,7 @@ class PricePair(BaseModel):
     savings: Decimal = Field(..., alias="savings", description="节省金额 (std - vave)")
     savings_rate: float = Field(..., alias="savingsRate", description="节省率 (savings / std)")
 
-    model_config = {"populate_by_name": True}
+    model_config = {"populate_by_name": True, "by_alias": True}
 
 
 class StatusLight(str, Enum):
