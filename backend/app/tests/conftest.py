@@ -1,0 +1,35 @@
+"""测试配置和 fixtures."""
+
+import pytest
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.pool import NullPool
+from app.config import get_settings
+
+
+@pytest.fixture(scope="function")
+async def test_db_session():
+    """创建独立的测试数据库会话.
+
+    使用 NullPool 避免连接池与事件循环的冲突问题.
+    """
+    settings = get_settings()
+
+    # 创建测试专用引擎（使用 NullPool）
+    test_engine = create_async_engine(
+        settings.mysql_url,
+        echo=False,
+        poolclass=NullPool,  # 不使用连接池，避免事件循环冲突
+    )
+
+    # 创建会话工厂
+    TestingSessionLocal = async_sessionmaker(
+        test_engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
+    )
+
+    async with TestingSessionLocal() as session:
+        yield session
+
+    # 清理
+    await test_engine.dispose()
