@@ -75,6 +75,28 @@ export interface Product {
   description: string;
 }
 
+// 创建产品请求
+export interface ProductCreate {
+  projectId: string;
+  productName: string;
+  productCode: string;
+  routeCode?: string;
+  productVersion?: string;
+  annualVolume?: string;  // 前端暂存，不传给后端
+  description?: string;   // 前端暂存，不传给后端
+}
+
+// 产品响应
+export interface ProductResponse {
+  id: string;
+  projectId: string;
+  productName: string;
+  productCode: string;
+  routeCode?: string;
+  productVersion?: string;
+  createdAt: string;
+}
+
 // 负责人
 export interface ProjectOwner {
   sales: string;
