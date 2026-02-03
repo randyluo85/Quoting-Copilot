@@ -10,6 +10,8 @@ class ProductSchema(BaseModel):
     annualVolume: int = Field(..., alias="annual_volume")
     description: str
 
+    model_config = {"populate_by_name": True, "by_alias": True}
+
 
 class ProjectOwnerSchema(BaseModel):
     sales: str
@@ -17,6 +19,8 @@ class ProjectOwnerSchema(BaseModel):
     ie: str
     pe: str
     controlling: str
+
+    model_config = {"by_alias": True}
 
 
 class ProjectCreate(BaseModel):
@@ -30,6 +34,8 @@ class ProjectCreate(BaseModel):
     description: str
     products: List[ProductSchema]
     owners: ProjectOwnerSchema
+
+    model_config = {"populate_by_name": True, "by_alias": True}
 
 
 class ProjectResponse(BaseModel):
@@ -48,4 +54,4 @@ class ProjectResponse(BaseModel):
     createdDate: str = Field(..., alias="created_date")
     updatedDate: str = Field(..., alias="updated_date")
 
-    model_config = {"populate_by_name": True}
+    model_config = {"populate_by_name": True, "by_alias": True}
