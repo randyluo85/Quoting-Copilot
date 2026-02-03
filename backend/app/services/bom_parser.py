@@ -106,7 +106,10 @@ class BOMParser:
             ws = wb[sheet_name]
             sheet_type = self._detect_sheet_type(ws)
 
-            if sheet_type == "material":
+            if sheet_type == "info":
+                # 跳过信息类 sheet
+                continue
+            elif sheet_type == "material":
                 # 智能检测列映射
                 header_row, mapping = self._detect_column_mapping(ws)
                 materials.extend(self._parse_material_sheet(ws, header_row, mapping))
