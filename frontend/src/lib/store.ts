@@ -71,6 +71,19 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     set({ selectedProject: project || null });
   },
 
+  // 更新项目（当新增产品后调用）
+  updateProject: (project) => {
+    set((state) => ({
+      projects: state.projects.map((p) =>
+        p.id === project.id ? project : p
+      ),
+      selectedProject:
+        state.selectedProject?.id === project.id
+          ? project
+          : state.selectedProject,
+    }));
+  },
+
   // 清除错误
   clearError: () => set({ error: null }),
 }));
