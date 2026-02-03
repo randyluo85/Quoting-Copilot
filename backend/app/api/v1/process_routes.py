@@ -487,7 +487,14 @@ async def submit_process_route(
     route.updated_at = datetime.utcnow()
 
     await db.commit()
-    await db.refresh(route)
+
+    # 重新查询以获取完整数据
+    result = await db.execute(
+        select(ProcessRoute)
+        .options(selectinload(ProcessRoute.items))
+        .where(ProcessRoute.id == route_id)
+    )
+    route = result.scalar_one_or_none()
 
     return JSONResponse(content=_route_to_response(route).model_dump(by_alias=True))
 
