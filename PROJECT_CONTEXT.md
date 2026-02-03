@@ -110,8 +110,8 @@ $$ Cost_{vave} = (Qty \times MaterialPrice_{vave}) + \sum (CycleTime_{opt} \time
 |------|------|
 | **Frontend** | Next.js (App Router) + ShadcnUI + React Table (处理复杂 BOM) |
 | **Backend** | Python FastAPI (利用 Pydantic 做强类型校验) |
-| **AI Core** | **Parsing:** LLM (Claude 3.5 Sonnet / GPT-4o) 用于 Comments 列的特征提取<br>**Retrieval:** pgvector 用于非结构化历史报价检索 |
-| **Storage** | **MySQL:** 结构化主数据<br>**PostgreSQL:** 向量数据 |
+| **AI Core** | **Parsing:** 通义千问 Qwen-Plus (阿里云 DashScope) 用于 Comments 列的特征提取<br>**Retrieval:** pgvector 用于非结构化历史报价检索 |
+| **Storage** | **MySQL:** 结构化主数据<br>**PostgreSQL:** 向量数据<br>**Redis:** 缓存层 (物料价格、费率、LLM 响应) |
 
 ---
 
