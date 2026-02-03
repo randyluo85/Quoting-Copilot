@@ -32,7 +32,7 @@ class ProjectProductResponse(BaseModel):
     product_version: Optional[str] = Field(None, alias="productVersion")
     route_code: Optional[str] = Field(None, alias="routeCode")
     bom_file_path: Optional[str] = Field(None, alias="bomFilePath")
-    created_at: datetime = Field(..., alias="createdAt")
+    created_at: str = Field(..., alias="createdAt")  # 使用字符串类型
 
     model_config = {"populate_by_name": True, "by_alias": True}
 
