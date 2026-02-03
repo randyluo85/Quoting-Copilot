@@ -722,13 +722,24 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
         {/* Product Selector */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5" />
-              选择产品
-            </CardTitle>
-            <CardDescription>
-              本项目包含 {project.products.length} 个产品，请选择需要上传BOM表的产品
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="h-5 w-5" />
+                  选择产品
+                </CardTitle>
+                <CardDescription>
+                  本项目包含 {project.products.length} 个产品，请选择需要上传BOM表的产品
+                </CardDescription>
+              </div>
+              <Button
+                onClick={() => setIsAddProductOpen(true)}
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                新增产品
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
