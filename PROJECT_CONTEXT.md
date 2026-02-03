@@ -1,15 +1,15 @@
-# PROJECT_CONTEXT.md - SmartQuote 业务逻辑唯一真理源
+# PROJECT_CONTEXT.md - Dr.aiVOSS 业务逻辑唯一真理源
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v2.1   | 2026-02-02 | 2026-02-03 | SmartQuote 核心契约 (不可变) | Randy Luo |
+| v2.2   | 2026-02-02 | 2026-02-03 | Dr.aiVOSS 核心契约 (不可变) | Randy Luo |
 
 ---
 
-**版本:** v2.1 (MVP)
+**版本:** v2.2 (MVP)
 **最后更新:** 2026-02-03
 **状态:** 🔴 核心契约 (不可变)
-**适用范围:** SmartQuote (Dr.aiVOSS) 全团队
+**适用范围:** Dr.aiVOSS 智能快速报价助手 全团队
 
 ---
 
@@ -17,7 +17,8 @@
 
 | 属性 | 值 |
 |------|-----|
-| **项目名称** | SmartQuote (智能报价系统) |
+| **产品名称** | Dr.aiVOSS 智能快速报价助手 (Quoting-Copilot) |
+| **项目代号** | SmartQuote MVP |
 | **核心形态** | BOM 成本核算与 VAVE 决策辅助工具 (非单纯的 Chatbot) |
 | **核心理念** | **双轨核算 (Dual-Track Calculation)** —— 系统必须始终同时计算并展示"当前标准成本 (Std)"与"VAVE 目标成本 (VAVE)"，以量化降本潜力 |
 
