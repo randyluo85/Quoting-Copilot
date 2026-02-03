@@ -1,6 +1,5 @@
 """Pytest 配置和共享 fixtures"""
 import pytest
-import asyncio
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from datetime import datetime
@@ -12,21 +11,20 @@ from app.db.session import Base
 from app.models import Project, Material, ProcessRate, ProjectStatus
 
 
-# 测试数据库 URL（使用现有数据库作为测试库）
-# 注意：生产环境应使用独立测试数据库
+# 测试数据库 URL
 TEST_DATABASE_URL = "mysql+aiomysql://smartquote:smartpassword@localhost:3306/smartquote"
-
-# 创建测试引擎
-test_engine = create_async_engine(
-    TEST_DATABASE_URL,
-    echo=False,
-    pool_pre_ping=True,
-)
 
 
 @pytest.fixture
 async def db_session():
     """创建数据库会话"""
+    # 在 fixture 内创建引擎，确保属于同一事件循环
+    test_engine = create_async_engine(
+        TEST_DATABASE_URL,
+        echo=False,
+        pool_pre_ping=True,
+    )
+
     # 确保表存在
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -37,8 +35,9 @@ async def db_session():
 
     async with async_session() as session:
         yield session
-        # 清理：回滚事务但不删除表结构
-        await session.rollback()
+
+    # 清理：关闭引擎
+    await test_engine.dispose()
 
 
 @pytest.fixture
