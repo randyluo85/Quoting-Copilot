@@ -1383,94 +1383,99 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                   </TabsContent>
 
                   <TabsContent value="processes" className="mt-6">
-                    <div className="border rounded-lg overflow-hidden overflow-x-auto">
+                    <div className="rounded-xl border border-zinc-200 overflow-hidden overflow-x-auto shadow-sm">
                       <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-[80px]">工序号</TableHead>
-                            <TableHead>工序名称</TableHead>
-                            <TableHead>工作中心</TableHead>
-                            <TableHead className="text-right w-[100px]">标准工时</TableHead>
-                            <TableHead className="text-right w-[100px]">单价</TableHead>
-                            <TableHead className="text-right w-[100px]">VAVE单价</TableHead>
-                            <TableHead>规格要求</TableHead>
-                            <TableHead className="text-right w-[100px]">操作</TableHead>
+                        <TableHeader className="bg-gradient-to-r from-purple-50 to-indigo-50/50">
+                          <TableRow className="border-b-zinc-200 hover:bg-transparent">
+                            <TableHead className="w-[90px] text-xs font-semibold text-zinc-700">工序号</TableHead>
+                            <TableHead className="text-xs font-semibold text-zinc-700">工序名称</TableHead>
+                            <TableHead className="text-xs font-semibold text-zinc-700">工作中心</TableHead>
+                            <TableHead className="text-right w-[110px] text-xs font-semibold text-zinc-700">标准工时</TableHead>
+                            <TableHead className="text-right w-[110px] text-xs font-semibold text-zinc-700">单价</TableHead>
+                            <TableHead className="text-right w-[110px] text-xs font-semibold text-zinc-700">VAVE单价</TableHead>
+                            <TableHead className="text-xs font-semibold text-zinc-700">规格要求</TableHead>
+                            <TableHead className="text-right w-[100px] text-xs font-semibold text-zinc-700">操作</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {currentBomData.processes.map((process) => (
-                            <TableRow key={process.id}>
-                              <TableCell className="font-mono text-sm font-medium">
-                                {process.opNo}
+                            <TableRow
+                              key={process.id}
+                              className="border-b-zinc-100 hover:bg-purple-50/50 transition-colors"
+                            >
+                              <TableCell className="font-mono text-sm">
+                                <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-purple-100 text-purple-700 font-semibold text-xs">
+                                  {process.opNo}
+                                </span>
                               </TableCell>
-                              <TableCell className="font-medium">
+                              <TableCell className="font-medium text-sm text-zinc-900">
                                 {process.name}
                               </TableCell>
                               <TableCell className="text-sm">
-                                <Input 
+                                <Input
                                   value={process.workCenter}
-                                  className="h-8 text-xs"
+                                  className="h-8 text-xs bg-white border-zinc-200"
                                   disabled={currentBomData.isRoutingKnown && process.isOperationKnown}
                                   onChange={(e) => handleWorkCenterChange(process.id, e.target.value)}
                                 />
                               </TableCell>
                               <TableCell className="text-right">
                                 <div className="flex items-center justify-end gap-1">
-                                  <Input 
+                                  <Input
                                     value={process.standardTime}
                                     type="number"
                                     step="0.1"
-                                    className="h-8 w-20 text-xs text-right"
+                                    className="h-8 w-20 text-xs text-right bg-white border-zinc-200"
                                     disabled={currentBomData.isRoutingKnown && process.isOperationKnown}
                                     onChange={(e) => handleStandardTimeChange(process.id, parseFloat(e.target.value))}
                                   />
-                                  <span className="text-xs text-zinc-500">h</span>
+                                  <span className="text-xs text-zinc-500 font-medium">h</span>
                                 </div>
                               </TableCell>
                               <TableCell className="text-right">
                                 {process.hasHistoryData && process.unitPrice ? (
-                                  <span className="font-medium">
+                                  <span className="font-semibold text-zinc-900">
                                     ¥{process.unitPrice.toFixed(2)}
                                   </span>
                                 ) : (
-                                  <span className="text-zinc-400">-</span>
+                                  <span className="text-zinc-300 text-sm">-</span>
                                 )}
                               </TableCell>
                               <TableCell className="text-right">
                                 {process.hasHistoryData && process.vavePrice ? (
                                   <div className="flex items-center justify-end gap-1">
-                                    <TrendingDown className="h-3 w-3 text-green-600" />
-                                    <span className="font-medium text-green-600">
+                                    <TrendingDown className="h-3.5 w-3.5 text-green-600" />
+                                    <span className="font-semibold text-green-600">
                                       ¥{process.vavePrice.toFixed(2)}
                                     </span>
                                   </div>
                                 ) : (
-                                  <span className="text-zinc-400">-</span>
+                                  <span className="text-zinc-300 text-sm">-</span>
                                 )}
                               </TableCell>
-                              <TableCell className="text-xs text-zinc-500 max-w-[200px] truncate">
-                                {process.spec || '-'}
+                              <TableCell className="text-xs text-zinc-500 max-w-[200px] truncate" title={process.spec || ''}>
+                                {process.spec || <span className="text-zinc-300">-</span>}
                               </TableCell>
                               <TableCell className="text-right">
                                 {currentBomData.needsIEReview ? (
-                                  <Button 
-                                    variant="outline" 
+                                  <Button
+                                    variant="outline"
                                     size="sm"
-                                    className="gap-1 text-xs text-purple-600 border-purple-300"
+                                    className="gap-1 text-xs h-8 bg-white hover:bg-purple-50 hover:border-purple-300 hover:text-purple-700"
                                   >
                                     <Settings className="h-3 w-3" />
                                     IE确认
                                   </Button>
                                 ) : process.hasHistoryData ? (
-                                  <Badge variant="secondary" className="gap-1">
+                                  <Badge variant="secondary" className="gap-1 bg-green-50 text-green-700 border-green-200 hover:bg-green-50">
                                     <CheckCircle2 className="h-3 w-3" />
                                     已匹配
                                   </Badge>
                                 ) : (
-                                  <Button 
-                                    variant="outline" 
+                                  <Button
+                                    variant="outline"
                                     size="sm"
-                                    className="gap-1 text-xs"
+                                    className="gap-1 text-xs h-8 bg-white hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700"
                                     onClick={() => handleInquiry('process', process)}
                                   >
                                     <Mail className="h-3 w-3" />
@@ -1483,7 +1488,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                         </TableBody>
                       </Table>
                     </div>
-                    
+
                     {/* Routing Info Card */}
                     <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                       <div className="flex items-start gap-3">
