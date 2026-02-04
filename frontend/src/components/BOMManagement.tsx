@@ -1211,7 +1211,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                         </div>
 
                         {/* 询价卡片 */}
-                        <div className={`rounded-lg p-4 border min-w-[150px] ${needInquiry > 0 ? 'bg-orange-50 border-orange-300' : 'bg-white border-zinc-200'}`}>
+                        <div className={`rounded-lg p-4 border min-w-[250px] ${needInquiry > 0 ? 'bg-orange-50 border-orange-300' : 'bg-white border-zinc-200'}`}>
                           <div className="flex items-center gap-2 mb-2">
                             <AlertCircle className={`h-4 w-4 ${needInquiry > 0 ? 'text-orange-600' : 'text-zinc-400'}`} />
                             <span className={`text-xs font-medium ${needInquiry > 0 ? 'text-orange-700' : 'text-zinc-700'}`}>询价</span>
