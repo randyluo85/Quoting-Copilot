@@ -12,6 +12,7 @@ echo "📝 Setting up environment files..."
 [ ! -f backend/.env ] && cp backend/.env.example backend/.env || echo "backend/.env already exists"
 
 echo "🐳 Starting Docker services..."
+docker-compose down -v 2>/dev/null || true
 docker-compose up -d
 
 echo "✅ Setup complete!"
