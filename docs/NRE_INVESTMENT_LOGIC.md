@@ -373,7 +373,7 @@ sequenceDiagram
     "mode": "AMORTIZED",
     "amortization_volume": 29750,
     "duration_years": 2,
-    "interest_rate": 0.06,
+    "capital_interest_rate": 0.06,
     "unit_amortization": 6.40
   },
   "warnings": [
