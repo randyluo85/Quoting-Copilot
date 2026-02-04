@@ -319,3 +319,167 @@ class BOMParser:
             )
 
         return processes
+
+
+# ==================== 多产品 BOM 解析 ====================
+
+@dataclass
+class ProductInfo:
+    """产品元数据（从 sheet 顶部提取）."""
+    product_code: str          # 从 sheet 名称获取
+    product_name: str | None   # 从 "Product Name" 字段提取
+    product_number: str | None # 从 "Product Number" 字段提取
+    product_version: str       # 默认 "01"
+    customer_version: str      # 默认 "01"
+    customer_number: str | None # 从 "Customer Number" 字段提取
+    issue_date: datetime | None # 从 "Issue Date" 字段提取
+    material_count: int = 0
+    process_count: int = 0
+
+
+@dataclass
+class ProductBOMResult:
+    """单个产品的 BOM 解析结果."""
+    product_info: ProductInfo
+    materials: list[ParsedMaterial]
+    processes: list[ParsedProcess]
+
+
+@dataclass
+class MultiProductBOMParseResult:
+    """多产品 BOM 解析结果."""
+    products: list[ProductBOMResult]
+    total_products: int
+    total_materials: int
+    parse_warnings: list[str]
+
+
+class MultiProductBOMParser:
+    """多产品 BOM 解析器.
+
+    用于解析包含多个产品的 BOM 文件，每个 sheet 代表一个产品。
+    """
+
+    def __init__(self):
+        """初始化解析器."""
+        # 复用现有的 BOMParser 方法
+        self._base_parser = BOMParser()
+
+    def parse_excel_file(self, file_content: bytes) -> MultiProductBOMParseResult:
+        """解析多产品 Excel BOM 文件.
+
+        Args:
+            file_content: Excel 文件的字节内容
+
+        Returns:
+            MultiProductBOMParseResult: 解析后的多产品结果
+        """
+        import io
+
+        wb = load_workbook(filename=io.BytesIO(file_content), read_only=True)
+        results = []
+        warnings = []
+
+        for sheet_name in wb.sheetnames:
+            ws = wb[sheet_name]
+
+            # 检测 sheet 类型，跳过非物料 sheet
+            sheet_type = self._base_parser._detect_sheet_type(ws)
+            if sheet_type != "material":
+                continue
+
+            # 1. 提取产品元数据
+            product_info = self._extract_product_metadata(ws, sheet_name)
+
+            # 2. 解析物料列表
+            materials = self._parse_materials_for_product(ws)
+            product_info.material_count = len(materials)
+
+            # 3. 工艺路线暂为空
+            processes = []
+            product_info.process_count = 0
+
+            results.append(ProductBOMResult(
+                product_info=product_info,
+                materials=materials,
+                processes=processes
+            ))
+
+        return MultiProductBOMParseResult(
+            products=results,
+            total_products=len(results),
+            total_materials=sum(r.product_info.material_count for r in results),
+            parse_warnings=warnings
+        )
+
+    def _extract_product_metadata(self, worksheet, sheet_name: str) -> ProductInfo:
+        """从 sheet 顶部提取产品元数据.
+
+        Sheet 结构:
+        Row 0: Bill of Material
+        Row 1: Project Name | ... | Product Name | ... | Product Version | value
+        Row 2: AS/AC Number | ... | Product Number | ... | Customer Version | value
+        Row 3: Customer | ... | Customer Number | value | ... | Issue Date | value
+
+        Args:
+            worksheet: 工作表对象
+            sheet_name: Sheet 名称（用作 product_code）
+
+        Returns:
+            ProductInfo: 产品元数据
+        """
+        product_code = sheet_name.strip()
+        metadata = {}
+
+        # 解析 Row 1-3 的产品信息
+        for row_idx in range(1, 4):
+            row = worksheet[row_idx]
+            i = 0
+            while i < len(row) - 1:
+                key_cell = row[i]
+                value_cell = row[i + 1]
+
+                if key_cell.value and isinstance(key_cell.value, str):
+                    key = key_cell.value.rstrip(':').strip()
+                    # 只提取我们关心的字段
+                    if key in ['Product Name', 'Product Number', 'Product Version',
+                               'Customer Version', 'Customer Number', 'Issue Date']:
+                        if value_cell.value is not None:
+                            metadata[key] = str(value_cell.value)
+                i += 1
+
+        return ProductInfo(
+            product_code=product_code,
+            product_name=metadata.get('Product Name'),
+            product_number=metadata.get('Product Number'),
+            product_version=metadata.get('Product Version', '01'),
+            customer_version=metadata.get('Customer Version', '01'),
+            customer_number=metadata.get('Customer Number'),
+            issue_date=self._parse_date(metadata.get('Issue Date')),
+        )
+
+    def _parse_date(self, date_str: str | None) -> datetime | None:
+        """解析日期字符串."""
+        if not date_str:
+            return None
+        try:
+            # 处理 Excel 日期序列号
+            if isinstance(date_str, str) and date_str.isdigit():
+                return datetime.fromordinal(int(date_str) + 693594)  # Excel epoch 1900-01-01
+            # 处理字符串日期
+            return datetime.fromisoformat(date_str) if isinstance(date_str, str) else None
+        except (ValueError, TypeError):
+            return None
+
+    def _parse_materials_for_product(self, worksheet) -> list[ParsedMaterial]:
+        """为单个产品解析物料.
+
+        Args:
+            worksheet: 工作表对象
+
+        Returns:
+            list[ParsedMaterial]: 物料列表
+        """
+        # 使用现有的智能列检测
+        header_row, mapping = self._base_parser._detect_column_mapping(worksheet)
+        return self._base_parser._parse_material_sheet(worksheet, header_row, mapping)
