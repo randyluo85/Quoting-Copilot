@@ -1486,9 +1486,13 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                         </TableBody>
                       </Table>
                     </div>
-                  </TabsContent>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-                  <TabsContent value="processes" className="mt-6">
+              <TabsContent value="processes" className="mt-6">
+                <Card className="border-zinc-200 shadow-sm">
+                  <CardContent className="p-0">
                     <div className="rounded-xl border border-zinc-200 overflow-hidden overflow-x-auto shadow-sm">
                       <Table>
                         <TableHeader className="bg-gradient-to-r from-purple-50 to-indigo-50/50">
