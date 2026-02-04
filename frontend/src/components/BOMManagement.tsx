@@ -1729,65 +1729,74 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
         </SheetContent>
       </Sheet>
 
-      {/* 多产品 BOM 预览抽屉 */}
-      <Sheet open={showMultiProductDialog} onOpenChange={setShowMultiProductDialog}>
-        <SheetContent className="w-[500px] sm:max-w-[500px] overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-purple-600" />
-              检测到多个产品
-            </SheetTitle>
-            <SheetDescription>
-              识别到 <span className="font-semibold text-purple-600">{multiProductPreview?.products.length || 0}</span> 个产品，
-              共 <span className="font-semibold">{multiProductPreview?.total_materials || 0}</span> 个物料
-            </SheetDescription>
-          </SheetHeader>
-
-          {multiProductPreview && (
-            <div className="mt-6">
-              {/* 产品表格 */}
-              <div className="border rounded-lg overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead className="bg-zinc-50 border-b">
-                    <tr>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-zinc-600 w-8">#</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-zinc-600">产品代码</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-zinc-600">产品名称</th>
-                      <th className="px-3 py-2 text-right text-xs font-medium text-zinc-600 w-16">物料数</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-100">
-                    {multiProductPreview.products.map((product, idx) => (
-                      <tr key={idx} className="hover:bg-zinc-50">
-                        <td className="px-3 py-2 text-zinc-400 text-xs">{idx + 1}</td>
-                        <td className="px-3 py-2 font-medium text-zinc-900 text-xs">{product.product_code}</td>
-                        <td className="px-3 py-2 text-zinc-600 text-xs truncate max-w-[180px]">{product.product_name || <span className="italic text-zinc-400">未命名</span>}</td>
-                        <td className="px-3 py-2 text-right text-zinc-600 text-xs">{product.material_count}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* 操作按钮 */}
-              <div className="mt-6 space-y-3">
-                <Button
-                  onClick={() => {
-                    handleMultiProductConfirm();
-                    setShowMultiProductDialog(false);
-                    setMultiProductPreview(null);
-                  }}
-                  className="w-full"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  创建 {multiProductPreview.products.length} 个产品
+      {/* 多产品 BOM 预览 */}
+      {showMultiProductDialog && multiProductPreview && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-purple-600" />
+                    检测到多个产品
+                  </CardTitle>
+                  <CardDescription>
+                    识别到 <span className="font-semibold text-purple-600">{multiProductPreview.products.length}</span> 个产品，
+                    共 <span className="font-semibold">{multiProductPreview.total_materials}</span> 个物料
+                  </CardDescription>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  setShowMultiProductDialog(false);
+                  setMultiProductPreview(null);
+                }}>
+                  ✕
                 </Button>
+              </div>
+            </CardHeader>
+
+            <CardContent className="flex-1 overflow-y-auto">
+              {/* 产品表格 */}
+              {multiProductPreview.products.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-12">#</TableHead>
+                      <TableHead>产品代码</TableHead>
+                      <TableHead>产品名称</TableHead>
+                      <TableHead className="w-20 text-right">物料数</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {multiProductPreview.products.map((product, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell className="text-zinc-400">{idx + 1}</TableCell>
+                        <TableCell className="font-medium">{product.product_code}</TableCell>
+                        <TableCell className="text-zinc-600">{product.product_name || <span className="italic text-zinc-400">未命名</span>}</TableCell>
+                        <TableCell className="text-right">{product.material_count}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="text-center py-12 text-zinc-400 border rounded-lg border-dashed">
+                  未检测到产品
+                </div>
+              )}
+            </CardContent>
+
+            <div className="flex justify-between px-6 py-4 border-t bg-zinc-50">
+              <Button variant="outline" onClick={() => {
+                setShowMultiProductDialog(false);
+                setMultiProductPreview(null);
+              }}>
+                取消
+              </Button>
+              <div className="flex gap-2">
                 <Button
                   variant="outline"
                   onClick={() => {
                     setShowMultiProductDialog(false);
                     setMultiProductPreview(null);
-                    // 仅导入到当前选中的产品
                     if (multiProductPreview) {
                       setBomData(prev => ({
                         ...prev,
@@ -1805,25 +1814,24 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                       }));
                     }
                   }}
-                  className="w-full"
                 >
-                  仅导入当前产品
+                  仅导入当前
                 </Button>
                 <Button
-                  variant="ghost"
                   onClick={() => {
+                    handleMultiProductConfirm();
                     setShowMultiProductDialog(false);
                     setMultiProductPreview(null);
                   }}
-                  className="w-full"
                 >
-                  取消
+                  <Plus className="h-4 w-4 mr-2" />
+                  创建 {multiProductPreview.products.length} 个产品
                 </Button>
               </div>
             </div>
-          )}
-        </SheetContent>
-      </Sheet>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
