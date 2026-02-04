@@ -224,19 +224,23 @@ erDiagram
 |------|------|------|------|
 | id | INT | PK, AUTO_INCREMENT | |
 | process_code | VARCHAR(50) | UNIQUE | 工序编码 |
-| **cost_center_id** | **VARCHAR(20)** | **FK** | **🔴 新增：关联成本中心** |
+| **cost_center_id** | **VARCHAR(20)** | **FK** | **🔴 v1.3 新增：关联成本中心** |
 | process_name | VARCHAR(100) | NOT NULL | 工序名称 |
 | equipment | VARCHAR(100) | | 设备 |
-| **std_mhr_var** | DECIMAL(10,2) | | **🔴 新增：标准变动费率** |
-| **std_mhr_fix** | DECIMAL(10,2) | | **🔴 新增：标准固定费率** |
-| **vave_mhr_var** | DECIMAL(10,2) | | **🔴 新增：VAVE变动费率** |
-| **vave_mhr_fix** | DECIMAL(10,2) | | **🔴 新增：VAVE固定费率** |
+| **std_mhr_var** | DECIMAL(10,2) | | **🔴 v1.3 新增：标准变动费率** |
+| **std_mhr_fix** | DECIMAL(10,2) | | **🔴 v1.3 新增：标准固定费率** |
+| **std_depreciation_rate** | DECIMAL(8,4) | | **🔴 v1.4 新增：标准折旧率** |
+| **vave_mhr_var** | DECIMAL(10,2) | | **🔴 v1.3 新增：VAVE变动费率** |
+| **vave_mhr_fix** | DECIMAL(10,2) | | **🔴 v1.3 新增：VAVE固定费率** |
+| **vave_depreciation_rate** | DECIMAL(8,4) | | **🔴 v1.4 新增：VAVE折旧率** |
 | efficiency_factor | DECIMAL(4,2) | DEFAULT 1.0 | 效率系数 |
 | remarks | TEXT | | 备注 |
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
 
-> **兼容性说明：** `std_mhr_var + std_mhr_fix` 等同于原 `std_mhr`，前端可通过计算显示"总费率"
+> **兼容性说明：**
+> - `std_mhr_var + std_mhr_fix` 等同于原 `std_mhr`，前端可通过计算显示"总费率"
+> - **v1.4 折旧说明**：MHR_fix 包含折旧、利息、租金、保险；depreciation_rate 单独存储，用于 Payback 现金流计算（现金流 = 净利 + 折旧）
 
 ### 3.2 交易数据表 {#transaction-data}
 
