@@ -1454,8 +1454,8 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
               )}
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
