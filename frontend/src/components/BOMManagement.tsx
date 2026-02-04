@@ -1055,7 +1055,17 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                   选择产品
                 </CardTitle>
                 <CardDescription>
-                  本项目包含 {project.products.length} 个产品，请选择需要上传BOM表的产品
+                  {project.projectName} {project.id} · 包含 {project.products.length} 个产品
+                  {(() => {
+                    const uploadedCount = project.products.filter(p => bomData[p.id]?.isUploaded).length;
+                    const notUploadedCount = project.products.length - uploadedCount;
+                    return (
+                      <span className="text-zinc-600">
+                        ，已上传BOM表 {uploadedCount} 个
+                        {notUploadedCount > 0 && <span>，未上传BOM表 {notUploadedCount} 个</span>}
+                      </span>
+                    );
+                  })()}
                 </CardDescription>
               </div>
               <Button
