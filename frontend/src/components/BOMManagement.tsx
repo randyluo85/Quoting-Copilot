@@ -1020,8 +1020,8 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
   const stats = getProductStats();
 
   return (
-    <div className="px-4 py-4 lg:px-4">
-      <div className="mx-auto max-w-4xl space-y-3">
+    <div className="px-4 py-4 lg:px-6">
+      <div className="mx-auto max-w-6xl space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
