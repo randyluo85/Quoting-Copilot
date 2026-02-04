@@ -3,7 +3,7 @@
 设计规范: docs/DATABASE_DESIGN.md
 """
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 from decimal import Decimal
 from datetime import datetime
 from app.schemas.common import PricePair, StatusLight
