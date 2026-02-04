@@ -564,7 +564,8 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
             parseProgress: 100,
             materials: groupedProduct.materials || [],
             processes: groupedProduct.processes || [],
-            isRoutingKnown: false,
+            routingId: `RT-${groupedProduct.product_code || 'BOM'}-${Date.now().toString().slice(-4)}`,
+            isRoutingKnown: (groupedProduct.processes || []).length > 0,
             needsIEReview: (groupedProduct.materials || []).filter((m: any) => !m.hasHistoryData).length > 0
           };
         }
