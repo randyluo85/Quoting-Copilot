@@ -321,7 +321,7 @@ export function NewProject({ onNavigate, onProjectCreated }: NewProjectProps) {
   };
 
   return (
-    <div className="p-8 max-w-4xl">
+    <div className="p-8 max-w-7xl">
       <div className="mb-8">
         <h1 className="text-2xl mb-1">新建报价项目</h1>
         <p className="text-sm text-zinc-500">填写项目基本信息或导入报价单快速创建</p>
