@@ -194,6 +194,12 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
       product_name: string | null;
       material_count: number;
     }>;
+    products_grouped?: Array<{
+      product_code: string;
+      product_name: string | null;
+      materials: any[];
+      processes: any[];
+    }>;
     total_materials: number;
     materials: any[];
     processes: any[];
