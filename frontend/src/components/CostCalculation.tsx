@@ -429,7 +429,7 @@ function renderCostDetail(
 
         {/* Process Tab */}
         <TabsContent value="process" className="mt-4">
-          <div className="border rounded-lg">
+          <div className="border rounded-lg overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
