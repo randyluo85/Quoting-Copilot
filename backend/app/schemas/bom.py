@@ -242,7 +242,7 @@ class MaterialSchema(BaseModel):
     unit: str
     comments: str
 
-    model_config = {"by_alias": True}
+    model_config = {"by_alias": True, "populate_by_name": True}
 
 
 class ProcessSchema(BaseModel):
