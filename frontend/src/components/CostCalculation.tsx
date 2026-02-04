@@ -120,7 +120,7 @@ export function CostCalculation({ onNavigate }: CostCalculationProps) {
   const isLoading = calcStatus === 'calculating' || calculating;
 
   return (
-    <div className="p-8">
+    <div className="px-4 py-8 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="mb-2 flex items-center justify-between">
