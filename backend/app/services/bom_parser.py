@@ -415,60 +415,70 @@ class MultiProductBOMParser:
     def _extract_product_metadata(self, worksheet, sheet_name: str) -> ProductInfo:
         """从 sheet 顶部提取产品元数据.
 
-        Sheet 实际结构:
-        Row 1: ... | Product Name: | value | ... | Product Version: | value
-        Row 2: ... | Product Number: | value | ... | Customer Version: | value
-        Row 3: ... | Customer Number: | value | ... | Issue Date: | value
+        Sheet 实际结构（基于 W04_BOM_.xlsx 分析）:
+        - Row 1 (index 0): 标题行 "Bill of Material"
+        - Row 2 (index 1): Product Name (col 5) -> 值在 col 7, Product Version (col 11) -> 值在 col 13
+        - Row 3 (index 2): Product Number (col 5) -> 值在 col 6, Customer Version (col 11) -> 值在 col 13
+        - Row 5 (index 4): Customer Number (col 5) -> 值在 col 6, Issue Date (col 11) -> 值在 col 12
 
-        值在固定列位置，需要根据标签位置来定位值。
+        使用固定列位置提取值。
         """
         product_code = sheet_name.strip()
-        metadata = {}
+        product_name = None
+        product_number = None
+        product_version = "01"
+        customer_version = "01"
+        customer_number = None
+        issue_date = None
 
-        # 获取 Row 1-3 的所有单元格值
-        for row_idx in range(1, 4):
+        # 检查前 10 行，寻找包含关键标签的行
+        for row_idx in range(1, min(11, worksheet.max_row)):
             row = worksheet[row_idx]
             row_values = [cell.value for cell in row]
 
-            # 查找标签的位置，然后获取值（通常在标签后 1-2 列）
-            for i, cell_value in enumerate(row_values):
+            # 检查每一列，找到标签后根据已知位置提取值
+            for col_idx, cell_value in enumerate(row_values):
                 if cell_value and isinstance(cell_value, str):
-                    key = cell_value.rstrip(':').strip()
+                    key = cell_value.rstrip(':').strip().lower()
 
-                    # 根据标签位置查找值
-                    if key == 'Product Name' and i + 2 < len(row_values):
-                        value = row_values[i + 2]
-                        if value:
-                            metadata['Product Name'] = str(value)
-                    elif key == 'Product Number' and i + 1 < len(row_values):
-                        value = row_values[i + 1]
-                        if value:
-                            metadata['Product Number'] = str(value)
-                    elif key == 'Product Version' and i + 2 < len(row_values):
-                        value = row_values[i + 2]
-                        if value:
-                            metadata['Product Version'] = str(value)
-                    elif key == 'Customer Version' and i + 2 < len(row_values):
-                        value = row_values[i + 2]
-                        if value:
-                            metadata['Customer Version'] = str(value)
-                    elif key == 'Customer Number' and i + 1 < len(row_values):
-                        value = row_values[i + 1]
-                        if value:
-                            metadata['Customer Number'] = str(value)
-                    elif key == 'Issue Date' and i + 2 < len(row_values):
-                        value = row_values[i + 2]
-                        if value:
-                            metadata['Issue Date'] = str(value)
+                    # Product Name: 标签在 col 5, 值在 col 7
+                    if 'product name' in key and col_idx == 5:
+                        if len(row_values) > 7 and row_values[7]:
+                            product_name = str(row_values[7])
+
+                    # Product Number: 标签在 col 5, 值在 col 6
+                    elif 'product number' in key and col_idx == 5:
+                        if len(row_values) > 6 and row_values[6]:
+                            product_number = str(row_values[6])
+
+                    # Product Version: 标签在 col 11, 值在 col 13
+                    elif 'product version' in key and col_idx == 11:
+                        if len(row_values) > 13 and row_values[13]:
+                            product_version = str(row_values[13])
+
+                    # Customer Version: 标签在 col 11, 值在 col 13
+                    elif 'customer version' in key and col_idx == 11:
+                        if len(row_values) > 13 and row_values[13]:
+                            customer_version = str(row_values[13])
+
+                    # Customer Number: 标签在 col 5, 值在 col 6
+                    elif 'customer number' in key and col_idx == 5:
+                        if len(row_values) > 6 and row_values[6]:
+                            customer_number = str(row_values[6])
+
+                    # Issue Date: 标签在 col 11, 值在 col 12
+                    elif 'issue date' in key and col_idx == 11:
+                        if len(row_values) > 12 and row_values[12]:
+                            issue_date = str(row_values[12])
 
         return ProductInfo(
             product_code=product_code,
-            product_name=metadata.get('Product Name'),
-            product_number=metadata.get('Product Number'),
-            product_version=metadata.get('Product Version', '01'),
-            customer_version=metadata.get('Customer Version', '01'),
-            customer_number=metadata.get('Customer Number'),
-            issue_date=self._parse_date(metadata.get('Issue Date')),
+            product_name=product_name,
+            product_number=product_number,
+            product_version=product_version,
+            customer_version=customer_version,
+            customer_number=customer_number,
+            issue_date=self._parse_date(issue_date),
         )
 
     def _parse_date(self, date_str: str | None) -> datetime | None:
