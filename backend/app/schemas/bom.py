@@ -291,4 +291,4 @@ class BOMPreviewResponse(BaseModel):
     total_materials: int
     parse_warnings: List[str] = []
 
-    model_config = {"by_alias": True}
+    model_config = {"by_alias": True, "populate_by_name": True}
