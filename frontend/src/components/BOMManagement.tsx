@@ -1099,11 +1099,11 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                   <Upload className="h-4 w-4" />
                   选择文件
                 </label>
-                <Input
+                <input
                   id="bom-file-input"
                   type="file"
                   accept=".xlsx,.xls,.csv"
-                  className="hidden"
+                  style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0, overflow: 'hidden', clip: 'rect(0, 0, 0, 0)' }}
                   onChange={handleBOMUpload}
                 />
               </div>
