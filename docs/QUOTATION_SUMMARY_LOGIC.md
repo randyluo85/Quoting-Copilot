@@ -27,7 +27,7 @@
 - HK III: 46.238 = 27.055 (Material) + 19.18 (Production)
 - S&A: 7.196 = 342,658 (Net Sales) × 2.1%
 - SK-1: 53.434 = 46.238 + 7.196 (S&A)
-- SK-2: 61.67 = 53.434 + 6.40 (Tooling) + 0.54 (R&D) + 利息 (0.73) + 物流 (0.56)
+- SK-2: 61.67 = 53.434 + 6.40 (Tooling, 含 Capital Interest) + 0.54 (R&D) + Working Capital Interest (0.73) + 物流 (0.56)
 
 **关键观察：**
 - 2026/27年有 Tooling 分摊 6.4039，但 2028年变为 0
