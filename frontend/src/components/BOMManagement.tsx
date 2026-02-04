@@ -1357,7 +1357,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                             <TableHead className="w-12 text-right text-xs font-semibold text-zinc-700">数量</TableHead>
                             <TableHead className="w-14 text-right text-xs font-semibold text-zinc-700">单价</TableHead>
                             <TableHead className="w-14 text-right text-xs font-semibold text-zinc-700">VAVE</TableHead>
-                            <TableHead className="w-24 text-xs font-semibold text-zinc-700">备注</TableHead>
+                            <TableHead className="w-20 text-xs font-semibold text-zinc-700">备注</TableHead>
                             <TableHead className="w-14 text-right text-xs font-semibold text-zinc-700">操作</TableHead>
                           </TableRow>
                         </TableHeader>
