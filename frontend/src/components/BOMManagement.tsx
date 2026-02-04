@@ -1192,41 +1192,41 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                       <>
                         {/* 物料卡片 */}
                         <div className="bg-white rounded-lg p-3 border border-zinc-200 min-w-[300px]">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-1.5">
                               <Package className="h-4 w-4 text-blue-600" />
                               <span className="text-xs font-medium text-zinc-700">物料</span>
                             </div>
-                            <div className="text-2xl font-bold text-blue-600">{materials.length} 项</div>
+                            <div className="text-2xl font-bold text-blue-600">{materials.length} <span className="text-sm font-normal text-zinc-500">项</span></div>
                           </div>
                         </div>
 
                         {/* 工艺卡片 */}
                         <div className="bg-white rounded-lg p-3 border border-zinc-200 min-w-[300px]">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-1.5">
                               <Settings className="h-4 w-4 text-purple-600" />
                               <span className="text-xs font-medium text-zinc-700">工艺</span>
                             </div>
-                            <div className="text-2xl font-bold text-purple-600">{processes.length} 项</div>
+                            <div className="text-2xl font-bold text-purple-600">{processes.length} <span className="text-sm font-normal text-zinc-500">项</span></div>
                           </div>
                         </div>
 
                         {/* 询价卡片 */}
                         <div className={`rounded-lg p-3 border min-w-[300px] ${needInquiry > 0 ? 'bg-orange-50 border-orange-300' : 'bg-white border-zinc-200'}`}>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-1.5">
                               <AlertCircle className={`h-4 w-4 ${needInquiry > 0 ? 'text-orange-600' : 'text-zinc-400'}`} />
                               <span className={`text-xs font-medium ${needInquiry > 0 ? 'text-orange-700' : 'text-zinc-700'}`}>询价</span>
                             </div>
-                            <div className={`text-2xl font-bold ${needInquiry > 0 ? 'text-orange-600' : 'text-zinc-600'}`}>{needInquiry} 项</div>
+                            <div className={`text-2xl font-bold ${needInquiry > 0 ? 'text-orange-600' : 'text-zinc-600'}`}>{needInquiry} <span className="text-sm font-normal text-zinc-500">项</span></div>
                           </div>
                         </div>
 
                         {/* 单价卡片 */}
                         <div className={`rounded-lg p-3 border min-w-[300px] ${unitCost > 0 ? 'bg-green-50 border-green-300' : 'bg-white border-zinc-200'}`}>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-1.5">
                               <DollarSign className={`h-4 w-4 ${unitCost > 0 ? 'text-green-600' : 'text-zinc-400'}`} />
                               <span className={`text-xs font-medium ${unitCost > 0 ? 'text-green-700' : 'text-zinc-700'}`}>单件</span>
                             </div>
