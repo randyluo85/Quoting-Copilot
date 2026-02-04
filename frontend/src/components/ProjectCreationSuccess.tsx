@@ -410,7 +410,7 @@ export function ProjectCreationSuccess({ onNavigate, projectData }: ProjectCreat
                     </SheetDescription>
                   </SheetHeader>
 
-                  <div className="mt-6 space-y-4">
+                  <div className="px-6 mt-6 space-y-4">
                     {similarProjects.map((project) => (
                       <Card key={project.id} className="hover:shadow-md transition-shadow">
                         <CardContent className="p-4">
