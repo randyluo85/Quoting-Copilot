@@ -1346,20 +1346,18 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
         </div>
       </div>
 
-      {/* 新增产品对话框 */}
-      <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          {/* 调试信息 */}
-          {isAddProductOpen && console.log('Dialog should be visible, isAddProductOpen:', isAddProductOpen)}
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+      {/* 新增产品抽屉 */}
+      <Sheet open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
+        <SheetContent className="w-[450px] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5" />
               新增产品
-            </DialogTitle>
-            <DialogDescription>
+            </SheetTitle>
+            <SheetDescription>
               为项目 {project.id} 添加新产品，带 * 的字段为必填项
-            </DialogDescription>
-          </DialogHeader>
+            </SheetDescription>
+          </SheetHeader>
 
           <div className="space-y-4 py-4">
             {/* 产品名称 - 必填 */}
