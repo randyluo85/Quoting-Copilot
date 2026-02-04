@@ -145,9 +145,9 @@ class QuotationYearData(BaseModel):
     production_cost: Decimal   # Production Cost
     hk_3: Decimal              # HK III 制造成本
     sk_1: Decimal              # SK-1 完全成本（不含分摊）
-    tooling_amort: Decimal     # Tooling 分摊
+    tooling_amort: Decimal     # Tooling 分摊（含 Capital Interest）
     rnd_amort: Decimal         # R&D 分摊
-    interest: Decimal          # 资金占用
+    working_capital_interest: Decimal  # 营运资金利息（资金占用成本）
     logistics: Decimal         # 物流费用
     sk_2: Decimal              # SK-2 项目全成本
 
