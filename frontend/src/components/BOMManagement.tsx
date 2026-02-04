@@ -1378,10 +1378,10 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                                   {material.level}
                                 </span>
                               </TableCell>
-                              <TableCell className="font-mono text-xs text-blue-700 font-medium">
+                              <TableCell className="font-mono text-xs text-blue-700 font-medium truncate">
                                 {material.partNumber}
                               </TableCell>
-                              <TableCell className="font-medium text-sm text-zinc-900">
+                              <TableCell className="font-medium text-sm text-zinc-900 truncate" title={material.partName}>
                                 {material.partName}
                               </TableCell>
                               <TableCell className="text-xs">
