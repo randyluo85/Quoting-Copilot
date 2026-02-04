@@ -36,12 +36,12 @@ import {
   SelectValue,
 } from './ui/select';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from './ui/dialog';
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from './ui/sheet';
 import type { View, ProjectData, Product } from '../App';
 import { api } from '../lib/api';
 import { useProjectStore } from '../lib/store';
