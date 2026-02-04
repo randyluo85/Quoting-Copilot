@@ -47,11 +47,13 @@ npm run build    # 生产构建
 ### 后端 (Server)
 
 ```bash
+# 安装 uv（如果尚未安装）
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# 或使用 pip: pip install uv
+
 cd backend
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+# 使用 uv 运行（自动管理虚拟环境）
+uv run uvicorn app.main:app --reload --port 8000
 # API 文档: http://localhost:8000/docs
 ```
 
