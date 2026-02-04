@@ -435,23 +435,42 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
     updateProject(updatedProject);
 
     // 为每个新产品分配对应的物料数据
-    // 注意：这里简化处理，将所有物料分配给第一个新产品
-    // 实际情况应该根据物料所属的产品进行分配
     const newBomData: Record<string, ProductBOMData> = { ...bomData };
 
-    newProducts.forEach((product, idx) => {
-      newBomData[product.id] = {
-        productId: product.id,
-        isUploaded: true,
-        isParsing: false,
-        isParsed: true,
-        parseProgress: 100,
-        materials: idx === 0 ? multiProductPreview.materials : [], // 第一个产品获得所有物料
-        processes: idx === 0 ? multiProductPreview.processes : [],
-        isRoutingKnown: false,
-        needsIEReview: false,
-      };
-    });
+    // 使用 products_grouped 来分配物料
+    if (multiProductPreview.products_grouped && multiProductPreview.products_grouped.length > 0) {
+      multiProductPreview.products_grouped.forEach((groupedProduct, idx) => {
+        const product = newProducts[idx];
+        if (product) {
+          newBomData[product.id] = {
+            productId: product.id,
+            isUploaded: true,
+            isParsing: false,
+            isParsed: true,
+            parseProgress: 100,
+            materials: groupedProduct.materials || [],
+            processes: groupedProduct.processes || [],
+            isRoutingKnown: false,
+            needsIEReview: (groupedProduct.materials || []).filter((m: any) => !m.hasHistoryData).length > 0
+          };
+        }
+      });
+    } else {
+      // 如果没有 products_grouped，将所有物料分配给第一个产品
+      newProducts.forEach((product, idx) => {
+        newBomData[product.id] = {
+          productId: product.id,
+          isUploaded: true,
+          isParsing: false,
+          isParsed: true,
+          parseProgress: 100,
+          materials: idx === 0 ? multiProductPreview.materials : [],
+          processes: idx === 0 ? multiProductPreview.processes : [],
+          isRoutingKnown: false,
+          needsIEReview: false,
+        };
+      });
+    }
 
     // 更新当前选中产品的数据
     newBomData[selectedProduct.id] = {
