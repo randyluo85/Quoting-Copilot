@@ -318,6 +318,37 @@ async def upload_bom(
 
     print(f"[DEBUG] Total time: {time.time() - start_time:.3f}s")
 
+    # 按产品分组物料和工艺数据
+    products_grouped = []
+    material_idx = 0
+    process_idx = 0
+
+    for product in parse_result.products:
+        # 获取该产品的物料（使用物料数量来确定范围）
+        product_materials = []
+        for _ in range(product.product_info.material_count):
+            if material_idx < len(materials):
+                product_materials.append(materials[material_idx].model_dump(by_alias=True))
+                material_idx += 1
+
+        # 获取该产品的工艺
+        product_processes = []
+        for _ in range(product.product_info.process_count):
+            if process_idx < len(processes):
+                product_processes.append(processes[process_idx].model_dump(by_alias=True))
+                process_idx += 1
+
+        products_grouped.append({
+            "product_code": product.product_info.product_code,
+            "product_name": product.product_info.product_name,
+            "product_number": product.product_info.product_number,
+            "customer_number": product.product_info.customer_number,
+            "material_count": product.product_info.material_count,
+            "process_count": product.product_info.process_count,
+            "materials": product_materials,
+            "processes": product_processes,
+        })
+
     return JSONResponse(
         content={
             "parseId": f"parse-{project_id}",
@@ -339,6 +370,8 @@ async def upload_bom(
                     for p in parse_result.products
                 ],
             },
+            # 新增：按产品分组的数据
+            "products_grouped": products_grouped,
         }
     )
 
