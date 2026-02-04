@@ -221,11 +221,14 @@ class AmortizationStrategy(BaseModel):
     mode: AmortizationMode
     amortization_volume: int | None = None   # 分摊基数销量
     duration_years: int = 2                  # 分摊年限
-    interest_rate: Decimal = Field(default=Decimal("0.06"))
-    calculated_unit_add: Decimal | None = None  # 计算结果：单件分摊额
+    interest_rate: Decimal = Field(default=Decimal("0.06"), description="资本利率（Capital Interest Rate）")
+    calculated_unit_add: Decimal | None = None  # 计算结果：单件分摊额（含 Capital Interest）
 
     def calculate_unit_amort(self, total_investment: Decimal) -> Decimal:
-        """计算单件分摊额（含息）"""
+        """计算单件分摊额（含 Capital Interest）
+
+        注意：此利息为模具投资的资本成本，与 QS 表中的 Working Capital Interest 是不同的概念。
+        """
         if self.mode == AmortizationMode.UPFRONT:
             return Decimal("0")
 
@@ -233,6 +236,7 @@ class AmortizationStrategy(BaseModel):
             return Decimal("0")
 
         # VOSS 单利公式: I × (1 + R × Y) / V
+        # 其中 (1 + R × Y) 为 Capital Interest 因子
         interest_factor = Decimal("1") + self.interest_rate * self.duration_years
         return total_investment * interest_factor / self.amortization_volume
 
