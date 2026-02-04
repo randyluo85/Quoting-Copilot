@@ -1,6 +1,8 @@
 """BOM 文件解析服务."""
 
 from typing import NamedTuple
+from dataclasses import dataclass
+from datetime import datetime
 from openpyxl import load_workbook
 
 
