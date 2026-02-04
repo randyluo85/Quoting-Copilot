@@ -1093,21 +1093,20 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                 <p className="text-sm text-zinc-500 mb-4">
                   点击或拖拽文件到此区域上传
                 </p>
-                <label htmlFor="bom-upload">
-                  <Button asChild>
-                    <span className="cursor-pointer gap-2">
-                      <Upload className="h-4 w-4" />
-                      选择文件
-                    </span>
-                  </Button>
-                  <Input
-                    id="bom-upload"
-                    type="file"
-                    accept=".xlsx,.xls,.csv"
-                    className="hidden"
-                    onChange={handleBOMUpload}
-                  />
-                </label>
+                <Button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  选择文件
+                </Button>
+                <Input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  className="hidden"
+                  onChange={handleBOMUpload}
+                />
               </div>
 
               <div className="mt-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
