@@ -187,6 +187,19 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
     description: '',
   });
 
+  // 多产品 BOM 解析状态
+  const [multiProductPreview, setMultiProductPreview] = useState<{
+    products: Array<{
+      product_code: string;
+      product_name: string | null;
+      material_count: number;
+    }>;
+    total_materials: number;
+    materials: any[];
+    processes: any[];
+  } | null>(null);
+  const [showMultiProductDialog, setShowMultiProductDialog] = useState(false);
+
   // 调试：监听 isAddProductOpen 变化
   useEffect(() => {
     console.log('isAddProductOpen changed to:', isAddProductOpen);
