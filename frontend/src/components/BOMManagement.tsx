@@ -1832,6 +1832,8 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                     setShowMultiProductDialog(false);
                     setMultiProductPreview(null);
                     if (multiProductPreview) {
+                      const materials = multiProductPreview.materials || [];
+                      const processes = multiProductPreview.processes || [];
                       setBomData(prev => ({
                         ...prev,
                         [selectedProduct.id]: {
@@ -1840,10 +1842,11 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                           isParsing: false,
                           isParsed: true,
                           parseProgress: 100,
-                          materials: multiProductPreview.materials,
-                          processes: multiProductPreview.processes,
-                          isRoutingKnown: false,
-                          needsIEReview: multiProductPreview.materials.filter((m: any) => !m.hasHistoryData).length > 0
+                          materials,
+                          processes,
+                          routingId: `RT-${selectedProduct.partNumber || 'BOM'}-${Date.now().toString().slice(-4)}`,
+                          isRoutingKnown: processes.length > 0,
+                          needsIEReview: materials.filter((m: any) => !m.hasHistoryData).length > 0
                         }
                       }));
                     }
