@@ -200,7 +200,7 @@ class QuotationSummaryResponse(BaseModel):
 ```python
 # 成本累加
 hk_3 = material_cost + production_cost
-sk_1 = hk_3 * sk1_factor  # 通常 1.175
+sk_1 = hk_3 + (net_sales * sa_rate)  # S&A 管销费用
 
 # 资金占用
 interest = vp * interest_rate * (payment_terms_days / 360)
