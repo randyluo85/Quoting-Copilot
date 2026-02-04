@@ -1072,100 +1072,103 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
             </div>
           </CardHeader>
           <CardContent className="p-4">
-            {/* 产品 Tab 列表 - 横向紧凑布局 */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar">
+            {/* 产品卡片网格 - 每行最多8个 */}
+            <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
               {project.products.map((product) => {
                 const isSelected = selectedProduct.id === product.id;
                 const productBom = bomData[product.id];
-                const displayName = product.name || product.partNumber || '未命名';
+                const materials = productBom?.materials || [];
+                const processes = productBom?.processes || [];
+                const needInquiry = materials.filter((m: any) => !m.hasHistoryData).length +
+                  processes.filter((p: any) => !p.hasHistoryData).length;
+
+                // 计算单件成本
+                const materialCost = materials
+                  .filter((m: any) => m.hasHistoryData && (m.unitPrice || m.vavePrice))
+                  .reduce((sum: number, m: any) => sum + (m.vavePrice || m.unitPrice || 0) * (m.quantity || 0), 0);
+                const processCost = processes
+                  .filter((p: any) => p.hasHistoryData && (p.unitPrice || p.vavePrice))
+                  .reduce((sum: number, p: any) => sum + (p.vavePrice || p.unitPrice || 0) * (p.quantity || 0), 0);
+                const unitCost = materialCost + processCost;
 
                 return (
-                  <button
+                  <div
                     key={product.id}
                     onClick={() => setSelectedProduct(product)}
                     className={`
-                      flex-shrink-0 px-2 py-1 rounded text-xs font-medium transition-all whitespace-nowrap
+                      cursor-pointer p-3 rounded-lg border-2 transition-all
                       ${isSelected
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                        ? 'border-blue-500 bg-blue-50 shadow-md'
+                        : 'border-zinc-200 hover:border-blue-300 hover:shadow-sm bg-white'
                       }
                     `}
-                    title={displayName}
                   >
-                    {displayName.length > 12 ? displayName.slice(0, 12) + '...' : displayName}
-                  </button>
+                    {/* 产品名称 */}
+                    <div className="font-medium text-sm text-zinc-900 mb-1 truncate" title={product.name}>
+                      {product.name}
+                    </div>
+                    <div className="text-xs text-zinc-500 font-mono mb-2 truncate" title={product.partNumber}>
+                      {product.partNumber || '未设置编码'}
+                    </div>
+
+                    {/* 状态徽章 */}
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {productBom?.isParsed ? (
+                        <Badge variant="secondary" className="gap-0.5 text-xs">
+                          <CheckCircle2 className="h-2.5 w-2.5" />
+                          已解析
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-xs text-zinc-400">
+                          未上传
+                        </Badge>
+                      )}
+                      {productBom?.routingId && (
+                        productBom.isRoutingKnown ? (
+                          <Badge className="gap-0.5 bg-green-100 text-green-700 border-green-300 text-xs">
+                            <CheckCircle2 className="h-2.5 w-2.5" />
+                            成熟
+                          </Badge>
+                        ) : productBom.needsIEReview ? (
+                          <Badge variant="outline" className="gap-0.5 text-red-600 border-red-300 text-xs">
+                            <AlertCircle className="h-2.5 w-2.5" />
+                            需IE
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="gap-0.5 text-orange-600 border-orange-300 text-xs">
+                            <AlertTriangle className="h-2.5 w-2.5" />
+                            新路线
+                          </Badge>
+                        )
+                      )}
+                    </div>
+
+                    {/* 数据统计 */}
+                    <div className="space-y-1 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-zinc-500">物料:</span>
+                        <span className="font-medium text-zinc-700">{materials.length}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-zinc-500">工艺:</span>
+                        <span className="font-medium text-zinc-700">{processes.length}</span>
+                      </div>
+                      {needInquiry > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-orange-600">需询价:</span>
+                          <span className="font-medium text-orange-600">{needInquiry}</span>
+                        </div>
+                      )}
+                      {productBom?.isParsed && unitCost > 0 && (
+                        <div className="flex justify-between pt-1 border-t border-zinc-200 mt-1">
+                          <span className="text-zinc-500">单件:</span>
+                          <span className="font-semibold text-green-600">¥{unitCost.toFixed(2)}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 );
               })}
-            </div>
-
-            {/* 当前产品详情 */}
-            <div className="mt-4 p-3 bg-zinc-50 rounded-lg border border-zinc-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div>
-                    <p className="font-medium text-sm">{selectedProduct.name}</p>
-                    <p className="text-xs text-zinc-500 font-mono">{selectedProduct.partNumber}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {(() => {
-                      const productBom = bomData[selectedProduct.id];
-                      if (productBom?.isParsed) {
-                        return (
-                          <Badge variant="secondary" className="gap-1 text-xs">
-                            <CheckCircle2 className="h-3 w-3" />
-                            已解析
-                          </Badge>
-                        );
-                      }
-                      return null;
-                    })()}
-                    {(() => {
-                      const productBom = bomData[selectedProduct.id];
-                      if (productBom?.routingId) {
-                        if (productBom.isRoutingKnown) {
-                          return (
-                            <Badge className="gap-1 bg-green-100 text-green-700 border-green-300 text-xs">
-                              <CheckCircle2 className="h-3 w-3" />
-                              成熟路线
-                            </Badge>
-                          );
-                        } else if (productBom.needsIEReview) {
-                          return (
-                            <Badge variant="outline" className="gap-1 text-red-600 border-red-300 text-xs">
-                              <AlertCircle className="h-3 w-3" />
-                              需IE确认
-                            </Badge>
-                          );
-                        } else {
-                          return (
-                            <Badge variant="outline" className="gap-1 text-orange-600 border-orange-300 text-xs">
-                              <AlertTriangle className="h-3 w-3" />
-                              新路线
-                            </Badge>
-                          );
-                        }
-                      }
-                      return null;
-                    })()}
-                  </div>
-                </div>
-                <div className="text-xs text-zinc-500">
-                  年量：{selectedProduct.annualVolume?.toLocaleString() || '0'} pcs
-                </div>
-              </div>
-              {(() => {
-                const productBom = bomData[selectedProduct.id];
-                if (productBom?.routingId) {
-                  return (
-                    <div className="mt-2 pt-2 border-t border-zinc-200">
-                      <p className="text-xs text-zinc-400">
-                        路线编码：<span className="font-mono text-zinc-600">{productBom.routingId}</span>
-                      </p>
-                    </div>
-                  );
-                }
-                return null;
-              })()}
             </div>
           </CardContent>
         </Card>
