@@ -1464,8 +1464,10 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                                   <span className="text-zinc-300 text-sm">-</span>
                                 )}
                               </TableCell>
-                              <TableCell className="text-xs text-zinc-500 truncate max-w-[60px]" title={material.comments || ''}>
-                                {material.comments || <span className="text-zinc-300">-</span>}
+                              <TableCell className="text-xs text-zinc-500 p-2">
+                                <div className="truncate max-w-[80px]" title={material.comments || ''}>
+                                  {material.comments || <span className="text-zinc-300">-</span>}
+                                </div>
                               </TableCell>
                               <TableCell className="text-right">
                                 {material.hasHistoryData ? (
