@@ -186,13 +186,22 @@ class PaybackAnalysis(BaseModel):
     vave_unit_cost: Decimal           # VAVE 方案单件成本
     unit_cost_saving: Decimal         # 单件节省
 
+    # 折旧数据（v1.4 新增）
+    standard_depreciation_per_unit: Decimal  # 标准方案单件折旧
+    vave_depreciation_per_unit: Decimal      # VAVE 方案单件折旧
+
     # 回本计算
     payback_months: Decimal           # 回本月数
     payback_years: Decimal            # 回本年数
     break_even_month: int             # 盈亏平衡月份
 
+    # 现金流计算（考虑折旧回拨）
+    net_profit_annual: Decimal        # 年度净利
+    depreciation_annual: Decimal      # 年度折旧（用于回拨）
+    cash_flow_annual: Decimal         # 年度现金流 = 净利 + 折旧
+
     # 生命周期收益
-    project lifecycle_months: int     # 项目生命周期（月）
+    project_lifecycle_months: int     # 项目生命周期（月）
     remaining_profit_after_payback: Decimal  # 回本后剩余收益
 
     # 决策建议
