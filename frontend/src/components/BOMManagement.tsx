@@ -1732,9 +1732,9 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
       {/* 多产品 BOM 预览对话框 */}
       {showMultiProductDialog && multiProductPreview && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <Card className="max-w-lg w-full max-h-[75vh] overflow-hidden flex flex-col shadow-2xl border-zinc-200">
+          <Card className="w-1/2 max-w-md max-h-[75vh] overflow-hidden flex flex-col shadow-2xl border-zinc-200">
             {/* Header */}
-            <CardHeader className="border-b border-zinc-200 py-3 px-4">
+            <CardHeader className="border-b border-zinc-200 py-4 px-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-purple-600" />
