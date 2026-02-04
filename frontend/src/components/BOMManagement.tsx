@@ -1322,67 +1322,6 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
           </Card>
         ) : (
           <>
-            {/* Stats */}
-            <div className="grid grid-cols-4 gap-4">
-              <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-white shadow-sm">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-blue-600 mb-1 font-medium">物料项数</p>
-                      <p className="text-2xl font-bold text-blue-700">{stats.materials}</p>
-                    </div>
-                    <div className="p-2 rounded-lg bg-blue-100">
-                      <Package className="h-5 w-5 text-blue-600" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-white shadow-sm">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-purple-600 mb-1 font-medium">工艺项数</p>
-                      <p className="text-2xl font-bold text-purple-700">{stats.processes}</p>
-                    </div>
-                    <div className="p-2 rounded-lg bg-purple-100">
-                      <Settings className="h-5 w-5 text-purple-600" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-orange-200 bg-gradient-to-br from-orange-50 to-white shadow-sm">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-orange-600 mb-1 font-medium">需询价</p>
-                      <p className="text-2xl font-bold text-orange-700">{stats.needInquiry}</p>
-                    </div>
-                    <div className="p-2 rounded-lg bg-orange-100">
-                      <AlertCircle className="h-5 w-5 text-orange-600" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-green-200 bg-gradient-to-br from-green-50 to-white shadow-sm">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-green-600 mb-1 font-medium">单件成本</p>
-                      <p className="text-2xl font-bold text-green-700">
-                        ¥{stats.totalCost.toFixed(2)}
-                      </p>
-                    </div>
-                    <div className="p-2 rounded-lg bg-green-100">
-                      <DollarSign className="h-5 w-5 text-green-600" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
             {/* Materials & Processes Tables */}
             <Card className="border-zinc-200 shadow-sm">
               <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-zinc-200">
