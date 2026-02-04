@@ -61,6 +61,12 @@ $$MHR_{var} = \frac{\sum (能源成本 + 维保成本 + 刀具成本)}{H_{effect
 
 $$MHR_{fix} = \frac{\sum (折旧 + 租金 + 管理分摊)}{H_{effective}}$$
 
+> **⚠️ v1.4 重要更新：折旧数据单独存储**
+> - 从 v1.4 开始，折旧率字段 `depreciation_rate` 从 MHR_fix 中单独剥离
+> - MHR_fix 仍包含折旧作为其组成部分之一
+> - `depreciation_rate` 字段独立存储，用于 Payback 现金流计算（现金流 = 净利 + 折旧）
+> - 可通过 `fix_excluding_depreciation` 属性获取不含折旧的固定费率
+
 #### 人工费率 (Labor Rate)
 
 $$Rate_{labor} = Average\ Wages\ per\ Hour \times Personnel\ per\ machine$$
