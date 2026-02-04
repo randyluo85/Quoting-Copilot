@@ -625,11 +625,11 @@ async def get_project_bom_data(
         for idx, p in enumerate(processes):
             processes_data.append({
                 "id": f"P-{idx + 1:03d}",
-                "opNo": p.op_no or f"{idx + 1:03d}",
-                "name": p.process_name or "",
-                "workCenter": p.work_center or "",
-                "standardTime": float(p.cycle_time) if p.cycle_time is not None else 0,
-                "spec": p.specifications,
+                "opNo": str(p.sequence_order) if p.sequence_order is not None else f"{idx + 1:03d}",
+                "name": p.process_code or "",
+                "workCenter": "",
+                "standardTime": float(p.cycle_time_std or p.cycle_time or 0) / 3600,  # 转换为小时
+                "spec": p.remarks,
                 "unit": "件",
                 "quantity": 1,
                 "unitPrice": float(p.std_cost) if p.std_cost is not None else None,
