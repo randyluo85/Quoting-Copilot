@@ -3,6 +3,7 @@ import {
   Upload,
   FileSpreadsheet,
   Sparkles,
+  Box,
   CheckCircle2,
   AlertCircle,
   Mail,
