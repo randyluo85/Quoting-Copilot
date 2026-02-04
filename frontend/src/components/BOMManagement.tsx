@@ -341,6 +341,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
           hasHistoryData: p.hasHistoryData || false,
         }));
 
+        // 先更新本地状态（立即显示）
         setBomData(prev => {
           const updated = { ...prev };
           updated[productId] = {
@@ -355,6 +356,50 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
           };
           return updated;
         });
+
+        // 调用 confirmCreate 保存数据到数据库
+        try {
+          // 将数据转换为 confirmCreate 期望的格式
+          const products_grouped = [{
+            product_info: {
+              product_code: selectedProduct.partNumber || selectedProduct.id,
+              product_name: selectedProduct.name,
+              product_number: selectedProduct.partNumber || '',
+              product_version: '01',
+              customer_version: '01',
+              customer_number: null,
+              issue_date: null,
+              material_count: materials.length,
+              process_count: processes.length,
+            },
+            materials: materials.map((m: any) => ({
+              level: m.level || '1',
+              part_number: m.partNumber,
+              part_name: m.partName,
+              version: m.version,
+              type: m.type,
+              status: m.status,
+              material: m.material,
+              supplier: m.supplier,
+              quantity: m.quantity,
+              unit: m.unit,
+              comments: m.comments,
+            })),
+            processes: processes.map((p: any) => ({
+              op_no: p.opNo,
+              name: p.name,
+              work_center: p.workCenter,
+              standard_time: p.standardTime,
+              spec: p.spec,
+            })),
+          }];
+
+          await api.bom.confirmCreate(project.id, products_grouped);
+          console.log('BOM data saved to database successfully');
+        } catch (saveError) {
+          console.error('Failed to save BOM data to database:', saveError);
+          // 不中断用户流程，数据已在本地显示
+        }
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '上传失败，请重试';
