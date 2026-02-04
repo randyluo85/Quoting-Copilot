@@ -347,8 +347,8 @@ export function ProcessAssessment({ onNavigate }: ProcessAssessmentProps) {
   };
 
   return (
-    <div className="px-4 py-8 lg:px-8">
-      <div className="w-full max-w-[960px] overflow-hidden">
+    <div className="px-4 py-8 lg:px-8 max-w-[960px]">
+      <div>
         {/* 页头 */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
