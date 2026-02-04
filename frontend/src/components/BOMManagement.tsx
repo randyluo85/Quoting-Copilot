@@ -1500,7 +1500,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                 <Card className="border-zinc-200 shadow-sm">
                   <CardContent className="p-0">
                     <div className="rounded-xl border border-zinc-200 overflow-hidden overflow-x-auto shadow-sm">
-                      <Table>
+                      <Table className="table-fixed">
                         <TableHeader className="bg-gradient-to-r from-purple-50 to-indigo-50/50">
                           <TableRow className="border-b-zinc-200 hover:bg-transparent">
                             <TableHead className="w-[90px] text-xs font-semibold text-zinc-700">工序号</TableHead>
