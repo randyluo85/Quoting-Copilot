@@ -15,7 +15,7 @@
 | 列名 | 逻辑与公式 | 业务含义 |
 |------|-----------|---------|
 | **HK III /pic** | = Material Cost + Production | 制造成本 |
-| **SK-1 /pic** | = HK III × 1.175 (SK1 Factor) | 完全成本（不含分摊）- 公司基础盈亏线 |
+| **SK-1 /pic** | = HK III + (净销售额 × S&A Rate) | 完全成本（含基础管销费用） |
 | **Tooling & Mould /pic** | 来自 Tooling 表的分摊值 | 模具分摊费 |
 | **R&D Validation /pic** | 来自 R&D 表的分摊值 | 研发验证分摊费 |
 | ** Interest...** | = VP × 利率 × (账期/360) | 资金占用成本 |
