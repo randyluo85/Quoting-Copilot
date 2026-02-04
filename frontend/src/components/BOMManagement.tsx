@@ -1343,7 +1343,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                 <Card className="border-zinc-200 shadow-sm">
                   <CardContent className="p-0">
                     <div className="rounded-lg border border-zinc-200 overflow-x-auto">
-                      <Table>
+                      <Table className="table-fixed">
                         <TableHeader className="bg-zinc-50">
                           <TableRow className="border-b-zinc-200 hover:bg-transparent">
                             <TableHead className="w-10 text-xs font-semibold text-zinc-700">层级</TableHead>
