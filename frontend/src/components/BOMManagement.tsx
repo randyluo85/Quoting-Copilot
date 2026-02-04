@@ -1021,7 +1021,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
 
   return (
     <div className="px-4 py-8 lg:px-8">
-      <div className="w-full space-y-6 overflow-x-auto">
+      <div className="mx-auto max-w-6xl space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
