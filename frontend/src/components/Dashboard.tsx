@@ -304,7 +304,7 @@ export function Dashboard({ onNavigate, projects, onSyncFromPM, onSelectProject 
                     <p className="text-xs text-zinc-400">点击"从PM软件同步"按钮同步新项目</p>
                   </div>
                 ) : (
-                  <div className="border rounded-lg overflow-hidden">
+                  <div className="border rounded-lg overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow>
