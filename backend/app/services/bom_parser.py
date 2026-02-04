@@ -415,38 +415,51 @@ class MultiProductBOMParser:
     def _extract_product_metadata(self, worksheet, sheet_name: str) -> ProductInfo:
         """从 sheet 顶部提取产品元数据.
 
-        Sheet 结构:
-        Row 0: Bill of Material
-        Row 1: Project Name | ... | Product Name | ... | Product Version | value
-        Row 2: AS/AC Number | ... | Product Number | ... | Customer Version | value
-        Row 3: Customer | ... | Customer Number | value | ... | Issue Date | value
+        Sheet 实际结构:
+        Row 1: ... | Product Name: | value | ... | Product Version: | value
+        Row 2: ... | Product Number: | value | ... | Customer Version: | value
+        Row 3: ... | Customer Number: | value | ... | Issue Date: | value
 
-        Args:
-            worksheet: 工作表对象
-            sheet_name: Sheet 名称（用作 product_code）
-
-        Returns:
-            ProductInfo: 产品元数据
+        值在固定列位置，需要根据标签位置来定位值。
         """
         product_code = sheet_name.strip()
         metadata = {}
 
-        # 解析 Row 1-3 的产品信息
+        # 获取 Row 1-3 的所有单元格值
         for row_idx in range(1, 4):
             row = worksheet[row_idx]
-            i = 0
-            while i < len(row) - 1:
-                key_cell = row[i]
-                value_cell = row[i + 1]
+            row_values = [cell.value for cell in row]
 
-                if key_cell.value and isinstance(key_cell.value, str):
-                    key = key_cell.value.rstrip(':').strip()
-                    # 只提取我们关心的字段
-                    if key in ['Product Name', 'Product Number', 'Product Version',
-                               'Customer Version', 'Customer Number', 'Issue Date']:
-                        if value_cell.value is not None:
-                            metadata[key] = str(value_cell.value)
-                i += 1
+            # 查找标签的位置，然后获取值（通常在标签后 1-2 列）
+            for i, cell_value in enumerate(row_values):
+                if cell_value and isinstance(cell_value, str):
+                    key = cell_value.rstrip(':').strip()
+
+                    # 根据标签位置查找值
+                    if key == 'Product Name' and i + 2 < len(row_values):
+                        value = row_values[i + 2]
+                        if value:
+                            metadata['Product Name'] = str(value)
+                    elif key == 'Product Number' and i + 1 < len(row_values):
+                        value = row_values[i + 1]
+                        if value:
+                            metadata['Product Number'] = str(value)
+                    elif key == 'Product Version' and i + 2 < len(row_values):
+                        value = row_values[i + 2]
+                        if value:
+                            metadata['Product Version'] = str(value)
+                    elif key == 'Customer Version' and i + 2 < len(row_values):
+                        value = row_values[i + 2]
+                        if value:
+                            metadata['Customer Version'] = str(value)
+                    elif key == 'Customer Number' and i + 1 < len(row_values):
+                        value = row_values[i + 1]
+                        if value:
+                            metadata['Customer Number'] = str(value)
+                    elif key == 'Issue Date' and i + 2 < len(row_values):
+                        value = row_values[i + 2]
+                        if value:
+                            metadata['Issue Date'] = str(value)
 
         return ProductInfo(
             product_code=product_code,
