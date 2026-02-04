@@ -202,11 +202,12 @@ class QuotationSummaryResponse(BaseModel):
 hk_3 = material_cost + production_cost
 sk_1 = hk_3 + (net_sales * sa_rate)  # S&A 管销费用
 
-# 资金占用
-interest = vp * interest_rate * (payment_terms_days / 360)
+# 营运资金利息（Working Capital Interest）
+working_capital_interest = vp * interest_rate * (payment_terms_days / 360)
 
 # 项目全成本
-sk_2 = sk_1 + tooling_amort + rnd_amort + interest + logistics
+# 注意：tooling_amort 已包含 Capital Interest（模具分摊中的资本利息）
+sk_2 = sk_1 + tooling_amort + rnd_amort + working_capital_interest + logistics
 
 # 净利率
 db4_rate = (vp - sk_2) / vp
