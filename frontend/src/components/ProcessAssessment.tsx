@@ -521,8 +521,8 @@ export function ProcessAssessment({ onNavigate }: ProcessAssessmentProps) {
             onCancel={() => setIsEditorOpen(false)}
             isSaving={isSaving}
           />
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
