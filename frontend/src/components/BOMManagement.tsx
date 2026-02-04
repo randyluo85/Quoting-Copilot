@@ -1509,7 +1509,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                             <TableHead className="text-right w-[110px] text-xs font-semibold text-zinc-700">标准工时</TableHead>
                             <TableHead className="text-right w-[110px] text-xs font-semibold text-zinc-700">单价</TableHead>
                             <TableHead className="text-right w-[110px] text-xs font-semibold text-zinc-700">VAVE单价</TableHead>
-                            <TableHead className="text-xs font-semibold text-zinc-700">规格要求</TableHead>
+                            <TableHead className="w-28 text-xs font-semibold text-zinc-700">规格要求</TableHead>
                             <TableHead className="text-right w-[100px] text-xs font-semibold text-zinc-700">操作</TableHead>
                           </TableRow>
                         </TableHeader>
