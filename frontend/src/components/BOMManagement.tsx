@@ -1235,7 +1235,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                     type="file"
                     accept=".xlsx,.xls,.csv"
                     className="hidden"
-                    onChange={handleFileUpload}
+                    onChange={handleBOMUpload}
                   />
                 </label>
               </div>
