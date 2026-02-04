@@ -262,8 +262,12 @@ async def upload_bom(
         materials.append(
             BOMMaterialResponse(
                 id=f"M-{idx + 1:03d}",
+                level=m.level,
                 part_number=m.part_number or "",
                 part_name=m.part_name or "",
+                version=m.version,
+                type=m.type,
+                stock_status=m.status,
                 material=m.material or price_data.get("material", ""),
                 supplier=m.supplier or price_data.get("supplier", ""),
                 quantity=m.quantity,
