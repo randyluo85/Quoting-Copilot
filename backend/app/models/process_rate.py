@@ -101,3 +101,38 @@ class ProcessRate(Base):
     def vave_mhr(self) -> Decimal | None:
         """VAVE 总 MHR (向后兼容)."""
         return self.vave_mhr_total
+
+    # ========== v1.4 新增：折旧计算属性 ==========
+    # 用于 Payback 现金流计算：现金流 = 净利 + 折旧
+
+    @property
+    def std_depreciation_per_hour(self) -> Decimal:
+        """标准折旧额/小时（用于 Payback 现金流计算）."""
+        if self.std_depreciation_rate is None:
+            return Decimal("0")
+        return Decimal(str(self.std_depreciation_rate))
+
+    @property
+    def vave_depreciation_per_hour(self) -> Decimal:
+        """VAVE 折旧额/小时（用于 Payback 现金流计算）."""
+        if self.vave_depreciation_rate is None:
+            return Decimal("0")
+        return Decimal(str(self.vave_depreciation_rate))
+
+    @property
+    def std_fix_excluding_depreciation(self) -> Decimal | None:
+        """标准固定费率（不含折旧）= MHR_fix - depreciation_rate."""
+        if self.std_mhr_fix is None:
+            return None
+        fix = Decimal(str(self.std_mhr_fix))
+        dep = Decimal(str(self.std_depreciation_rate)) if self.std_depreciation_rate is not None else Decimal("0")
+        return fix - dep
+
+    @property
+    def vave_fix_excluding_depreciation(self) -> Decimal | None:
+        """VAVE 固定费率（不含折旧）= MHR_fix - depreciation_rate."""
+        if self.vave_mhr_fix is None:
+            return None
+        fix = Decimal(str(self.vave_mhr_fix))
+        dep = Decimal(str(self.vave_depreciation_rate)) if self.vave_depreciation_rate is not None else Decimal("0")
+        return fix - dep
