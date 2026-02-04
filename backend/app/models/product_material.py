@@ -26,11 +26,15 @@ class ProductMaterial(Base):
     material_id: Mapped[str | None] = mapped_column(
         String(50), index=True
     )
-    # 物料层级（BOM层级）
-    material_level: Mapped[int | None] = mapped_column(Integer)
+    # BOM 原始数据
+    part_number: Mapped[str | None] = mapped_column(String(100))  # 零件号
+    material_level: Mapped[int | None] = mapped_column(Integer)  # BOM层级
+    version: Mapped[str | None] = mapped_column(String(20))  # 版本号（Ver.列）
+    stock_status: Mapped[str | None] = mapped_column(String(20))  # 库存状态（St.列）
     # 物料快照数据
     material_name: Mapped[str | None] = mapped_column(String(200))
     material_type: Mapped[str | None] = mapped_column(String(20))  # made/bought
+    supplier: Mapped[str | None] = mapped_column(String(200))  # 供应商
     quantity: Mapped[float | None] = mapped_column(Numeric(10, 3))
     unit: Mapped[str | None] = mapped_column(String(10))
     # 双轨成本
