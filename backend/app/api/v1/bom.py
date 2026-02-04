@@ -1,7 +1,7 @@
 """BOM API 路由."""
 
 from sqlalchemy import select
-from fastapi import APIRouter, Depends, UploadFile, File, Form
+from fastapi import APIRouter, Depends, UploadFile, File, Form, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker, Session
@@ -9,8 +9,13 @@ from asyncio import to_thread
 import pymysql
 
 from app.db.session import get_db
-from app.services.bom_parser import BOMParser
-from app.schemas.bom import BOMMaterialResponse, BOMProcessResponse
+from app.services.bom_parser import BOMParser, MultiProductBOMParser
+from app.schemas.bom import (
+    BOMMaterialResponse, BOMProcessResponse,
+    ProductInfoSchema, MaterialSchema, ProcessSchema,
+    ProductBOMResultSchema, MultiProductBOMParseResultSchema,
+    BOMConfirmCreateRequest, BOMPreviewResponse
+)
 from app.schemas.common import StatusLight
 from app.models.material import Material
 from app.models.process_rate import ProcessRate
