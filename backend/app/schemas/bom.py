@@ -253,7 +253,7 @@ class ProcessSchema(BaseModel):
     standard_time: float = Field(..., alias="standardTime")
     spec: Optional[str] = None
 
-    model_config = {"by_alias": True}
+    model_config = {"by_alias": True, "populate_by_name": True}
 
 
 class ProductBOMResultSchema(BaseModel):
