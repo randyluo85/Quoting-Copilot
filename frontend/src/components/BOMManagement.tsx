@@ -491,7 +491,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
   };
 
   // 处理多产品确认 - 创建新产品并分配物料
-  const handleMultiProductConfirm = () => {
+  const handleMultiProductConfirm = async () => {
     if (!multiProductPreview) return;
 
     // 为每个检测到的产品创建新的 Product 对象
@@ -503,21 +503,57 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
       description: `从 BOM 文件自动导入`,
     }));
 
-    // 更新项目的产品列表
-    const updatedProject = {
-      ...project,
-      products: [...project.products, ...newProducts],
-    };
-    updateProject(updatedProject);
-
     // 为每个新产品分配对应的物料数据
     const newBomData: Record<string, ProductBOMData> = { ...bomData };
 
+    // 准备发送给 confirmCreate 的数据
+    const products_grouped_for_api = [];
+
     // 使用 products_grouped 来分配物料
     if (multiProductPreview.products_grouped && multiProductPreview.products_grouped.length > 0) {
-      multiProductPreview.products_grouped.forEach((groupedProduct, idx) => {
+      multiProductPreview.products_grouped.forEach((groupedProduct: any, idx: number) => {
         const product = newProducts[idx];
         if (product) {
+          // 转换物料数据为 API 期望的格式
+          const materials_for_api = (groupedProduct.materials || []).map((m: any) => ({
+            level: m.level || '1',
+            part_number: m.part_number || m.partNumber,
+            part_name: m.part_name || m.partName,
+            version: m.version || '1.0',
+            type: m.type || 'I',
+            status: m.stock_status || m.stockStatus || m.status || 'N',
+            material: m.material || '',
+            supplier: m.supplier || '',
+            quantity: m.quantity,
+            unit: m.unit || 'PC',
+            comments: m.comments || '',
+          }));
+
+          // 转换工艺数据为 API 期望的格式
+          const processes_for_api = (groupedProduct.processes || []).map((p: any) => ({
+            op_no: p.opNo || p.op_no,
+            name: p.name,
+            work_center: p.workCenter || p.work_center || '',
+            standard_time: p.standardTime || p.standard_time || 0,
+            spec: p.spec || '',
+          }));
+
+          products_grouped_for_api.push({
+            product_info: {
+              product_code: groupedProduct.product_code,
+              product_name: groupedProduct.product_name,
+              product_number: groupedProduct.product_number,
+              product_version: '01',
+              customer_version: '01',
+              customer_number: groupedProduct.customer_number,
+              issue_date: null,
+              material_count: materials_for_api.length,
+              process_count: processes_for_api.length,
+            },
+            materials: materials_for_api,
+            processes: processes_for_api,
+          });
+
           newBomData[product.id] = {
             productId: product.id,
             isUploaded: true,
@@ -531,37 +567,23 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
           };
         }
       });
-    } else {
-      // 如果没有 products_grouped，将所有物料分配给第一个产品
-      newProducts.forEach((product, idx) => {
-        newBomData[product.id] = {
-          productId: product.id,
-          isUploaded: true,
-          isParsing: false,
-          isParsed: true,
-          parseProgress: 100,
-          materials: idx === 0 ? multiProductPreview.materials : [],
-          processes: idx === 0 ? multiProductPreview.processes : [],
-          isRoutingKnown: false,
-          needsIEReview: false,
-        };
-      });
     }
 
-    // 更新当前选中产品的数据
-    // 注意：默认产品不分配物料（物料已分配给新产品）
-    // 如果需要给默认产品也分配物料，可以手动选择第一个新产品的物料
-    newBomData[selectedProduct.id] = {
-      productId: selectedProduct.id,
-      isUploaded: false,
-      isParsing: false,
-      isParsed: false,
-      parseProgress: 0,
-      materials: [],
-      processes: [],
-      isRoutingKnown: false,
-      needsIEReview: false,
+    // 调用 API 保存数据到数据库
+    try {
+      await api.bom.confirmCreate(project.id, products_grouped_for_api);
+      console.log('Multi-product BOM data saved to database successfully');
+    } catch (saveError) {
+      console.error('Failed to save multi-product BOM data to database:', saveError);
+      // 不中断用户流程
+    }
+
+    // 更新项目的产品列表
+    const updatedProject = {
+      ...project,
+      products: [...project.products, ...newProducts],
     };
+    updateProject(updatedProject);
 
     setBomData(newBomData);
 
@@ -569,9 +591,6 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
     if (newProducts.length > 0) {
       setSelectedProduct(newProducts[0]);
     }
-
-    // 显示成功消息
-    alert(`成功创建 ${newProducts.length} 个产品！每个产品已分配对应的物料数据。`);
   };
 
   // 模拟数据用于演示（保留原功能作为fallback）
