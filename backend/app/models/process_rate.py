@@ -13,6 +13,11 @@ class ProcessRate(Base):
     从 v1.3 开始，MHR 拆分为变动费率(var)和固定费率(fix)两部分：
     - MHR = MHR_var + MHR_fix
 
+    从 v1.4 开始，折旧从固定费率中单独剥离，支持 Payback 现金流计算：
+    - MHR_fix 包含：折旧(depreciation) + 利息 + 租金 + 保险
+    - 折旧率单独存储，可通过 depreciation_rate 字段获取
+    - Payback 计算公式：现金流 = 净利 + 折旧
+
     设计规范: docs/DATABASE_DESIGN.md
     """
 
@@ -37,10 +42,12 @@ class ProcessRate(Base):
     # 标准费率拆分
     std_mhr_var: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)  # 变动费率
     std_mhr_fix: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)  # 固定费率
+    std_depreciation_rate: Mapped[Decimal | None] = mapped_column(Numeric(8, 4), nullable=True)  # 标准折旧率
 
     # VAVE 费率拆分
     vave_mhr_var: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)  # 变动费率
     vave_mhr_fix: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)  # 固定费率
+    vave_depreciation_rate: Mapped[Decimal | None] = mapped_column(Numeric(8, 4), nullable=True)  # VAVE 折旧率
 
     # ========== 向后兼容：保留原有字段作为计算属性 ==========
     # 注意：std_mhr 和 vave_mhr 不再是数据库列，而是 @property 计算属性
@@ -94,3 +101,38 @@ class ProcessRate(Base):
     def vave_mhr(self) -> Decimal | None:
         """VAVE 总 MHR (向后兼容)."""
         return self.vave_mhr_total
+
+    # ========== v1.4 新增：折旧计算属性 ==========
+    # 用于 Payback 现金流计算：现金流 = 净利 + 折旧
+
+    @property
+    def std_depreciation_per_hour(self) -> Decimal:
+        """标准折旧额/小时（用于 Payback 现金流计算）."""
+        if self.std_depreciation_rate is None:
+            return Decimal("0")
+        return Decimal(str(self.std_depreciation_rate))
+
+    @property
+    def vave_depreciation_per_hour(self) -> Decimal:
+        """VAVE 折旧额/小时（用于 Payback 现金流计算）."""
+        if self.vave_depreciation_rate is None:
+            return Decimal("0")
+        return Decimal(str(self.vave_depreciation_rate))
+
+    @property
+    def std_fix_excluding_depreciation(self) -> Decimal | None:
+        """标准固定费率（不含折旧）= MHR_fix - depreciation_rate."""
+        if self.std_mhr_fix is None:
+            return None
+        fix = Decimal(str(self.std_mhr_fix))
+        dep = Decimal(str(self.std_depreciation_rate)) if self.std_depreciation_rate is not None else Decimal("0")
+        return fix - dep
+
+    @property
+    def vave_fix_excluding_depreciation(self) -> Decimal | None:
+        """VAVE 固定费率（不含折旧）= MHR_fix - depreciation_rate."""
+        if self.vave_mhr_fix is None:
+            return None
+        fix = Decimal(str(self.vave_mhr_fix))
+        dep = Decimal(str(self.vave_depreciation_rate)) if self.vave_depreciation_rate is not None else Decimal("0")
+        return fix - dep

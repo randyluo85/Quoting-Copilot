@@ -62,7 +62,12 @@ def _query_materials_sync(material_codes: list[str]) -> dict:
 
 
 def _query_processes_sync(process_names: list[str]) -> dict:
-    """同步查询工艺费率（在线程池中执行）."""
+    """同步查询工艺费率（在线程池中执行）.
+
+    使用新的 MHR 拆分费率结构：
+    - 单价 = (std_mhr_var + std_mhr_fix) × standard_time
+    - VAVE单价 = (vave_mhr_var + vave_mhr_fix) × standard_time
+    """
     processes_with_rate = {}
     if not process_names:
         return processes_with_rate
@@ -79,20 +84,43 @@ def _query_processes_sync(process_names: list[str]) -> dict:
 
     try:
         with conn.cursor() as cursor:
-            placeholders = ','.join(['%s'] * len(process_names))
+            # 使用新的 MHR 拆分字段，同时支持按工艺名称或编码匹配
+            # 分别为 process_name 和 process_code 构建占位符
+            name_placeholders = ','.join(['%s'] * len(process_names))
+            code_placeholders = ','.join(['%s'] * len(process_names))
             query = f"""
-                SELECT process_name, std_hourly_rate, vave_hourly_rate, work_center
+                SELECT process_code, process_name, equipment, work_center,
+                       std_mhr_var, std_mhr_fix, vave_mhr_var, vave_mhr_fix,
+                       std_hourly_rate, vave_hourly_rate, efficiency_factor
                 FROM process_rates
-                WHERE process_name IN ({placeholders})
+                WHERE process_name IN ({name_placeholders}) OR process_code IN ({code_placeholders})
             """
-            cursor.execute(query, process_names)
+            all_params = process_names + process_names
+            cursor.execute(query, all_params)
             results = cursor.fetchall()
 
             for row in results:
+                # 优先使用新的 MHR 拆分费率
+                if row['std_mhr_var'] is not None and row['std_mhr_fix'] is not None:
+                    std_rate = float(row['std_mhr_var']) + float(row['std_mhr_fix'])
+                else:
+                    std_rate = float(row['std_hourly_rate']) if row['std_hourly_rate'] else None
+
+                if row['vave_mhr_var'] is not None and row['vave_mhr_fix'] is not None:
+                    vave_rate = float(row['vave_mhr_var']) + float(row['vave_mhr_fix'])
+                else:
+                    vave_rate = float(row['vave_hourly_rate']) if row['vave_hourly_rate'] else None
+
                 processes_with_rate[row['process_name']] = {
-                    "unit_price": float(row['std_hourly_rate']) if row['std_hourly_rate'] else None,
-                    "vave_price": float(row['vave_hourly_rate']) if row['vave_hourly_rate'] else None,
+                    "process_code": row['process_code'],
+                    "equipment": row['equipment'] or "",
                     "work_center": row['work_center'] or "",
+                    "std_mhr_var": float(row['std_mhr_var']) if row['std_mhr_var'] else None,
+                    "std_mhr_fix": float(row['std_mhr_fix']) if row['std_mhr_fix'] else None,
+                    "vave_mhr_var": float(row['vave_mhr_var']) if row['vave_mhr_var'] else None,
+                    "vave_mhr_fix": float(row['vave_mhr_fix']) if row['vave_mhr_fix'] else None,
+                    "unit_price": std_rate,
+                    "vave_price": vave_rate,
                     "has_history_data": True,
                 }
     finally:
@@ -218,6 +246,7 @@ async def upload_bom(
                 material=m.material or price_data.get("material", ""),
                 supplier=m.supplier or price_data.get("supplier", ""),
                 quantity=m.quantity,
+                unit=m.unit,  # 从 BOM 文件解析的单位
                 unit_price=price_data.get("unit_price"),
                 vave_price=price_data.get("vave_price"),
                 has_history_data=price_data.get("has_history_data", False),
@@ -244,15 +273,27 @@ async def upload_bom(
         rate_data = processes_with_rate.get(p.name, {})
         print(f"[DEBUG] Process {p.name}: rate_data={rate_data}")
 
+        # 计算工序总成本：费率 × 标准工时
+        standard_time = p.standard_time or 1.0
+        hourly_rate = rate_data.get("unit_price")
+        vave_hourly_rate = rate_data.get("vave_price")
+
+        unit_price = None
+        vave_price = None
+        if hourly_rate is not None:
+            unit_price = round(hourly_rate * standard_time, 2)
+        if vave_hourly_rate is not None:
+            vave_price = round(vave_hourly_rate * standard_time, 2)
+
         processes.append(
             BOMProcessResponse(
                 id=f"P-{idx + 1:03d}",
                 op_no=p.op_no or f"{idx + 1:03d}",
                 name=p.name,
                 work_center=p.work_center or rate_data.get("work_center", ""),
-                standard_time=p.standard_time or 1.0,
-                unit_price=rate_data.get("unit_price"),
-                vave_price=rate_data.get("vave_price"),
+                standard_time=standard_time,
+                unit_price=unit_price,
+                vave_price=vave_price,
                 has_history_data=rate_data.get("has_history_data", False),
             )
         )

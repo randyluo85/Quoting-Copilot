@@ -135,8 +135,8 @@ export function Dashboard({ onNavigate, projects, onSyncFromPM, onSelectProject 
   };
 
   return (
-    <div className="p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="px-4 py-8 lg:px-8">
+      <div className="max-w-7xl space-y-6">
         {/* Sync Success Notification */}
         {showSyncNotification && (
           <div className="fixed top-6 right-6 z-50 animate-in slide-in-from-top-5">
@@ -304,7 +304,7 @@ export function Dashboard({ onNavigate, projects, onSyncFromPM, onSelectProject 
                     <p className="text-xs text-zinc-400">点击"从PM软件同步"按钮同步新项目</p>
                   </div>
                 ) : (
-                  <div className="border rounded-lg overflow-hidden">
+                  <div className="border rounded-lg overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow>

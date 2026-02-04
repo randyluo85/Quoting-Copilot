@@ -106,7 +106,10 @@ class BOMParser:
             ws = wb[sheet_name]
             sheet_type = self._detect_sheet_type(ws)
 
-            if sheet_type == "material":
+            if sheet_type == "info":
+                # 跳过信息类 sheet
+                continue
+            elif sheet_type == "material":
                 # 智能检测列映射
                 header_row, mapping = self._detect_column_mapping(ws)
                 materials.extend(self._parse_material_sheet(ws, header_row, mapping))
@@ -123,10 +126,18 @@ class BOMParser:
         keywords_material = ["物料", "material", "bom", "item", "零件", "bill of material"]
         keywords_process = ["工艺", "process", "operation", "工序", "op"]
 
+        # 排除的信息类 sheet
+        exclude_keywords = ["product info", "产品信息", "产品名称"]
+
         for row in worksheet.iter_rows(min_row=1, max_row=10, values_only=True):
             if not row:
                 continue
             row_text = " ".join(str(cell).lower() for cell in row if cell)
+
+            # 先检查是否为排除的 sheet
+            for kw in exclude_keywords:
+                if kw in row_text:
+                    return "info"
 
             for kw in keywords_material:
                 if kw in row_text:
@@ -281,13 +292,27 @@ class BOMParser:
             if not op_no or op_no.lower() in ["", "none", "op no", "工序号"]:
                 continue
 
+            # 安全获取各列数据，处理行数据不完整的情况
+            name = str(row[1]) if len(row) > 1 and row[1] else ""
+            work_center = str(row[2]) if len(row) > 2 and row[2] else ""
+
+            # 标准工时可能是分钟或小时，存储为分钟数
+            standard_time = 0
+            if len(row) > 3 and row[3] is not None:
+                try:
+                    standard_time = float(row[3])
+                except (ValueError, TypeError):
+                    standard_time = 0
+
+            spec = str(row[4]) if len(row) > 4 and row[4] else None
+
             processes.append(
                 ParsedProcess(
                     op_no=op_no,
-                    name=str(row[1] or ""),
-                    work_center=str(row[2] or ""),
-                    standard_time=float(row[3] or 0),
-                    spec=str(row[4]) if len(row) > 4 and row[4] else None,
+                    name=name,
+                    work_center=work_center,
+                    standard_time=standard_time,
+                    spec=spec,
                 )
             )
 

@@ -74,6 +74,8 @@ async def create_project(
     Returns:
         创建的项目
     """
+    from app.models.project_product import ProjectProduct
+
     project_id = f"PRJ-{datetime.now().strftime('%Y%m%d')}-{str(uuid.uuid4())[:6].upper()}"
 
     project = Project(
@@ -93,6 +95,22 @@ async def create_project(
     )
 
     db.add(project)
+    await db.flush()  # flush 以获取 project ID
+
+    # 同时创建 ProjectProduct 记录到 project_products 表
+    for product_data in data.products:
+        product = ProjectProduct(
+            id=str(uuid.uuid4()),
+            project_id=project_id,
+            product_name=product_data.name,
+            product_code=product_data.part_number,
+            product_version=None,
+            route_code=None,
+            bom_file_path=None,
+            created_at=datetime.utcnow(),
+        )
+        db.add(product)
+
     await db.commit()
     await db.refresh(project)
 

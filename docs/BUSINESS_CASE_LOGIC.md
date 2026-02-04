@@ -76,7 +76,9 @@ $$SK_n = HK\_III_n + Amortization_n (摊销) + S\&A (管销费用)$$
 - 下方的回收额: $20,369 (Tool) + 19,797 (R\&D) = 40,166$
 - **差额:** $47,553 - 40,166 = € 7,387$
 
-**结论:** 这通常是 **S&A (Sales & Administration 销售与管理费)** 或 **Interest (资金利息)**
+**结论:** 这差额主要是 **S&A (Sales & Administration 销售与管理费)**，以及可能的 **Working Capital Interest (营运资金利息)**
+
+> **注意**：模具摊销（Recovery_Tool）中已包含 Capital Interest（资本利息），不再额外计算
 
 **开发指令:**
 

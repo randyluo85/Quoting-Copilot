@@ -2,7 +2,7 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.1   | 2026-02-03 | 2026-02-03 | 工艺成本计算逻辑 | Randy Luo |
+| v1.2   | 2026-02-03 | 2026-02-04 | 工艺成本计算逻辑 | Randy Luo |
 
 ---
 
@@ -60,6 +60,12 @@ $$MHR_{var} = \frac{\sum (能源成本 + 维保成本 + 刀具成本)}{H_{effect
 包含：折旧、利息、厂房租金、保险费
 
 $$MHR_{fix} = \frac{\sum (折旧 + 租金 + 管理分摊)}{H_{effective}}$$
+
+> **⚠️ v1.4 重要更新：折旧数据单独存储**
+> - 从 v1.4 开始，折旧率字段 `depreciation_rate` 从 MHR_fix 中单独剥离
+> - MHR_fix 仍包含折旧作为其组成部分之一
+> - `depreciation_rate` 字段独立存储，用于 Payback 现金流计算（现金流 = 净利 + 折旧）
+> - 可通过 `fix_excluding_depreciation` 属性获取不含折旧的固定费率
 
 #### 人工费率 (Labor Rate)
 
@@ -155,10 +161,17 @@ $$Savings\ Rate = \frac{Savings}{Cost_{std}} \times 100\%$$
 | `process_name` | VARCHAR(100) | 工序名称 | 注塑成型 |
 | `std_mhr_var` | DECIMAL(10,2) | 标准变动费率 | 45.00 |
 | `std_mhr_fix` | DECIMAL(10,2) | 标准固定费率 | 30.00 |
+| `std_depreciation_rate` | DECIMAL(8,4) | **🔴 v1.4 新增：标准折旧率** | 8.50 |
 | `vave_mhr_var` | DECIMAL(10,2) | VAVE 变动费率 | 42.00 |
 | `vave_mhr_fix` | DECIMAL(10,2) | VAVE 固定费率 | 28.00 |
+| `vave_depreciation_rate` | DECIMAL(8,4) | **🔴 v1.4 新增：VAVE 折旧率** | 7.50 |
 | `efficiency_factor` | DECIMAL(4,2) | 效率系数 | 1.00 |
 | `created_at` | DATETIME | 创建时间 | DEFAULT NOW() |
+
+> **v1.4 折旧率说明：**
+> - `depreciation_rate` 单独存储，用于 Payback 现金流计算
+> - 折旧额 = `depreciation_rate × (cycle_time / 3600)`
+> - 不含折旧的固定费率 = `MHR_fix - depreciation_rate`
 
 ### 表 3: `product_processes` (产品工艺路线) - 扩展
 
@@ -210,8 +223,10 @@ class ProcessRate(BaseModel):
     process_name: str
     std_mhr_var: Decimal
     std_mhr_fix: Decimal
+    std_depreciation_rate: Decimal = Field(default=Decimal("0"))  # v1.4 新增
     vave_mhr_var: Decimal | None = None
     vave_mhr_fix: Decimal | None = None
+    vave_depreciation_rate: Decimal = Field(default=Decimal("0"))  # v1.4 新增
     efficiency_factor: Decimal = Field(default=Decimal("1.0"))
 
     @property
@@ -225,6 +240,27 @@ class ProcessRate(BaseModel):
         var = self.vave_mhr_var or self.std_mhr_var
         fix = self.vave_mhr_fix or self.std_mhr_fix
         return (var + fix) * self.efficiency_factor
+
+    @property
+    def std_depreciation_per_hour(self) -> Decimal:
+        """标准折旧额/小时（用于 Payback 现金流计算）"""
+        return self.std_depreciation_rate
+
+    @property
+    def vave_depreciation_per_hour(self) -> Decimal:
+        """VAVE 折旧额/小时（用于 Payback 现金流计算）"""
+        return self.vave_depreciation_rate
+
+    @property
+    def std_fix_excluding_depreciation(self) -> Decimal:
+        """标准固定费率（不含折旧）"""
+        return self.std_mhr_fix - self.std_depreciation_rate
+
+    @property
+    def vave_fix_excluding_depreciation(self) -> Decimal:
+        """VAVE 固定费率（不含折旧）"""
+        fix = self.vave_mhr_fix or self.std_mhr_fix
+        return fix - self.vave_depreciation_rate
 
 
 class ProductProcess(BaseModel):
@@ -305,6 +341,7 @@ flowchart TD
 |------|--------|
 | `DATABASE_DESIGN.md` | 依赖 `cost_centers`, `process_rates`, `product_processes` 表 |
 | `NRE_INVESTMENT_LOGIC.md` | 设备投资影响 MHR 固定费率计算 |
+| `PAYBACK_LOGIC.md` | `depreciation_rate` 用于现金流计算（现金流 = 净利 + 折旧） |
 | `BUSINESS_CASE_LOGIC.md` | 工艺成本汇总为 HK III |
 | `QUOTATION_SUMMARY_LOGIC.md` | 工艺成本影响 SK1/SK2 |
 

@@ -33,6 +33,22 @@ from app.schemas.bom import (
     MaterialDetailResponse,
 )
 
+# 工艺路线模板相关（新增）
+from app.schemas.process_route import (
+    ProcessRouteStatus,
+    ProcessRouteCreate,
+    ProcessRouteUpdate,
+    ProcessRouteResponse,
+    ProcessRouteList,
+    ProcessRouteQuery,
+    ProcessRouteItemCreate,
+    ProcessRouteItemUpdate,
+    ProcessRouteItemResponse,
+    ProcessRouteSubmitRequest,
+    ProcessRouteApprovalRequest,
+    ProcessRouteApprovalResponse,
+)
+
 __all__ = [
     # 通用类型
     "PricePair",
@@ -56,4 +72,17 @@ __all__ = [
     "QuoteSummaryCreate",
     "QuoteSummaryResponse",
     "MaterialDetailResponse",
+    # 工艺路线模板相关
+    "ProcessRouteStatus",
+    "ProcessRouteCreate",
+    "ProcessRouteUpdate",
+    "ProcessRouteResponse",
+    "ProcessRouteList",
+    "ProcessRouteQuery",
+    "ProcessRouteItemCreate",
+    "ProcessRouteItemUpdate",
+    "ProcessRouteItemResponse",
+    "ProcessRouteSubmitRequest",
+    "ProcessRouteApprovalRequest",
+    "ProcessRouteApprovalResponse",
 ]
