@@ -1419,12 +1419,12 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                                   </Badge>
                                 )}
                               </TableCell>
-                              <TableCell className="min-w-[180px]">
+                              <TableCell>
                                 <Select
                                   value={material.material}
                                   onValueChange={(value) => handleMaterialTypeChange(material.id, value)}
                                 >
-                                  <SelectTrigger className="h-8 text-xs bg-white border-zinc-200">
+                                  <SelectTrigger className="h-7 text-xs bg-white border-zinc-200 px-2">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
