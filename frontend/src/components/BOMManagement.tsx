@@ -1786,7 +1786,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
             </CardContent>
 
             {/* Footer */}
-            <div className="flex justify-between items-center px-4 py-3 border-t border-zinc-200 bg-zinc-50">
+            <div className="flex justify-between items-center px-6 py-4 border-t border-zinc-200 bg-zinc-50">
               <Button
                 variant="outline"
                 size="sm"
