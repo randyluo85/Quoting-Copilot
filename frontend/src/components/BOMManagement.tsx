@@ -311,12 +311,12 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
         // 转换响应数据为前端格式
         const materials = (response.materials || []).map((m: any) => ({
           id: m.id,
-          level: '一级',
-          partNumber: m.partNumber || '',
-          partName: m.partName || '',
-          version: '1.0',
-          type: '原材料',
-          status: '可用',
+          level: m.level || '1',
+          partNumber: m.part_number || m.partNumber || '',
+          partName: m.part_name || m.partName || '',
+          version: m.version || '1.0',
+          type: m.type || 'I',
+          status: m.status || 'N',
           material: m.material || '',
           supplier: m.supplier || '',
           quantity: m.quantity,
