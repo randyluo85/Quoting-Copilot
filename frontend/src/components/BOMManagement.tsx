@@ -1204,31 +1204,35 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
             </div>
 
             {/* Materials & Processes Tables */}
-            <Card>
-              <CardHeader>
+            <Card className="border-zinc-200 shadow-sm">
+              <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-zinc-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Sparkles className="h-5 w-5 text-purple-600" />
+                    <CardTitle className="flex items-center gap-2 text-zinc-900">
+                      <div className="p-1.5 rounded-lg bg-purple-100">
+                        <Sparkles className="h-4 w-4 text-purple-600" />
+                      </div>
                       AI 解析结果
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-zinc-600">
                       物料清单和工艺清单已从BOM表中识别，数据库查询完成
                     </CardDescription>
                   </div>
-                  <Badge variant="secondary" className="gap-1">
+                  <Badge variant="secondary" className="gap-1 bg-green-50 text-green-700 border-green-200 hover:bg-green-50">
                     <CheckCircle2 className="h-3 w-3" />
                     {fileName}
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 <Tabs defaultValue="materials" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="materials">
+                  <TabsList className="grid w-full grid-cols-2 bg-zinc-100/80 p-1 rounded-xl">
+                    <TabsTrigger value="materials" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                      <Package className="h-4 w-4 mr-2" />
                       物料清单 ({currentBomData.materials.length})
                     </TabsTrigger>
-                    <TabsTrigger value="processes">
+                    <TabsTrigger value="processes" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                      <Settings className="h-4 w-4 mr-2" />
                       工艺清单 ({currentBomData.processes.length})
                     </TabsTrigger>
                   </TabsList>
