@@ -6,7 +6,7 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.2   | 2026-02-02 | 2026-02-03 | Dr.aiVOSS 智能快速报价助手项目说明 | Randy Luo |
+| v1.3   | 2026-02-02 | 2026-02-04 | Dr.aiVOSS 智能快速报价助手项目说明 | Randy Luo |
 
 ## 1. 项目简介 (Vision)
 
@@ -47,11 +47,13 @@ npm run build    # 生产构建
 ### 后端 (Server)
 
 ```bash
+# 安装 uv（如果尚未安装）
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# 或使用 pip: pip install uv
+
 cd backend
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+# 使用 uv 运行（自动管理虚拟环境）
+uv run uvicorn app.main:app --reload --port 8000
 # API 文档: http://localhost:8000/docs
 ```
 

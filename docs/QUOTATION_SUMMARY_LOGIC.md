@@ -15,18 +15,19 @@
 | 列名 | 逻辑与公式 | 业务含义 |
 |------|-----------|---------|
 | **HK III /pic** | = Material Cost + Production | 制造成本 |
-| **SK-1 /pic** | = HK III × 1.175 (SK1 Factor) | 完全成本（不含分摊）- 公司基础盈亏线 |
+| **SK-1 /pic** | = HK III + (净销售额 × S&A Rate) | 完全成本（含基础管销费用） |
 | **Tooling & Mould /pic** | 来自 Tooling 表的分摊值 | 模具分摊费 |
 | **R&D Validation /pic** | 来自 R&D 表的分摊值 | 研发验证分摊费 |
-| ** Interest...** | = VP × 利率 × (账期/360) | 资金占用成本 |
-| **SK-2 /pic** | = SK1 + 分摊(模具/研发) + 利息 + 物流 | 项目全成本 (Project Full Cost) |
+| **Working Capital Interest...** | = VP × 利率 × (账期/360) | 营运资金利息（资金占用成本） |
+| **SK-2 /pic** | = SK1 + 分摊(模具/研发) + Working Capital Interest + 物流 | 项目全成本 (Project Full Cost) |
 
 ### 1.2 数据示例解析
 
 **2026年数据：**
 - HK III: 46.238 = 27.055 (Material) + 19.18 (Production)
-- SK-1: 54.33 = 46.238 × 1.175
-- SK-2: 63.85 = 54.33 + 6.40 (Tooling) + 0.54 (R&D) + 利息 + 物流
+- S&A: 7.196 = 342,658 (Net Sales) × 2.1%
+- SK-1: 53.434 = 46.238 + 7.196 (S&A)
+- SK-2: 61.67 = 53.434 + 6.40 (Tooling, 含 Capital Interest) + 0.54 (R&D) + Working Capital Interest (0.73) + 物流 (0.56)
 
 **关键观察：**
 - 2026/27年有 Tooling 分摊 6.4039，但 2028年变为 0
@@ -144,9 +145,9 @@ class QuotationYearData(BaseModel):
     production_cost: Decimal   # Production Cost
     hk_3: Decimal              # HK III 制造成本
     sk_1: Decimal              # SK-1 完全成本（不含分摊）
-    tooling_amort: Decimal     # Tooling 分摊
+    tooling_amort: Decimal     # Tooling 分摊（含 Capital Interest）
     rnd_amort: Decimal         # R&D 分摊
-    interest: Decimal          # 资金占用
+    working_capital_interest: Decimal  # 营运资金利息（资金占用成本）
     logistics: Decimal         # 物流费用
     sk_2: Decimal              # SK-2 项目全成本
 
@@ -175,7 +176,7 @@ class QuotationSummaryParams(BaseModel):
     base_year: int
     end_year: int
     lta_rate: Decimal = Field(default=Decimal("0.03"), description="年降比例")
-    sk1_factor: Decimal = Field(default=Decimal("1.175"), description="SK1 系数")
+    sa_rate: Decimal = Field(default=Decimal("0.021"), description="管销费用率 (S&A Rate, 默认 2.1%)")
     payment_terms_days: int = Field(default=90, description="付款账期（天）")
     interest_rate: Decimal = Field(default=Decimal("0.05"), description="年利率")
     amortization_strategy: AmortizationStrategy
@@ -199,13 +200,14 @@ class QuotationSummaryResponse(BaseModel):
 ```python
 # 成本累加
 hk_3 = material_cost + production_cost
-sk_1 = hk_3 * sk1_factor  # 通常 1.175
+sk_1 = hk_3 + (net_sales * sa_rate)  # S&A 管销费用
 
-# 资金占用
-interest = vp * interest_rate * (payment_terms_days / 360)
+# 营运资金利息（Working Capital Interest）
+working_capital_interest = vp * interest_rate * (payment_terms_days / 360)
 
 # 项目全成本
-sk_2 = sk_1 + tooling_amort + rnd_amort + interest + logistics
+# 注意：tooling_amort 已包含 Capital Interest（模具分摊中的资本利息）
+sk_2 = sk_1 + tooling_amort + rnd_amort + working_capital_interest + logistics
 
 # 净利率
 db4_rate = (vp - sk_2) / vp
@@ -231,9 +233,9 @@ flowchart TD
     E --> F
     F --> G[计算年降后 VP = Base × 1-LTAⁿ]
     G --> H[计算 HK3 = Material + Production]
-    H --> I[计算 SK1 = HK3 × 1.175]
-    I --> J[计算 Interest = VP × Rate × Days/360]
-    J --> K[计算 SK2 = SK1 + 分摊 + Interest + 物流]
+    H --> I[计算 SK1 = HK3 + S&A 管销费用]
+    I --> J[计算 Working Capital Interest = VP × Rate × Days/360]
+    J --> K[计算 SK2 = SK1 + 分摊 + Working Capital Interest + 物流]
     K --> L[计算 DB4 = VP - SK2 / VP]
     L --> M{DB4 < -5%?}
     M -->|是| N[标记预警]
@@ -281,11 +283,15 @@ flowchart TD
 
 ### 8.1 表格列布局
 
-| Year | Volume | HK3 | SK1 | Tooling | R&D | Interest | SK2 | VP | DB4% | DB4 Value | 预警 |
+| Year | Volume | HK3 | SK1 | Tooling<sup>1</sup> | R&D | Working Cap Interest<sup>2</sup> | SK2 | VP | DB4% | DB4 Value | 预警 |
 |------|--------|-----|-----|---------|-----|----------|-----|----|----|-----------|----|
 | 2026 | 7,085 | 46.24 | 54.33 | 6.40 | 0.54 | 0.73 | 63.85 | 57.90 | -10.29% | -72,952 | ⚠️ |
 | 2027 | 8,500 | 44.85 | 52.70 | 6.40 | 0.54 | 0.70 | 62.01 | 56.16 | -10.40% | -88,400 | ⚠️ |
 | 2028 | 9,000 | 43.50 | 51.12 | 0 | 0 | 0.68 | 55.05 | 54.48 | -1.06% | -9,540 | |
+
+**注：**
+1. **Tooling 列**：模具分摊费用，**已隐含 Capital Interest（资本利息）**，计算公式见 `NRE_INVESTMENT_LOGIC.md`
+2. **Working Cap Interest 列**：营运资金利息，独立计算的资金占用成本，公式：`VP × 利率 × (账期/360)`
 
 ### 8.2 预警样式
 

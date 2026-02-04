@@ -20,7 +20,7 @@ export function UnderConstruction({
 }: UnderConstructionProps) {
   return (
     <div className="p-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl">
         <div className="mb-8">
           <h1 className="text-2xl mb-1">{title}</h1>
           <p className="text-sm text-zinc-500">{description}</p>
@@ -28,7 +28,7 @@ export function UnderConstruction({
 
         <Card className="border-dashed border-2 border-zinc-300">
           <CardContent className="p-12">
-            <div className="flex flex-col items-center justify-center text-center">
+            <div className="flex flex-col items-start justify-center text-left">
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-zinc-100 mb-6">
                 <Construction className="h-10 w-10 text-zinc-400" />
               </div>

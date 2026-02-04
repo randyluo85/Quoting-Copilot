@@ -21,6 +21,7 @@ interface ProjectState {
   fetchProjects: () => Promise<void>;
   createProject: (data: ProjectCreate) => Promise<ProjectData>;
   selectProject: (id: string | null) => void;
+  updateProject: (project: ProjectData) => void;
   clearError: () => void;
 }
 
@@ -50,6 +51,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       const project = await api.projects.create(data);
       set((state) => ({
         projects: [...state.projects, project],
+        selectedProject: project, // 自动选中新创建的项目
         loading: false,
       }));
       return project;
@@ -68,6 +70,19 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     }
     const project = get().projects.find((p) => p.id === id);
     set({ selectedProject: project || null });
+  },
+
+  // 更新项目（当新增产品后调用）
+  updateProject: (project) => {
+    set((state) => ({
+      projects: state.projects.map((p) =>
+        p.id === project.id ? project : p
+      ),
+      selectedProject:
+        state.selectedProject?.id === project.id
+          ? project
+          : state.selectedProject,
+    }));
   },
 
   // 清除错误

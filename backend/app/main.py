@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
-from app.api.v1 import projects, bom, costs, project_products, materials, investments, business_case
+from app.api.v1 import projects, bom, costs, project_products, materials, investments, business_case, process_routes, process_rates
 
 settings = get_settings()
 
@@ -11,10 +11,15 @@ app = FastAPI(
     debug=settings.DEBUG,
 )
 
-# CORS 配置
+# CORS 配置 - 支持 localhost 和 127.0.0.1
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000", "http://localhost:3001"],
+    allow_origins=[
+        "http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176",
+        "http://localhost:3000", "http://localhost:3001",
+        "http://127.0.0.1:5173", "http://127.0.0.1:5174", "http://127.0.0.1:5175", "http://127.0.0.1:5176",
+        "http://127.0.0.1:3000", "http://127.0.0.1:3001",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -28,6 +33,8 @@ app.include_router(costs.router, prefix="/api/v1/cost", tags=["costs"])
 app.include_router(materials.router, prefix="/api/v1/materials", tags=["materials"])
 app.include_router(investments.router, prefix="/api/v1", tags=["investments"])
 app.include_router(business_case.router, prefix="/api/v1", tags=["business-case"])
+app.include_router(process_routes.router, prefix="/api/v1/process-routes", tags=["process-routes"])  # 新增
+app.include_router(process_rates.router, prefix="/api/v1/process-rates", tags=["process-rates"])  # 新增
 
 
 @app.get("/health")

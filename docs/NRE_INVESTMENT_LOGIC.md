@@ -102,22 +102,32 @@ $$Quantity_{jig} = \lceil \frac{CycleTime_{process}}{T_{cycle}} \times N_{statio
 
 #### 模式 B：分摊进单价 (Amortized in Piece Price) —— *VOSS 默认模式*
 
-公司垫资开模，客户通过买零件分期还款（含利息）。
+公司垫资开模，客户通过买零件分期还款（含 **Capital Interest / 资本利息**）。
+
+> **⚠️ 重要区分：**
+> - **Capital Interest（资本利息）**：模具投资本身的资金成本，**已打包进 Tooling 分摊费用中**
+> - **Working Capital Interest（营运资金利息）**：基于销售账期的资金占用，**独立列示于 QS 表**
+> - 两者是不同的成本项，**不可重复计算**
 
 **输入参数：**
 - $I_{total}$ = 投资总额 (计算得出的 Total Invest)
 - $V_{amort}$ = 分摊总销量 (通常为前 2-3 年销量，由 Sales 设定)
 - $Y_{amort}$ = 分摊年限 (如 2 年)
-- $R_{interest}$ = 资金年利率 (如 6%，由 Controlling 配置)
+- $R_{interest}$ = 资本年利率 (如 6%，由 Controlling 配置)
 
-**核心公式 (VOSS 单利逻辑)：**
+**核心公式 (VOSS 单利逻辑，含 Capital Interest)：**
 
 $$UnitAmort = \frac{I_{total} \times (1 + R_{interest} \times Y_{amort})}{V_{amort}}$$
 
+其中 `(1 + R_{interest} × Y_{amort})` 为 **Capital Interest 因子**。
+
 **示例计算：**
-- 模具费 17 万，分摊 2 年，利率 6%，分摊量 29,750 件
-- 含息总额 = $170,000 \times (1 + 0.06 \times 2) = 190,400$
+- 模具费 17 万，分摊 2 年，资本利率 6%，分摊量 29,750 件
+- Capital Interest 因子 = $1 + 0.06 \times 2 = 1.12$
+- 含息总额 = $170,000 \times 1.12 = 190,400$
 - 单件分摊 = $190,400 / 29,750 = 6.40$ 元
+
+**注意**：这 6.40 元已包含 Capital Interest，在 QS 表的 Tooling 列中列示，**不再额外计算利息**。
 
 ---
 
@@ -211,11 +221,14 @@ class AmortizationStrategy(BaseModel):
     mode: AmortizationMode
     amortization_volume: int | None = None   # 分摊基数销量
     duration_years: int = 2                  # 分摊年限
-    interest_rate: Decimal = Field(default=Decimal("0.06"))
-    calculated_unit_add: Decimal | None = None  # 计算结果：单件分摊额
+    interest_rate: Decimal = Field(default=Decimal("0.06"), description="资本利率（Capital Interest Rate）")
+    calculated_unit_add: Decimal | None = None  # 计算结果：单件分摊额（含 Capital Interest）
 
     def calculate_unit_amort(self, total_investment: Decimal) -> Decimal:
-        """计算单件分摊额（含息）"""
+        """计算单件分摊额（含 Capital Interest）
+
+        注意：此利息为模具投资的资本成本，与 QS 表中的 Working Capital Interest 是不同的概念。
+        """
         if self.mode == AmortizationMode.UPFRONT:
             return Decimal("0")
 
@@ -223,6 +236,7 @@ class AmortizationStrategy(BaseModel):
             return Decimal("0")
 
         # VOSS 单利公式: I × (1 + R × Y) / V
+        # 其中 (1 + R × Y) 为 Capital Interest 因子
         interest_factor = Decimal("1") + self.interest_rate * self.duration_years
         return total_investment * interest_factor / self.amortization_volume
 
@@ -359,7 +373,7 @@ sequenceDiagram
     "mode": "AMORTIZED",
     "amortization_volume": 29750,
     "duration_years": 2,
-    "interest_rate": 0.06,
+    "capital_interest_rate": 0.06,
     "unit_amortization": 6.40
   },
   "warnings": [

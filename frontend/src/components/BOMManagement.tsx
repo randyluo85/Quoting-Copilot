@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Upload,
   FileSpreadsheet,
@@ -17,11 +17,14 @@ import {
   ThumbsUp,
   DollarSign,
   ArrowRight,
-  ChevronRight
+  ChevronRight,
+  Plus,
+  X,
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
+import { Label } from './ui/label';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
@@ -32,8 +35,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from './ui/sheet';
 import type { View, ProjectData, Product } from '../App';
 import { api } from '../lib/api';
+import { useProjectStore } from '../lib/store';
 
 // 材质类型定义
 const MATERIAL_TYPES = [
@@ -121,11 +132,12 @@ interface ProductBOMData {
 }
 
 export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
+  const updateProject = useProjectStore((state) => state.updateProject);
   // 添加空值检查
   if (!project) {
     return (
-      <div className="p-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="px-4 py-8 lg:px-8">
+        <div className="max-w-7xl">
           <Card>
             <CardContent className="p-12 text-center">
               <FileSpreadsheet className="h-12 w-12 text-zinc-300 mx-auto mb-4" />
@@ -140,9 +152,45 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
     );
   }
 
+  // 检查项目是否有产品
+  if (!project.products || project.products.length === 0) {
+    return (
+      <div className="px-4 py-8 lg:px-8">
+        <div className="max-w-7xl">
+          <Card>
+            <CardContent className="p-12 text-center">
+              <Package className="h-12 w-12 text-zinc-300 mx-auto mb-4" />
+              <h2 className="text-lg font-medium mb-2">该项目暂无产品</h2>
+              <p className="text-zinc-500 mb-4">请先为项目添加产品信息</p>
+              <Button onClick={() => onNavigate('dashboard')}>
+                返回项目列表
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   const [selectedProduct, setSelectedProduct] = useState<Product>(project.products[0]);
   const [bomData, setBomData] = useState<Record<string, ProductBOMData>>({});
   const [fileName, setFileName] = useState('');
+
+  // 新增产品状态
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [isAddingProduct, setIsAddingProduct] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    code: '',
+    routeCode: '',
+    annualVolume: project.annualVolume || '0',
+    description: '',
+  });
+
+  // 调试：监听 isAddProductOpen 变化
+  useEffect(() => {
+    console.log('isAddProductOpen changed to:', isAddProductOpen);
+  }, [isAddProductOpen]);
 
   // 获取当前产品的BOM数据
   const currentBomData = bomData[selectedProduct.id];
@@ -271,14 +319,25 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
         material: m.material || '其他',
         supplier: m.supplier || '',
         quantity: m.quantity,
-        unit: 'kg',
+        unit: m.unit || 'PC',  // 使用 API 返回的单位，默认为 PC
         unitPrice: m.unitPrice,
         vavePrice: m.vavePrice,
         comments: m.comments || '',
         hasHistoryData: m.hasHistoryData
       }));
 
-      const processes: Process[] = []; // TODO: 从API响应获取工艺数据
+      // 从 API 响应获取工艺数据
+      const processes: Process[] = (response.processes || []).map((p, idx) => ({
+        id: p.id,
+        opNo: p.opNo,
+        name: p.name,
+        workCenter: p.workCenter || '',
+        standardTime: p.standardTime || 0,
+        unitPrice: p.unitPrice,
+        vavePrice: p.vavePrice,
+        hasHistoryData: p.hasHistoryData || false,
+        isOperationKnown: p.hasHistoryData || false
+      }));
 
       // 完成解析
       clearInterval(progressInterval);
@@ -626,6 +685,82 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   };
 
+  // 处理新增产品
+  const handleAddProduct = async () => {
+    // 验证必填字段
+    if (!newProduct.name.trim()) {
+      alert('请输入产品名称');
+      return;
+    }
+    if (!newProduct.code.trim()) {
+      alert('请输入产品编码');
+      return;
+    }
+
+    setIsAddingProduct(true);
+    try {
+      // 使用新的 api.products.create
+      const result = await api.products.create({
+        projectId: project.id,
+        productName: newProduct.name,
+        productCode: newProduct.code,
+        routeCode: newProduct.routeCode || undefined,
+      });
+
+      // 创建成功，添加到产品列表
+      const newProductData: Product = {
+        id: result.id,
+        name: result.productName,
+        partNumber: result.productCode,
+        annualVolume: parseInt(newProduct.annualVolume) || 0,
+        description: newProduct.description,
+      };
+
+      // 更新当前项目的 products 数组
+      const updatedProject: ProjectData = {
+        ...project,
+        products: [...project.products, newProductData],
+        updatedDate: new Date().toISOString(),
+      };
+
+      // 通知 store 更新项目数据
+      updateProject(updatedProject);
+
+      // 更新本地产品和 BOM 数据
+      setSelectedProduct(newProductData);
+      setBomData(prev => ({
+        ...prev,
+        [newProductData.id]: {
+          productId: newProductData.id,
+          isUploaded: false,
+          isParsing: false,
+          parseProgress: 0,
+          isParsed: false,
+          materials: [],
+          processes: [],
+        },
+      }));
+
+      // 关闭对话框并重置表单
+      setIsAddProductOpen(false);
+      setNewProduct({
+        name: '',
+        code: '',
+        routeCode: '',
+        annualVolume: project.annualVolume || '0',
+        description: '',
+      });
+
+      // 成功提示
+      alert('产品创建成功！');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '创建产品失败';
+      alert(`创建产品失败：${message}`);
+    } finally {
+      setIsAddingProduct(false);
+    }
+  };
+
   // 计算统计数据
   const getProductStats = () => {
     if (!currentBomData?.isParsed) {
@@ -654,8 +789,8 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
   const stats = getProductStats();
 
   return (
-    <div className="p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="px-4 py-8 lg:px-8">
+      <div className="w-full space-y-6 overflow-x-auto">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -682,13 +817,28 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
         {/* Product Selector */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5" />
-              选择产品
-            </CardTitle>
-            <CardDescription>
-              本项目包含 {project.products.length} 个产品，请选择需要上传BOM表的产品
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="h-5 w-5" />
+                  选择产品
+                </CardTitle>
+                <CardDescription>
+                  本项目包含 {project.products.length} 个产品，请选择需要上传BOM表的产品
+                </CardDescription>
+              </div>
+              <Button
+                onClick={() => {
+                  console.log('新增产品按钮被点击');
+                  setIsAddProductOpen(true);
+                  console.log('isAddProductOpen 设置为 true');
+                }}
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                新增产品
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
@@ -1195,6 +1345,117 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
           )}
         </div>
       </div>
+
+      {/* 新增产品抽屉 */}
+      <Sheet open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
+        <SheetContent className="w-[600px] sm:max-w-[600px] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              新增产品
+            </SheetTitle>
+            <SheetDescription>
+              为项目 {project.id} 添加新产品，带 * 的字段为必填项
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="px-6 space-y-4 py-4">
+            {/* 产品名称 - 必填 */}
+            <div className="space-y-2">
+              <Label htmlFor="productName">
+                产品名称 <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="productName"
+                value={newProduct.name}
+                onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                placeholder="例如：发动机缸体"
+                disabled={isAddingProduct}
+              />
+            </div>
+
+            {/* 产品编码 - 必填 */}
+            <div className="space-y-2">
+              <Label htmlFor="productCode">
+                产品编码 <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="productCode"
+                value={newProduct.code}
+                onChange={(e) => setNewProduct({ ...newProduct, code: e.target.value })}
+                placeholder="例如：PRT-2024-001"
+                disabled={isAddingProduct}
+              />
+            </div>
+
+            {/* 工艺路线编码 - 非必填 */}
+            <div className="space-y-2">
+              <Label htmlFor="routeCode">工艺路线编码</Label>
+              <Input
+                id="routeCode"
+                value={newProduct.routeCode}
+                onChange={(e) => setNewProduct({ ...newProduct, routeCode: e.target.value })}
+                placeholder="例如：RT-AL-CASTING（可选）"
+                disabled={isAddingProduct}
+              />
+              <p className="text-xs text-zinc-500">
+                如果已知工艺路线编码，请填写以自动关联工艺路线
+              </p>
+            </div>
+
+            {/* 年产量 */}
+            <div className="space-y-2">
+              <Label htmlFor="annualVolume">年产量</Label>
+              <Input
+                id="annualVolume"
+                type="number"
+                value={newProduct.annualVolume}
+                onChange={(e) => setNewProduct({ ...newProduct, annualVolume: e.target.value })}
+                placeholder="默认使用项目年产量"
+                disabled={isAddingProduct}
+              />
+            </div>
+
+            {/* 描述 */}
+            <div className="space-y-2">
+              <Label htmlFor="description">产品描述</Label>
+              <Input
+                id="description"
+                value={newProduct.description}
+                onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+                placeholder="产品的简要描述（可选）"
+                disabled={isAddingProduct}
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 px-6 pt-4 border-t">
+            <Button
+              variant="outline"
+              onClick={() => setIsAddProductOpen(false)}
+              disabled={isAddingProduct}
+            >
+              取消
+            </Button>
+            <Button
+              onClick={handleAddProduct}
+              disabled={isAddingProduct || !newProduct.name.trim() || !newProduct.code.trim()}
+            >
+              {isAddingProduct ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  创建中...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4 mr-2" />
+                  创建产品
+                </>
+              )}
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
