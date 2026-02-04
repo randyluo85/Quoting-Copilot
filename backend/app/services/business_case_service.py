@@ -160,11 +160,13 @@ class BusinessCaseService:
     ) -> BusinessCaseResponse:
         """计算完整的 Business Case.
 
-        计算公式:
+        计算公式（累加法）:
         - HK3 = Material Cost + Process Cost
-        - SK = HK3 + Tooling Recovery + R&D Recovery + SA Overhead
-        - DB1 = Net Sales - SK
-        - DB4 = DB1 - Other Costs
+        - S&A = Net Sales × sa_rate (管销费用率，默认 2.1%)
+        - Interest = Net Price × interest_rate × (payment_terms_days / 360) × volume
+        - SK = HK3 + Tooling Recovery + R&D Recovery + S&A + Interest
+        - DB1 = Net Sales - HK3 (边际贡献 I)
+        - DB4 = Net Sales - SK (净利润 IV)
         """
         # 保存参数
         bc_params = await self.upsert_params(params)
