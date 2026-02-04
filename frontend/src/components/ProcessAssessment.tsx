@@ -20,12 +20,12 @@ import {
   SelectValue,
 } from './ui/select';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from './ui/dialog';
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from './ui/sheet';
 import { Plus, Search, Eye, Edit3, Copy, History, Trash2, ArrowLeft } from 'lucide-react';
 import { ProcessRouteEditor, ProcessRouteEdit, ProcessItemEdit } from './ProcessRouteEditor';
 import type { View } from '../App';
