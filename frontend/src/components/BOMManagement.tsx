@@ -1471,7 +1471,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                               </TableCell>
                               <TableCell className="text-right">
                                 {material.hasHistoryData ? (
-                                  <Badge variant="secondary" className="gap-1 bg-green-50 text-green-700 border-green-200 hover:bg-green-50">
+                                  <Badge variant="secondary" className="gap-1 bg-green-50 text-green-700 border-green-200 hover:bg-green-50 text-xs">
                                     <CheckCircle2 className="h-3 w-3" />
                                     已匹配
                                   </Badge>
@@ -1479,7 +1479,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className="gap-1 text-xs h-8 bg-white hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700"
+                                    className="gap-1 text-xs h-7 px-2 bg-white hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700"
                                     onClick={() => handleInquiry('material', material)}
                                   >
                                     <Mail className="h-3 w-3" />
