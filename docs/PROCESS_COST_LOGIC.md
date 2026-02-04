@@ -341,6 +341,7 @@ flowchart TD
 |------|--------|
 | `DATABASE_DESIGN.md` | 依赖 `cost_centers`, `process_rates`, `product_processes` 表 |
 | `NRE_INVESTMENT_LOGIC.md` | 设备投资影响 MHR 固定费率计算 |
+| `PAYBACK_LOGIC.md` | `depreciation_rate` 用于现金流计算（现金流 = 净利 + 折旧） |
 | `BUSINESS_CASE_LOGIC.md` | 工艺成本汇总为 HK III |
 | `QUOTATION_SUMMARY_LOGIC.md` | 工艺成本影响 SK1/SK2 |
 
