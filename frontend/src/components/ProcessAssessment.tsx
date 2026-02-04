@@ -493,7 +493,6 @@ export function ProcessAssessment({ onNavigate }: ProcessAssessmentProps) {
               )}
             </TableBody>
           </Table>
-          </div>
         </Card>
       </div>
 
