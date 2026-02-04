@@ -441,6 +441,9 @@ async def confirm_create_products(
         )
         db.add(project_product)
 
+        # 先 flush 确保 ProjectProduct 插入到数据库（满足外键约束）
+        await db.flush()
+
         # 2. 创建 ProductMaterial 记录
         for material_data in product_data.materials:
             material_id = str(uuid.uuid4())
