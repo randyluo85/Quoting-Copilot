@@ -473,22 +473,29 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
     }
 
     // 更新当前选中产品的数据
+    // 注意：默认产品不分配物料（物料已分配给新产品）
+    // 如果需要给默认产品也分配物料，可以手动选择第一个新产品的物料
     newBomData[selectedProduct.id] = {
       productId: selectedProduct.id,
-      isUploaded: true,
+      isUploaded: false,
       isParsing: false,
-      isParsed: true,
-      parseProgress: 100,
-      materials: multiProductPreview.materials,
-      processes: multiProductPreview.processes,
+      isParsed: false,
+      parseProgress: 0,
+      materials: [],
+      processes: [],
       isRoutingKnown: false,
-      needsIEReview: multiProductPreview.materials.filter((m: any) => !m.hasHistoryData).length > 0
+      needsIEReview: false,
     };
 
     setBomData(newBomData);
 
+    // 自动选中第一个新产品
+    if (newProducts.length > 0) {
+      setSelectedProduct(newProducts[0]);
+    }
+
     // 显示成功消息
-    alert(`成功创建 ${newProducts.length} 个产品！`);
+    alert(`成功创建 ${newProducts.length} 个产品！每个产品已分配对应的物料数据。`);
   };
 
   // 模拟数据用于演示（保留原功能作为fallback）
