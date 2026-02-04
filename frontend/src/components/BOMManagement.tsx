@@ -316,7 +316,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
           partName: m.part_name || m.partName || '',
           version: m.version || '1.0',
           type: m.type || 'I',
-          status: m.status || 'N',
+          status: m.stock_status || m.stockStatus || 'N',  // BOM 文件的 "St" 列
           material: m.material || '',
           supplier: m.supplier || '',
           quantity: m.quantity,
