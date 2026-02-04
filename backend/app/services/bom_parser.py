@@ -416,12 +416,9 @@ class MultiProductBOMParser:
         """从 sheet 顶部提取产品元数据.
 
         Sheet 实际结构（基于 W04_BOM_.xlsx 分析）:
-        - Row 1 (index 0): 标题行 "Bill of Material"
-        - Row 2 (index 1): Product Name (col 5) -> 值在 col 7, Product Version (col 11) -> 值在 col 13
-        - Row 3 (index 2): Product Number (col 5) -> 值在 col 6, Customer Version (col 11) -> 值在 col 13
-        - Row 5 (index 4): Customer Number (col 5) -> 值在 col 6, Issue Date (col 11) -> 值在 col 12
-
-        使用固定列位置提取值。
+        Row 2 (index 1): Product Name (col 5), Product Version (col 11) -> 值在 col 13
+        Row 3 (index 2): Product Number (col 5) -> 值在 col 6, Customer Version (col 11) -> 值在 col 13
+        Row 4 (index 3): Customer Number (col 5) -> 值在 col 6, Issue Date (col 11) -> 值在 col 13
         """
         product_code = sheet_name.strip()
         product_name = None
@@ -436,40 +433,57 @@ class MultiProductBOMParser:
             row = worksheet[row_idx]
             row_values = [cell.value for cell in row]
 
-            # 检查每一列，找到标签后根据已知位置提取值
             for col_idx, cell_value in enumerate(row_values):
                 if cell_value and isinstance(cell_value, str):
                     key = cell_value.rstrip(':').strip().lower()
 
-                    # Product Name: 标签在 col 5, 值在 col 7
+                    # Product Name: 标签在 col 5, 值可能在 col 6 或 7
                     if 'product name' in key and col_idx == 5:
-                        if len(row_values) > 7 and row_values[7]:
-                            product_name = str(row_values[7])
+                        # 尝试 col 6, 7 找值
+                        for val_col in [6, 7]:
+                            if len(row_values) > val_col and row_values[val_col]:
+                                val = str(row_values[val_col]).strip()
+                                if val and val != 'Product Name':
+                                    product_name = val
+                                    break
 
                     # Product Number: 标签在 col 5, 值在 col 6
                     elif 'product number' in key and col_idx == 5:
                         if len(row_values) > 6 and row_values[6]:
-                            product_number = str(row_values[6])
+                            val = str(row_values[6]).strip()
+                            if val and val != 'Product Number':
+                                product_number = val
 
                     # Product Version: 标签在 col 11, 值在 col 13
                     elif 'product version' in key and col_idx == 11:
                         if len(row_values) > 13 and row_values[13]:
-                            product_version = str(row_values[13])
+                            val = str(row_values[13]).strip()
+                            if val:
+                                product_version = val
 
                     # Customer Version: 标签在 col 11, 值在 col 13
                     elif 'customer version' in key and col_idx == 11:
                         if len(row_values) > 13 and row_values[13]:
-                            customer_version = str(row_values[13])
+                            val = str(row_values[13]).strip()
+                            if val:
+                                customer_version = val
 
                     # Customer Number: 标签在 col 5, 值在 col 6
                     elif 'customer number' in key and col_idx == 5:
                         if len(row_values) > 6 and row_values[6]:
-                            customer_number = str(row_values[6])
+                            val = str(row_values[6]).strip()
+                            if val and val != 'Customer Number':
+                                customer_number = val
 
-                    # Issue Date: 标签在 col 11, 值在 col 12
+                    # Issue Date: 标签在 col 11, 值在 col 13
                     elif 'issue date' in key and col_idx == 11:
-                        if len(row_values) > 12 and row_values[12]:
-                            issue_date = str(row_values[12])
+                        if len(row_values) > 13 and row_values[13]:
+                            val = row_values[13]
+                            # 处理 Excel 日期格式
+                            if isinstance(val, datetime):
+                                issue_date = val.isoformat()
+                            else:
+                                issue_date = str(val)
 
         return ProductInfo(
             product_code=product_code,
