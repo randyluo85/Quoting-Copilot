@@ -397,7 +397,6 @@ export function ProcessAssessment({ onNavigate }: ProcessAssessmentProps) {
 
         {/* 工艺路线列表 */}
         <Card>
-          <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
