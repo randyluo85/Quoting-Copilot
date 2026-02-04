@@ -262,7 +262,7 @@ class ProductBOMResultSchema(BaseModel):
     materials: List[MaterialSchema]
     processes: List[ProcessSchema]
 
-    model_config = {"by_alias": True}
+    model_config = {"by_alias": True, "populate_by_name": True}
 
 
 class MultiProductBOMParseResultSchema(BaseModel):
@@ -272,7 +272,7 @@ class MultiProductBOMParseResultSchema(BaseModel):
     total_materials: int
     parse_warnings: List[str] = []
 
-    model_config = {"by_alias": True}
+    model_config = {"by_alias": True, "populate_by_name": True}
 
 
 class BOMConfirmCreateRequest(BaseModel):
@@ -280,7 +280,7 @@ class BOMConfirmCreateRequest(BaseModel):
     project_id: str = Field(..., alias="projectId")
     products: List[ProductBOMResultSchema]
 
-    model_config = {"by_alias": True}
+    model_config = {"by_alias": True, "populate_by_name": True}
 
 
 class BOMPreviewResponse(BaseModel):
