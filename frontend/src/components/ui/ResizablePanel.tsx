@@ -104,9 +104,10 @@ export function ResizableSidePanel({
 
 // 简化版：用于直接嵌入到现有布局中
 // 不带遮罩层，主内容可以继续点击
+// 默认打开且不可关闭的持久化侧边栏
 interface SidePanelProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   children: React.ReactNode;
   title?: string;
   description?: string;
@@ -114,13 +115,20 @@ interface SidePanelProps {
   className?: string;
 }
 
-export function SidePanel({ open, onOpenChange, children, title, description, width = 600, className }: SidePanelProps) {
+export function SidePanel({
+  open = true,
+  onOpenChange,
+  children,
+  title,
+  description,
+  width = 600,
+  className
+}: SidePanelProps) {
   return (
     <aside
       className={cn(
-        "fixed top-0 right-0 h-full bg-background border-l shadow-lg z-50 transition-transform duration-300 ease-in-out flex flex-col",
-        open ? "translate-x-0" : "translate-x-full",
-        !open && "pointer-events-none",
+        "fixed top-0 right-0 h-full bg-background border-l shadow-lg z-50 flex flex-col",
+        !open && "-translate-x-full",
         className
       )}
       style={{ width: `${width}px` }}
@@ -132,14 +140,7 @@ export function SidePanel({ open, onOpenChange, children, title, description, wi
             {title && <h2 className="text-2xl font-semibold">{title}</h2>}
             {description && <p className="text-zinc-500 text-sm">{description}</p>}
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onOpenChange(false)}
-            className="h-8 w-8 p-0 shrink-0"
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          {/* 移除关闭按钮，或设置为仅用于视觉（不可点击） */}
         </div>
       )}
 
