@@ -613,11 +613,11 @@ async def get_project_bom_data(
             materials_data.append({
                 "id": f"M-{idx + 1:03d}",
                 "level": str(m.material_level) if m.material_level is not None else "",
-                "part_number": m.part_number or "",
+                "partNumber": m.part_number or "",
                 "partName": m.material_name or "",
                 "version": m.version or "1.0",
                 "type": m.material_type or "I",
-                "stock_status": m.stock_status or "N",
+                "stockStatus": m.stock_status or "N",
                 "material": price_data.get("material", ""),
                 "supplier": m.supplier or price_data.get("supplier", ""),
                 "quantity": float(m.quantity) if m.quantity is not None else 0,
@@ -625,7 +625,8 @@ async def get_project_bom_data(
                 "unitPrice": price_data.get("unit_price"),
                 "vavePrice": price_data.get("vave_price"),
                 "hasHistoryData": price_data.get("has_history_data", False),
-                "comments": m.remarks or ""
+                "comments": m.remarks or "",
+                "status": "GREEN" if price_data.get("has_history_data") else "RED"
             })
 
         # 转换工艺数据为前端格式
