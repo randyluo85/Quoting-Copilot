@@ -1732,104 +1732,98 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
       {/* 多产品 BOM 预览对话框 */}
       {showMultiProductDialog && multiProductPreview && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <Card className="max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl border-zinc-200">
+          <Card className="max-w-xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl border-zinc-200">
             {/* Header */}
-            <CardHeader className="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border-b border-zinc-200">
+            <CardHeader className="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border-b border-zinc-200 py-3 px-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-3 text-zinc-900">
-                    <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
-                      <Sparkles className="h-5 w-5 text-white" />
-                    </div>
-                    检测到多个产品
-                  </CardTitle>
-                  <CardDescription className="text-zinc-600 mt-2">
-                    AI 智能识别 BOM 文件包含 <span className="font-semibold text-purple-700">{multiProductPreview.products.length}</span> 个产品，是否自动创建？
-                  </CardDescription>
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow">
+                    <Sparkles className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-sm text-zinc-900">检测到多个产品</CardTitle>
+                    <p className="text-xs text-zinc-600 mt-0.5">
+                      识别到 <span className="font-semibold text-purple-700">{multiProductPreview.products.length}</span> 个产品
+                    </p>
+                  </div>
                 </div>
                 <button
                   onClick={() => {
                     setShowMultiProductDialog(false);
                     setMultiProductPreview(null);
                   }}
-                  className="p-2 rounded-lg hover:bg-zinc-200/50 transition-colors"
+                  className="p-1 rounded hover:bg-zinc-200/50 transition-colors"
                 >
-                  <X className="h-5 w-5 text-zinc-500" />
+                  <X className="h-4 w-4 text-zinc-500" />
                 </button>
               </div>
             </CardHeader>
 
             {/* Content */}
-            <CardContent className="flex-1 overflow-y-auto p-6">
-              <div className="space-y-3">
+            <CardContent className="flex-1 overflow-y-auto p-3">
+              <div className="space-y-2">
                 {multiProductPreview.products.map((product, idx) => (
                   <div
                     key={idx}
-                    className="group flex items-center justify-between p-4 bg-gradient-to-r from-white to-zinc-50 rounded-xl border border-zinc-200 hover:border-purple-300 hover:shadow-md transition-all duration-200"
+                    className="group flex items-center justify-between px-3 py-2 bg-white rounded-lg border border-zinc-200 hover:border-purple-300 hover:shadow-sm transition-all duration-150"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="relative">
-                        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
-                          <Package className="h-6 w-6 text-indigo-600" />
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="relative shrink-0">
+                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
+                          <Package className="h-4 w-4 text-indigo-600" />
                         </div>
-                        <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                        <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-purple-600 flex items-center justify-center text-white text-[10px] font-bold">
                           {idx + 1}
                         </div>
                       </div>
-                      <div>
-                        <p className="font-semibold text-zinc-900">{product.product_code}</p>
-                        <p className="text-sm text-zinc-500 mt-0.5">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-zinc-900 truncate">{product.product_code}</p>
+                        <p className="text-xs text-zinc-500 truncate">
                           {product.product_name || <span className="italic text-zinc-400">未命名</span>}
-                          <span className="mx-2 text-zinc-300">·</span>
-                          <span className="inline-flex items-center gap-1">
-                            <Box className="h-3 w-3" />
-                            {product.material_count} 个物料
+                          <span className="mx-1 text-zinc-300">·</span>
+                          <span className="inline-flex items-center gap-0.5">
+                            <Box className="h-2.5 w-2.5" />
+                            {product.material_count}
                           </span>
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="gap-1 bg-green-50 text-green-700 border-green-200">
-                        <CheckCircle2 className="h-3 w-3" />
-                        已解析
-                      </Badge>
-                    </div>
+                    <Badge variant="secondary" className="gap-0.5 bg-green-50 text-green-700 border-green-200 text-[10px] px-1.5 py-0 shrink-0">
+                      <CheckCircle2 className="h-2.5 w-2.5" />
+                      已解析
+                    </Badge>
                   </div>
                 ))}
               </div>
 
               {/* Summary Card */}
-              <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-blue-100">
-                    <Database className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-blue-900 mb-1">数据导入预览</p>
-                    <p className="text-sm text-blue-700">
-                      共 <span className="font-bold">{multiProductPreview.total_materials}</span> 个物料将被导入到各自的产品中，
-                      每个产品的 BOM 和工艺路线将独立管理
-                    </p>
-                  </div>
+              <div className="mt-3 px-3 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                <div className="flex items-center gap-2">
+                  <Database className="h-4 w-4 text-blue-600 shrink-0" />
+                  <p className="text-xs text-blue-700">
+                    共 <span className="font-bold text-blue-900">{multiProductPreview.total_materials}</span> 个物料将被导入
+                  </p>
                 </div>
               </div>
             </CardContent>
 
             {/* Footer */}
-            <div className="flex justify-between items-center p-6 border-t border-zinc-200 bg-zinc-50/50">
+            <div className="flex justify-between items-center px-4 py-3 border-t border-zinc-200 bg-zinc-50/50">
               <Button
                 variant="ghost"
+                size="sm"
                 onClick={() => {
                   setShowMultiProductDialog(false);
                   setMultiProductPreview(null);
                 }}
-                className="text-zinc-600 hover:text-zinc-900"
+                className="text-zinc-600 hover:text-zinc-900 h-8 text-xs"
               >
                 取消
               </Button>
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                 <Button
                   variant="outline"
+                  size="sm"
                   onClick={() => {
                     setShowMultiProductDialog(false);
                     setMultiProductPreview(null);
@@ -1851,21 +1845,20 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                       }));
                     }
                   }}
-                  className="hover:bg-zinc-100"
+                  className="hover:bg-zinc-100 h-8 text-xs"
                 >
-                  <Package className="h-4 w-4 mr-2" />
-                  仅导入当前产品
+                  仅导入当前
                 </Button>
                 <Button
+                  size="sm"
                   onClick={() => {
                     // 创建新产品并分配物料
                     handleMultiProductConfirm();
                     setShowMultiProductDialog(false);
                     setMultiProductPreview(null);
                   }}
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg"
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 h-8 text-xs"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
                   创建 {multiProductPreview.products.length} 个产品
                 </Button>
               </div>
