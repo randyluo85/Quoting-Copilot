@@ -319,3 +319,163 @@ async def upload_bom(
             },
         }
     )
+
+
+# ==================== 多产品 BOM 解析 API ====================
+
+@router.post("/parse-preview")
+async def parse_bom_preview(
+    file: UploadFile = File(...),
+    project_id: str = Query(..., alias="projectId"),
+    db: AsyncSession = Depends(get_db)
+):
+    """解析多产品 BOM 文件，返回预览结果（不创建数据）.
+
+    两步流程的第一步：上传 → 解析 → 返回预览
+
+    Args:
+        file: Excel BOM 文件
+        project_id: 关联的项目 ID
+
+    Returns:
+        BOMPreviewResponse: 包含所有产品的预览数据
+    """
+    content = await file.read()
+
+    parser = MultiProductBOMParser()
+    result = parser.parse_excel_file(content)
+
+    # 转换为 Schema 格式
+    products_schema = []
+    for product in result.products:
+        materials_schema = [
+            MaterialSchema(
+                level=m.level,
+                part_number=m.part_number,
+                part_name=m.part_name,
+                version=m.version,
+                type=m.type,
+                status=m.status,
+                material=m.material,
+                supplier=m.supplier,
+                quantity=m.quantity,
+                unit=m.unit,
+                comments=m.comments
+            )
+            for m in product.materials
+        ]
+
+        processes_schema = [
+            ProcessSchema(
+                op_no=p.op_no,
+                name=p.name,
+                work_center=p.work_center,
+                standard_time=p.standard_time,
+                spec=p.spec
+            )
+            for p in product.processes
+        ]
+
+        products_schema.append(ProductBOMResultSchema(
+            product_info=ProductInfoSchema(
+                product_code=product.product_info.product_code,
+                product_name=product.product_info.product_name,
+                product_number=product.product_info.product_number,
+                product_version=product.product_info.product_version,
+                customer_version=product.product_info.customer_version,
+                customer_number=product.product_info.customer_number,
+                issue_date=product.product_info.issue_date,
+                material_count=product.product_info.material_count,
+                process_count=product.product_info.process_count
+            ),
+            materials=materials_schema,
+            processes=processes_schema
+        ))
+
+    response = BOMPreviewResponse(
+        project_id=project_id,
+        products=products_schema,
+        total_products=result.total_products,
+        total_materials=result.total_materials,
+        parse_warnings=result.parse_warnings
+    )
+
+    return JSONResponse(content=response.model_dump(by_alias=True))
+
+
+@router.post("/confirm-create")
+async def confirm_create_products(
+    request: BOMConfirmCreateRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """确认创建产品及 BOM 数据.
+
+    两步流程的第二步：确认 → 创建产品 + 物料
+
+    Args:
+        request: 包含产品和物料数据的创建请求
+
+    Returns:
+        创建结果摘要
+    """
+    from app.models.project_product import ProjectProduct
+    from app.models.bom import ProductMaterial
+    import uuid
+    from datetime import datetime
+
+    created_products = []
+    total_materials = 0
+
+    for product_data in request.products:
+        # 1. 创建 ProjectProduct 记录
+        product_id = str(uuid.uuid4())
+        project_product = ProjectProduct(
+            id=product_id,
+            project_id=request.project_id,
+            product_name=product_data.product_info.product_name or product_data.product_info.product_code,
+            product_code=product_data.product_info.product_code,
+            product_version=product_data.product_info.product_version,
+            route_code=None,  # 工艺路线代码待后续添加
+            bom_file_path=None,
+            created_at=datetime.utcnow()
+        )
+        db.add(project_product)
+
+        # 2. 创建 ProductMaterial 记录
+        for material_data in product_data.materials:
+            material_id = str(uuid.uuid4())
+            product_material = ProductMaterial(
+                id=material_id,
+                project_product_id=product_id,
+                material_id=None,  # 关联到 materials 表的 ID（后续可匹配）
+                material_level=int(material_data.level) if material_data.level.isdigit() else None,
+                material_name=material_data.part_name,
+                material_type=material_data.type,
+                quantity=float(material_data.quantity),
+                unit=material_data.unit,
+                std_cost=None,  # 待后续成本计算填充
+                vave_cost=None,
+                confidence=None,
+                remarks=material_data.comments,
+                created_at=datetime.utcnow()
+            )
+            db.add(product_material)
+            total_materials += 1
+
+        created_products.append({
+            "id": product_id,
+            "product_code": product_data.product_info.product_code,
+            "product_name": product_data.product_info.product_name,
+            "material_count": len(product_data.materials)
+        })
+
+    # 提交所有更改
+    await db.commit()
+
+    return JSONResponse(content={
+        "status": "success",
+        "message": f"成功创建 {len(created_products)} 个产品，共 {total_materials} 条物料记录",
+        "created_products": created_products,
+        "total_products": len(created_products),
+        "total_materials": total_materials
+    })
