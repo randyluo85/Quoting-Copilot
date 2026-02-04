@@ -1359,7 +1359,7 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
             </SheetDescription>
           </SheetHeader>
 
-          <div className="space-y-4 py-4">
+          <div className="px-6 space-y-4 py-4">
             {/* 产品名称 - 必填 */}
             <div className="space-y-2">
               <Label htmlFor="productName">
