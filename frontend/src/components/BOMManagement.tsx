@@ -192,16 +192,19 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
           const newBomData: Record<string, ProductBOMData> = {};
 
           for (const productData of response.products) {
+            const materials = productData.materials || [];
+            const processes = productData.processes || [];
             newBomData[productData.productId] = {
               productId: productData.productId,
               isUploaded: productData.isParsed,
               isParsing: false,
               isParsed: productData.isParsed,
               parseProgress: 100,
-              materials: productData.materials || [],
-              processes: productData.processes || [],
-              isRoutingKnown: (productData.processes || []).length > 0,
-              needsIEReview: (productData.materials || []).filter((m: any) => !m.hasHistoryData).length > 0
+              materials,
+              processes,
+              routingId: productData.routingId || `RT-${productData.productId?.slice(-8) || 'BOM'}-001`,
+              isRoutingKnown: processes.length > 0,
+              needsIEReview: materials.filter((m: any) => !m.hasHistoryData).length > 0
             };
           }
 
