@@ -234,6 +234,35 @@ class BusinessCaseService:
         break_even_year = None
 
         for year_data in years:
+            # 确保 HK3 和 net_sales 有值
+            if year_data.hk_3_cost is None or year_data.net_sales is None:
+                raise ValueError(f"Year {year_data.year}: hk_3_cost and net_sales are required for calculation")
+
+            # 确保 net_price 和 volume 有值
+            if year_data.net_price is None or year_data.volume is None:
+                raise ValueError(f"Year {year_data.year}: net_price and volume are required for calculation")
+
+            # 计算或使用提供的摊销值
+            tooling_recovery = year_data.recovery_tooling or Decimal("0")
+            rnd_recovery = year_data.recovery_rnd or Decimal("0")
+
+            # 使用累加法计算 SK 各组成部分
+            sk_components = self._calculate_sk_components(
+                hk_3_cost=year_data.hk_3_cost,
+                net_sales=year_data.net_sales,
+                net_price=year_data.net_price,
+                volume=year_data.volume,
+                tooling_recovery=tooling_recovery,
+                rnd_recovery=rnd_recovery,
+                sa_rate=params.sa_rate,
+            )
+
+            # 更新年度数据中的计算字段
+            year_data.overhead_sa = sk_components["overhead_sa"]
+            year_data.sk_cost = sk_components["sk_cost"]
+            year_data.db_1 = sk_components["db_1"]
+            year_data.db_4 = sk_components["db_4"]
+
             # 保存或更新年度数据
             bc_year = await self.upsert_year_data(year_data)
 
