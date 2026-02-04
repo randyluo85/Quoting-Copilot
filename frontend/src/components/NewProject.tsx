@@ -101,6 +101,7 @@ export function NewProject({ onNavigate, onProjectCreated }: NewProjectProps) {
 
   // 获取创建项目的 store 方法
   const createProjectAPI = useProjectStore((state) => state.createProject);
+  const selectProject = useProjectStore((state) => state.selectProject);
 
   const [touched, setTouched] = useState({
     clientName: false,
