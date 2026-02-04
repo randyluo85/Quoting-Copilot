@@ -515,9 +515,13 @@ async def confirm_create_products(
                 id=material_id,
                 project_product_id=product_id,
                 material_id=None,  # 关联到 materials 表的 ID（后续可匹配）
-                material_level=int(material_data.level) if material_data.level.isdigit() else None,
+                part_number=material_data.part_number,
+                material_level=int(material_data.level) if str(material_data.level).isdigit() else None,
+                version=material_data.version,
+                stock_status=material_data.status,
                 material_name=material_data.part_name,
                 material_type=material_data.type,
+                supplier=material_data.supplier,
                 quantity=float(material_data.quantity),
                 unit=material_data.unit,
                 std_cost=None,  # 待后续成本计算填充
