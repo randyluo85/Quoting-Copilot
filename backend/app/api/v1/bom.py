@@ -400,7 +400,7 @@ async def parse_bom_preview(
         parse_warnings=result.parse_warnings
     )
 
-    return JSONResponse(content=response.model_dump(by_alias=True))
+    return JSONResponse(content=response.model_dump(by_alias=True, mode='json'))
 
 
 @router.post("/confirm-create")
