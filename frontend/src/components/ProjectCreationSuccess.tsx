@@ -128,7 +128,7 @@ export function ProjectCreationSuccess({ onNavigate, projectData }: ProjectCreat
   };
 
   return (
-    <div className="p-8 max-w-4xl">
+    <div className="p-8 max-w-7xl">
       <div className="space-y-6">
         {/* Success Header */}
         <div className="text-center py-8">
