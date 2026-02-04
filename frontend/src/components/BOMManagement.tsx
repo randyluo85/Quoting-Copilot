@@ -789,8 +789,8 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
   const stats = getProductStats();
 
   return (
-    <div className="p-8">
-      <div className="w-full space-y-6">
+    <div className="px-4 py-8 lg:px-8">
+      <div className="w-full space-y-6 overflow-x-auto">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
