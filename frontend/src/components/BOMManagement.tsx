@@ -1760,36 +1760,36 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
             </CardHeader>
 
             {/* Content */}
-            <CardContent className="flex-1 overflow-y-auto p-3">
-              <div className="space-y-2">
+            <CardContent className="flex-1 overflow-y-auto p-2">
+              <div className="space-y-1.5">
                 {multiProductPreview.products.map((product, idx) => (
                   <div
                     key={idx}
-                    className="group flex items-center justify-between px-3 py-2 bg-white rounded-lg border border-zinc-200 hover:border-purple-300 hover:shadow-sm transition-all duration-150"
+                    className="group flex items-center justify-between px-2 py-1.5 bg-white rounded-md border border-zinc-200 hover:border-purple-300 transition-all duration-150"
                   >
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0">
                       <div className="relative shrink-0">
-                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
-                          <Package className="h-4 w-4 text-indigo-600" />
+                        <div className="h-6 w-6 rounded-md bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
+                          <Package className="h-3 w-3 text-indigo-600" />
                         </div>
-                        <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-purple-600 flex items-center justify-center text-white text-[10px] font-bold">
+                        <div className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full bg-purple-600 flex items-center justify-center text-white text-[8px] font-bold">
                           {idx + 1}
                         </div>
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-zinc-900 truncate">{product.product_code}</p>
-                        <p className="text-xs text-zinc-500 truncate">
+                        <p className="text-xs font-medium text-zinc-900 truncate">{product.product_code}</p>
+                        <p className="text-[10px] text-zinc-500 truncate">
                           {product.product_name || <span className="italic text-zinc-400">未命名</span>}
-                          <span className="mx-1 text-zinc-300">·</span>
+                          <span className="mx-0.5 text-zinc-300">·</span>
                           <span className="inline-flex items-center gap-0.5">
-                            <Box className="h-2.5 w-2.5" />
+                            <Box className="h-2 w-2" />
                             {product.material_count}
                           </span>
                         </p>
                       </div>
                     </div>
-                    <Badge variant="secondary" className="gap-0.5 bg-green-50 text-green-700 border-green-200 text-[10px] px-1.5 py-0 shrink-0">
-                      <CheckCircle2 className="h-2.5 w-2.5" />
+                    <Badge variant="secondary" className="gap-0.5 bg-green-50 text-green-700 border-green-200 text-[8px] px-1 py-0 shrink-0">
+                      <CheckCircle2 className="h-2 w-2" />
                       已解析
                     </Badge>
                   </div>
