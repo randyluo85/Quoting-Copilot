@@ -136,7 +136,7 @@ export function Dashboard({ onNavigate, projects, onSyncFromPM, onSelectProject 
 
   return (
     <div className="px-4 py-8 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl space-y-6">
         {/* Sync Success Notification */}
         {showSyncNotification && (
           <div className="fixed top-6 right-6 z-50 animate-in slide-in-from-top-5">
