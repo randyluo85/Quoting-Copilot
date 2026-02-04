@@ -13,6 +13,11 @@ class ProcessRate(Base):
     从 v1.3 开始，MHR 拆分为变动费率(var)和固定费率(fix)两部分：
     - MHR = MHR_var + MHR_fix
 
+    从 v1.4 开始，折旧从固定费率中单独剥离，支持 Payback 现金流计算：
+    - MHR_fix 包含：折旧(depreciation) + 利息 + 租金 + 保险
+    - 折旧率单独存储，可通过 depreciation_rate 字段获取
+    - Payback 计算公式：现金流 = 净利 + 折旧
+
     设计规范: docs/DATABASE_DESIGN.md
     """
 
