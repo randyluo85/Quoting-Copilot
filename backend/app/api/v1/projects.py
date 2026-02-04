@@ -173,11 +173,33 @@ async def get_project(
     Returns:
         项目详情
     """
+    from app.models.project_product import ProjectProduct
+
     result = await db.execute(select(Project).where(Project.id == project_id))
     project = result.scalar_one_or_none()
 
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
+
+    # 从 project_products 表获取产品列表
+    products_result = await db.execute(
+        select(ProjectProduct)
+        .where(ProjectProduct.project_id == project_id)
+        .order_by(ProjectProduct.created_at)
+    )
+    db_products = products_result.scalars().all()
+
+    # 转换为前端格式
+    products = [
+        {
+            "id": db_p.id,
+            "name": db_p.product_name,
+            "partNumber": db_p.product_code or "",
+            "annualVolume": project.annual_volume,
+            "description": "",
+        }
+        for db_p in db_products
+    ]
 
     response = ProjectResponse(
         id=project.id,
@@ -189,7 +211,7 @@ async def get_project(
         project_name=project.project_name,
         annual_volume=str(project.annual_volume),
         description=project.description or "",
-        products=project.products,
+        products=products,
         owners=project.owners,
         status=project.status,
         target_margin=project.target_margin,
