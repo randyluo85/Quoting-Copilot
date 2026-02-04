@@ -240,7 +240,8 @@ export function NewProject({ onNavigate, onProjectCreated }: NewProjectProps) {
           }]
         });
 
-        // 创建成功，通知父组件
+        // 创建成功，选中项目并通知父组件
+        selectProject(createdProject.id);
         if (onProjectCreated) {
           onProjectCreated(createdProject.id);
         }
