@@ -406,6 +406,64 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
     }
   };
 
+  // 处理多产品确认 - 创建新产品并分配物料
+  const handleMultiProductConfirm = () => {
+    if (!multiProductPreview) return;
+
+    // 为每个检测到的产品创建新的 Product 对象
+    const newProducts: Product[] = multiProductPreview.products.map((p, idx) => ({
+      id: `P-${Date.now()}-${idx}`,
+      name: p.product_name || p.product_code,
+      partNumber: p.product_code,
+      annualVolume: parseInt(project.annualVolume) || 100000,
+      description: `从 BOM 文件自动导入`,
+    }));
+
+    // 更新项目的产品列表
+    const updatedProject = {
+      ...project,
+      products: [...project.products, ...newProducts],
+    };
+    updateProject(updatedProject);
+
+    // 为每个新产品分配对应的物料数据
+    // 注意：这里简化处理，将所有物料分配给第一个新产品
+    // 实际情况应该根据物料所属的产品进行分配
+    const newBomData: Record<string, ProductBOMData> = { ...bomData };
+
+    newProducts.forEach((product, idx) => {
+      newBomData[product.id] = {
+        productId: product.id,
+        isUploaded: true,
+        isParsing: false,
+        isParsed: true,
+        parseProgress: 100,
+        materials: idx === 0 ? multiProductPreview.materials : [], // 第一个产品获得所有物料
+        processes: idx === 0 ? multiProductPreview.processes : [],
+        isRoutingKnown: false,
+        needsIEReview: false,
+      };
+    });
+
+    // 更新当前选中产品的数据
+    newBomData[selectedProduct.id] = {
+      productId: selectedProduct.id,
+      isUploaded: true,
+      isParsing: false,
+      isParsed: true,
+      parseProgress: 100,
+      materials: multiProductPreview.materials,
+      processes: multiProductPreview.processes,
+      isRoutingKnown: false,
+      needsIEReview: multiProductPreview.materials.filter((m: any) => !m.hasHistoryData).length > 0
+    };
+
+    setBomData(newBomData);
+
+    // 显示成功消息
+    alert(`成功创建 ${newProducts.length} 个产品！`);
+  };
+
   // 模拟数据用于演示（保留原功能作为fallback）
   const handleFileUploadMock = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
