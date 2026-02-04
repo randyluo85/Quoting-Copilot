@@ -102,17 +102,24 @@ $$Quantity_{jig} = \lceil \frac{CycleTime_{process}}{T_{cycle}} \times N_{statio
 
 #### 模式 B：分摊进单价 (Amortized in Piece Price) —— *VOSS 默认模式*
 
-公司垫资开模，客户通过买零件分期还款（含利息）。
+公司垫资开模，客户通过买零件分期还款（含 **Capital Interest / 资本利息**）。
+
+> **⚠️ 重要区分：**
+> - **Capital Interest（资本利息）**：模具投资本身的资金成本，**已打包进 Tooling 分摊费用中**
+> - **Working Capital Interest（营运资金利息）**：基于销售账期的资金占用，**独立列示于 QS 表**
+> - 两者是不同的成本项，**不可重复计算**
 
 **输入参数：**
 - $I_{total}$ = 投资总额 (计算得出的 Total Invest)
 - $V_{amort}$ = 分摊总销量 (通常为前 2-3 年销量，由 Sales 设定)
 - $Y_{amort}$ = 分摊年限 (如 2 年)
-- $R_{interest}$ = 资金年利率 (如 6%，由 Controlling 配置)
+- $R_{interest}$ = 资本年利率 (如 6%，由 Controlling 配置)
 
-**核心公式 (VOSS 单利逻辑)：**
+**核心公式 (VOSS 单利逻辑，含 Capital Interest)：**
 
 $$UnitAmort = \frac{I_{total} \times (1 + R_{interest} \times Y_{amort})}{V_{amort}}$$
+
+其中 `(1 + R_{interest} × Y_{amort})` 为 **Capital Interest 因子**。
 
 **示例计算：**
 - 模具费 17 万，分摊 2 年，利率 6%，分摊量 29,750 件
