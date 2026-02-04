@@ -136,7 +136,7 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
   // 添加空值检查
   if (!project) {
     return (
-      <div className="p-8">
+      <div className="px-4 py-8 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <Card>
             <CardContent className="p-12 text-center">
@@ -155,7 +155,7 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
   // 检查项目是否有产品
   if (!project.products || project.products.length === 0) {
     return (
-      <div className="p-8">
+      <div className="px-4 py-8 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <Card>
             <CardContent className="p-12 text-center">
