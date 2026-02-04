@@ -84,6 +84,6 @@ def downgrade() -> None:
     op.drop_column('process_rates', 'std_mhr_fix')
     op.drop_column('process_rates', 'std_mhr_var')
 
-    # 删除外键约束和列
-    op.drop_constraint('fk_process_rates_cost_center', 'process_rates', type_='foreignkey')
+    # 删除成本中心列（外键约束暂时未创建）
+    # op.drop_constraint('fk_process_rates_cost_center', 'process_rates', type_='foreignkey')
     op.drop_column('process_rates', 'cost_center_id')
