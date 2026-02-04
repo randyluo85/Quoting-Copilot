@@ -171,6 +171,15 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
   } | null>(null);
   const [showMultiProductDialog, setShowMultiProductDialog] = useState(false);
 
+  // 当产品列表变化时，更新 selectedProduct - 必须在条件返回之前
+  useEffect(() => {
+    if (project?.products && project.products.length > 0) {
+      if (!selectedProduct.id || !project.products.find(p => p.id === selectedProduct.id)) {
+        setSelectedProduct(project.products[0]);
+      }
+    }
+  }, [project?.products]);
+
   // 添加空值检查
   if (!project) {
     return (
