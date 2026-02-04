@@ -1436,7 +1436,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                                   </SelectContent>
                                 </Select>
                               </TableCell>
-                              <TableCell className="text-xs text-zinc-600 truncate max-w-[80px]" title={material.supplier || ''}>
+                              <TableCell className="text-xs text-zinc-600 truncate max-w-[60px]" title={material.supplier || ''}>
                                 {material.supplier || <span className="text-zinc-400 italic">-</span>}
                               </TableCell>
                               <TableCell className="text-right text-sm font-medium text-zinc-700">
