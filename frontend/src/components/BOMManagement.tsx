@@ -137,7 +137,7 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
   if (!project) {
     return (
       <div className="px-4 py-8 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl">
           <Card>
             <CardContent className="p-12 text-center">
               <FileSpreadsheet className="h-12 w-12 text-zinc-300 mx-auto mb-4" />
@@ -156,7 +156,7 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
   if (!project.products || project.products.length === 0) {
     return (
       <div className="px-4 py-8 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl">
           <Card>
             <CardContent className="p-12 text-center">
               <Package className="h-12 w-12 text-zinc-300 mx-auto mb-4" />
