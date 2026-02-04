@@ -1234,56 +1234,83 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                   </TabsList>
 
                   <TabsContent value="materials" className="mt-6">
-                    <div className="border rounded-lg overflow-hidden overflow-x-auto">
+                    <div className="rounded-xl border border-zinc-200 overflow-hidden overflow-x-auto shadow-sm">
                       <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-[60px]">层级</TableHead>
-                            <TableHead className="w-[120px]">零件号</TableHead>
-                            <TableHead>零件名称</TableHead>
-                            <TableHead className="w-[60px]">版本</TableHead>
-                            <TableHead className="w-[60px]">类型</TableHead>
-                            <TableHead className="w-[60px]">状态</TableHead>
-                            <TableHead>材料</TableHead>
-                            <TableHead>供应商</TableHead>
-                            <TableHead className="text-right w-[80px]">数量</TableHead>
-                            <TableHead className="text-right w-[100px]">单价</TableHead>
-                            <TableHead className="text-right w-[100px]">VAVE单价</TableHead>
-                            <TableHead className="w-[150px]">备注</TableHead>
-                            <TableHead className="text-right w-[100px]">操作</TableHead>
+                        <TableHeader className="bg-gradient-to-r from-zinc-50 to-zinc-100/50">
+                          <TableRow className="border-b-zinc-200 hover:bg-transparent">
+                            <TableHead className="w-[60px] text-xs font-semibold text-zinc-700">层级</TableHead>
+                            <TableHead className="w-[140px] text-xs font-semibold text-zinc-700">零件号</TableHead>
+                            <TableHead className="text-xs font-semibold text-zinc-700">零件名称</TableHead>
+                            <TableHead className="w-[70px] text-xs font-semibold text-zinc-700">版本</TableHead>
+                            <TableHead className="w-[70px] text-xs font-semibold text-zinc-700">类型</TableHead>
+                            <TableHead className="w-[70px] text-xs font-semibold text-zinc-700">状态</TableHead>
+                            <TableHead className="text-xs font-semibold text-zinc-700">材料</TableHead>
+                            <TableHead className="w-[120px] text-xs font-semibold text-zinc-700">供应商</TableHead>
+                            <TableHead className="text-right w-[90px] text-xs font-semibold text-zinc-700">数量</TableHead>
+                            <TableHead className="text-right w-[110px] text-xs font-semibold text-zinc-700">单价</TableHead>
+                            <TableHead className="text-right w-[110px] text-xs font-semibold text-zinc-700">VAVE单价</TableHead>
+                            <TableHead className="w-[150px] text-xs font-semibold text-zinc-700">备注</TableHead>
+                            <TableHead className="text-right w-[100px] text-xs font-semibold text-zinc-700">操作</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {currentBomData.materials.map((material) => (
-                            <TableRow key={material.id}>
-                              <TableCell className="text-xs">
-                                {material.level}
+                          {currentBomData.materials.map((material, idx) => (
+                            <TableRow
+                              key={material.id}
+                              className="border-b-zinc-100 hover:bg-blue-50/50 transition-colors"
+                            >
+                              <TableCell className="text-xs text-zinc-500">
+                                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-zinc-100 text-zinc-600 font-medium">
+                                  {material.level}
+                                </span>
                               </TableCell>
-                              <TableCell className="font-mono text-xs">
+                              <TableCell className="font-mono text-xs text-blue-700 font-medium">
                                 {material.partNumber}
                               </TableCell>
-                              <TableCell className="font-medium text-sm">
+                              <TableCell className="font-medium text-sm text-zinc-900">
                                 {material.partName}
                               </TableCell>
-                              <TableCell className="text-xs text-zinc-500">
-                                {material.version}
+                              <TableCell className="text-xs">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 font-medium border border-indigo-100">
+                                  v{material.version}
+                                </span>
                               </TableCell>
                               <TableCell className="text-xs">
-                                <Badge variant="outline" className="text-xs">
-                                  {material.type}
-                                </Badge>
+                                {material.type === 'F' ? (
+                                  <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100 font-medium">
+                                    自制
+                                  </Badge>
+                                ) : material.type === 'I' ? (
+                                  <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100 font-medium">
+                                    外购
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="font-medium">
+                                    {material.type}
+                                  </Badge>
+                                )}
                               </TableCell>
                               <TableCell className="text-xs">
-                                <Badge variant="secondary" className="text-xs">
-                                  {material.status}
-                                </Badge>
+                                {material.status === 'N' ? (
+                                  <Badge className="bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-100 font-medium">
+                                    正常
+                                  </Badge>
+                                ) : material.status === 'C' ? (
+                                  <Badge className="bg-cyan-100 text-cyan-700 border-cyan-200 hover:bg-cyan-100 font-medium">
+                                    确认
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="secondary" className="font-medium">
+                                    {material.status}
+                                  </Badge>
+                                )}
                               </TableCell>
                               <TableCell className="min-w-[180px]">
                                 <Select
                                   value={material.material}
                                   onValueChange={(value) => handleMaterialTypeChange(material.id, value)}
                                 >
-                                  <SelectTrigger className="h-8 text-xs">
+                                  <SelectTrigger className="h-8 text-xs bg-white border-zinc-200">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -1296,49 +1323,51 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                                 </Select>
                               </TableCell>
                               <TableCell className="text-xs text-zinc-600">
-                                {material.supplier || '-'}
+                                {material.supplier || (
+                                  <span className="text-zinc-400 italic">未指定</span>
+                                )}
                               </TableCell>
-                              <TableCell className="text-right text-sm">
-                                {material.quantity} {material.unit}
+                              <TableCell className="text-right text-sm font-medium text-zinc-700">
+                                {material.quantity} <span className="text-zinc-500">{material.unit}</span>
                               </TableCell>
                               <TableCell className="text-right">
                                 {material.hasHistoryData && material.unitPrice ? (
-                                  <div className="space-y-1">
-                                    <div className="font-medium">
+                                  <div className="space-y-0.5">
+                                    <div className="font-semibold text-zinc-900">
                                       ¥{material.unitPrice.toFixed(2)}
                                     </div>
                                     {getPriceValidationBadge(material.material, material.unitPrice)}
                                   </div>
                                 ) : (
-                                  <span className="text-zinc-400">-</span>
+                                  <span className="text-zinc-300 text-sm">-</span>
                                 )}
                               </TableCell>
                               <TableCell className="text-right">
                                 {material.hasHistoryData && material.vavePrice ? (
                                   <div className="flex items-center justify-end gap-1">
-                                    <TrendingDown className="h-3 w-3 text-green-600" />
-                                    <span className="font-medium text-green-600">
+                                    <TrendingDown className="h-3.5 w-3.5 text-green-600" />
+                                    <span className="font-semibold text-green-600">
                                       ¥{material.vavePrice.toFixed(2)}
                                     </span>
                                   </div>
                                 ) : (
-                                  <span className="text-zinc-400">-</span>
+                                  <span className="text-zinc-300 text-sm">-</span>
                                 )}
                               </TableCell>
-                              <TableCell className="text-xs text-zinc-500 max-w-[150px] truncate">
-                                {material.comments || '-'}
+                              <TableCell className="text-xs text-zinc-500 max-w-[150px] truncate" title={material.comments || ''}>
+                                {material.comments || <span className="text-zinc-300">-</span>}
                               </TableCell>
                               <TableCell className="text-right">
                                 {material.hasHistoryData ? (
-                                  <Badge variant="secondary" className="gap-1">
+                                  <Badge variant="secondary" className="gap-1 bg-green-50 text-green-700 border-green-200 hover:bg-green-50">
                                     <CheckCircle2 className="h-3 w-3" />
                                     已匹配
                                   </Badge>
                                 ) : (
-                                  <Button 
-                                    variant="outline" 
+                                  <Button
+                                    variant="outline"
                                     size="sm"
-                                    className="gap-1 text-xs"
+                                    className="gap-1 text-xs h-8 bg-white hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700"
                                     onClick={() => handleInquiry('material', material)}
                                   >
                                     <Mail className="h-3 w-3" />
