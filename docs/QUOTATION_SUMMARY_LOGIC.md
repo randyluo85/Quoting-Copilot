@@ -19,7 +19,7 @@
 | **Tooling & Mould /pic** | 来自 Tooling 表的分摊值 | 模具分摊费 |
 | **R&D Validation /pic** | 来自 R&D 表的分摊值 | 研发验证分摊费 |
 | **Working Capital Interest...** | = VP × 利率 × (账期/360) | 营运资金利息（资金占用成本） |
-| **SK-2 /pic** | = SK1 + 分摊(模具/研发) + 利息 + 物流 | 项目全成本 (Project Full Cost) |
+| **SK-2 /pic** | = SK1 + 分摊(模具/研发) + Working Capital Interest + 物流 | 项目全成本 (Project Full Cost) |
 
 ### 1.2 数据示例解析
 
