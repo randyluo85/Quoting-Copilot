@@ -81,7 +81,6 @@ const validatePrice = (materialType: string, unitPrice: number | undefined): Pri
 
 interface BOMManagementProps {
   onNavigate: (view: View) => void;
-  project: ProjectData;
 }
 
 interface Material {
