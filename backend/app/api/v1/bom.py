@@ -194,21 +194,22 @@ async def upload_bom(
     project_id: str = Form(...),
     db: AsyncSession = Depends(get_db),
 ):
-    """上传并解析 BOM 文件，自动关联历史价格数据.
+    """上传并解析 BOM 文件，支持多产品 BOM，自动关联历史价格数据.
 
     解析流程：
-    1. 解析 Excel 文件获取物料和工艺列表
+    1. 使用 MultiProductBOMParser 解析 Excel 文件（支持多 Sheet）
     2. 根据物料编码查询历史价格（std_price, vave_price）
     3. 根据工艺名称查询历史费率（std_hourly_rate, vave_hourly_rate）
     4. 设置状态：GREEN=完全匹配，YELLOW=AI估算，RED=无数据
+    5. 汇总所有产品的物料和工艺返回
 
     Args:
-        file: Excel BOM 文件
+        file: Excel BOM 文件（可以是单产品或多产品）
         project_id: 项目 ID
         db: 数据库会话
 
     Returns:
-        解析结果，包含物料和工艺列表（含价格）
+        解析结果，包含所有产品的物料和工艺列表（含价格）
     """
     import time
     start_time = time.time()
@@ -217,13 +218,28 @@ async def upload_bom(
     content = await file.read()
     print(f"[DEBUG] File read time: {time.time() - start_time:.3f}s")
 
-    # 解析 Excel
-    parser = BOMParser()
+    # 使用多产品解析器解析 Excel
+    parser = MultiProductBOMParser()
     parse_result = parser.parse_excel_file(content)
     print(f"[DEBUG] Parse Excel time: {time.time() - start_time:.3f}s")
+    print(f"[DEBUG] Detected {parse_result.total_products} products, {parse_result.total_materials} materials")
 
-    # 批量查询物料历史价格（使用同步方式在线程池执行）
-    material_codes = [m.part_number for m in parse_result.materials if m.part_number]
+    # 汇总所有产品的物料和工艺
+    all_materials = []
+    all_processes = []
+    material_idx = 0
+    process_idx = 0
+
+    for product in parse_result.products:
+        # 收集所有物料
+        for m in product.materials:
+            all_materials.append(m)
+        # 收集所有工艺
+        for p in product.processes:
+            all_processes.append(p)
+
+    # 批量查询物料历史价格
+    material_codes = [m.part_number for m in all_materials if m.part_number]
     print(f"[DEBUG] Querying materials: {material_codes}")
 
     materials_with_price = await to_thread(_query_materials_sync, material_codes)
@@ -231,7 +247,7 @@ async def upload_bom(
 
     # 转换物料响应，自动填充价格
     materials = []
-    for idx, m in enumerate(parse_result.materials):
+    for idx, m in enumerate(all_materials):
         # 尝试从历史数据获取价格
         price_data = materials_with_price.get(m.part_number, {})
 
@@ -251,7 +267,7 @@ async def upload_bom(
                 material=m.material or price_data.get("material", ""),
                 supplier=m.supplier or price_data.get("supplier", ""),
                 quantity=m.quantity,
-                unit=m.unit,  # 从 BOM 文件解析的单位
+                unit=m.unit,
                 unit_price=price_data.get("unit_price"),
                 vave_price=price_data.get("vave_price"),
                 has_history_data=price_data.get("has_history_data", False),
@@ -260,23 +276,20 @@ async def upload_bom(
             )
         )
 
-    # 获取解析后的工艺数据（从Excel的工艺工作表）
-    print(f"[DEBUG] Parsed processes from Excel: {len(parse_result.processes)}")
-    for p in parse_result.processes:
-        print(f"[DEBUG]   - {p.op_no}: {p.name} @ {p.work_center}, {p.standard_time}h")
+    # 获取解析后的工艺数据
+    print(f"[DEBUG] Parsed processes from Excel: {len(all_processes)}")
 
-    # 直接使用解析出的工艺数据查询费率
-    process_names = [p.name for p in parse_result.processes if p.name]
+    # 查询工艺费率
+    process_names = [p.name for p in all_processes if p.name]
     print(f"[DEBUG] Querying processes: {process_names}")
 
     processes_with_rate = await to_thread(_query_processes_sync, process_names)
     print(f"[DEBUG] Processes query time: {time.time() - start_time:.3f}s, found: {len(processes_with_rate)}")
 
-    # 构建工艺响应 - 使用 Excel 解析的数据
+    # 构建工艺响应
     processes = []
-    for idx, p in enumerate(parse_result.processes):
+    for idx, p in enumerate(all_processes):
         rate_data = processes_with_rate.get(p.name, {})
-        print(f"[DEBUG] Process {p.name}: rate_data={rate_data}")
 
         # 计算工序总成本：费率 × 标准工时
         standard_time = p.standard_time or 1.0
@@ -316,6 +329,15 @@ async def upload_bom(
                 "matched_materials": sum(1 for m in materials if m.has_history_data),
                 "total_processes": len(processes),
                 "matched_processes": sum(1 for p in processes if p.has_history_data),
+                "total_products": parse_result.total_products,
+                "products": [
+                    {
+                        "product_code": p.product_info.product_code,
+                        "product_name": p.product_info.product_name,
+                        "material_count": p.product_info.material_count,
+                    }
+                    for p in parse_result.products
+                ],
             },
         }
     )

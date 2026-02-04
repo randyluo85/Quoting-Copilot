@@ -40,7 +40,7 @@
 ```bash
 cd frontend
 npm install
-npm run dev      # 开发模式: http://localhost:5173
+npm run dev      # 开发模式: http://localhost:3001
 npm run build    # 生产构建
 ```
 
