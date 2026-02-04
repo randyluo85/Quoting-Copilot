@@ -5,8 +5,8 @@
 - stock_status: 库存状态（BOM 的 St. 列）
 - supplier: 供应商
 
-Revision ID: 002
-Revises: 001
+Revision ID: 005
+Revises: 004
 Create Date: 2026-02-04
 
 """
@@ -17,8 +17,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '002'
-down_revision: Union[str, None] = '001'
+revision: str = '005'
+down_revision: Union[str, None] = '004'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
