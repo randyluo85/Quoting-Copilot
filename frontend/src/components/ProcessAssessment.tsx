@@ -494,7 +494,6 @@ export function ProcessAssessment({ onNavigate }: ProcessAssessmentProps) {
             </TableBody>
           </Table>
         </Card>
-      </div>
 
       {/* 编辑器抽屉 */}
       <SidePanel
