@@ -130,7 +130,8 @@ interface ProductBOMData {
   uploadError?: string; // 上传错误信息
 }
 
-export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
+export function BOMManagement({ onNavigate }: BOMManagementProps) {
+  const project = useProjectStore((state) => state.selectedProject)!;
   const updateProject = useProjectStore((state) => state.updateProject);
 
   // 状态声明 - 必须在所有检查之前
