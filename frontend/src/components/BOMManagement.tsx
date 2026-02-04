@@ -1399,17 +1399,21 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                                 )}
                               </TableCell>
                               <TableCell className="text-xs">
-                                {material.status === 'N' ? (
+                                {material.stockStatus === 'N' ? (
                                   <Badge className="bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-100 font-medium">
                                     正常
                                   </Badge>
-                                ) : material.status === 'C' ? (
+                                ) : material.stockStatus === 'C' ? (
                                   <Badge className="bg-cyan-100 text-cyan-700 border-cyan-200 hover:bg-cyan-100 font-medium">
                                     确认
                                   </Badge>
+                                ) : material.stockStatus ? (
+                                  <Badge variant="secondary" className="font-medium">
+                                    {material.stockStatus}
+                                  </Badge>
                                 ) : (
                                   <Badge variant="secondary" className="font-medium">
-                                    {material.status}
+                                    -
                                   </Badge>
                                 )}
                               </TableCell>
