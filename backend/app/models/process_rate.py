@@ -37,10 +37,12 @@ class ProcessRate(Base):
     # 标准费率拆分
     std_mhr_var: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)  # 变动费率
     std_mhr_fix: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)  # 固定费率
+    std_depreciation_rate: Mapped[Decimal | None] = mapped_column(Numeric(8, 4), nullable=True)  # 标准折旧率
 
     # VAVE 费率拆分
     vave_mhr_var: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)  # 变动费率
     vave_mhr_fix: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)  # 固定费率
+    vave_depreciation_rate: Mapped[Decimal | None] = mapped_column(Numeric(8, 4), nullable=True)  # VAVE 折旧率
 
     # ========== 向后兼容：保留原有字段作为计算属性 ==========
     # 注意：std_mhr 和 vave_mhr 不再是数据库列，而是 @property 计算属性
