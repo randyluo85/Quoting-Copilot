@@ -344,11 +344,13 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
       // 检查是否有多产品
       const detectedProducts = response.summary?.products || [];
       const totalProducts = response.summary?.total_products || 1;
+      const productsGrouped = response.products_grouped || [];
 
       if (totalProducts > 1 && detectedProducts.length > 0) {
         // 显示多产品预览对话框
         setMultiProductPreview({
           products: detectedProducts,
+          products_grouped: productsGrouped,
           total_materials: response.summary.total_materials,
           materials,
           processes,
