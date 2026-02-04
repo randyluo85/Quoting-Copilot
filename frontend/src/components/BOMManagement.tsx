@@ -154,6 +154,62 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
 
   // 检查项目是否有产品
   if (!project.products || project.products.length === 0) {
+    // 处理空产品状态下的 BOM 上传
+    const handleEmptyStateUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      try {
+        // 直接调用 API 解析文件
+        const response = await api.bom.upload(project.id, file);
+        const totalProducts = response.summary?.total_products || 1;
+        const productsGrouped = response.products_grouped || [];
+
+        // 创建新产品
+        const newProducts: Product[] = productsGrouped.map((p, idx) => ({
+          id: `P-${Date.now()}-${idx}`,
+          name: p.product_name || p.product_code,
+          partNumber: p.product_code,
+          annualVolume: parseInt(project.annualVolume) || 100000,
+          description: `从 BOM 文件自动导入`,
+        }));
+
+        // 更新项目
+        const updatedProject = {
+          ...project,
+          products: newProducts,
+        };
+        updateProject(updatedProject);
+
+        // 创建 BOM 数据
+        const newBomData: Record<string, ProductBOMData> = {};
+        productsGrouped.forEach((groupedProduct, idx) => {
+          const product = newProducts[idx];
+          if (product) {
+            newBomData[product.id] = {
+              productId: product.id,
+              isUploaded: true,
+              isParsing: false,
+              isParsed: true,
+              parseProgress: 100,
+              materials: groupedProduct.materials || [],
+              processes: groupedProduct.processes || [],
+              isRoutingKnown: false,
+              needsIEReview: (groupedProduct.materials || []).filter((m: any) => !m.hasHistoryData).length > 0
+            };
+          }
+        });
+
+        setBomData(newBomData);
+
+        // 显示成功消息
+        alert(`成功从 BOM 文件创建 ${newProducts.length} 个产品！`);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : '上传失败，请重试';
+        alert(`上传失败: ${message}`);
+      }
+    };
+
     return (
       <div className="px-4 py-8 lg:px-8">
         <div className="max-w-7xl">
@@ -178,30 +234,7 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
                   type="file"
                   accept=".xlsx,.xls,.csv"
                   className="hidden"
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    setFileName(file.name);
-                    // 创建一个临时的产品 ID 用于上传
-                    const tempProductId = `temp-${Date.now()}`;
-                    const tempProduct: Product = {
-                      id: tempProductId,
-                      name: '临时产品',
-                      partNumber: 'TEMP',
-                      annualVolume: parseInt(project.annualVolume) || 100000,
-                      description: '上传 BOM 后自动创建产品',
-                    };
-                    // 添加临时产品到项目中
-                    const updatedProject = {
-                      ...project,
-                      products: [tempProduct],
-                    };
-                    updateProject(updatedProject);
-                    setSelectedProduct(tempProduct);
-                    // 触发文件上传
-                    const event = { target: { files: [file] } } as any;
-                    setTimeout(() => handleFileUpload(event), 100);
-                  }}
+                  onChange={handleEmptyStateUpload}
                 />
               </div>
             </CardContent>
