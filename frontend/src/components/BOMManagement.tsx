@@ -1466,7 +1466,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                                   <span className="text-zinc-300 text-sm">-</span>
                                 )}
                               </TableCell>
-                              <TableCell className="text-xs text-zinc-500 max-w-[150px] truncate" title={material.comments || ''}>
+                              <TableCell className="text-xs text-zinc-500 truncate max-w-[100px]" title={material.comments || ''}>
                                 {material.comments || <span className="text-zinc-300">-</span>}
                               </TableCell>
                               <TableCell className="text-right">
