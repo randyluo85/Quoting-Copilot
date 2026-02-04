@@ -1201,7 +1201,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                         </div>
 
                         {/* 工艺卡片 */}
-                        <div className="bg-white rounded-lg p-4 border border-zinc-200 min-w-[150px]">
+                        <div className="bg-white rounded-lg p-4 border border-zinc-200 min-w-[250px]">
                           <div className="flex items-center gap-2 mb-2">
                             <Settings className="h-4 w-4 text-purple-600" />
                             <span className="text-xs font-medium text-zinc-700">工艺</span>
