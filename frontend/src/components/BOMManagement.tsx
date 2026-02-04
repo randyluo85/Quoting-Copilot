@@ -303,23 +303,6 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
       // 调用真实API上传BOM文件
       const response = await api.bom.upload(project.id, file);
 
-      // 模拟解析进度动画
-      let progress = 0;
-      const progressInterval = setInterval(() => {
-        progress += 20;
-        setBomData(prev => ({
-          ...prev,
-          [selectedProduct.id]: {
-            ...prev[selectedProduct.id],
-            parseProgress: Math.min(progress, 90)
-          }
-        }));
-
-        if (progress >= 90) {
-          clearInterval(progressInterval);
-        }
-      }, 100);
-
       // 转换API响应为前端格式
       const materials: Material[] = response.materials.map((m, idx) => ({
         id: m.id,
@@ -332,7 +315,7 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
         material: m.material || '其他',
         supplier: m.supplier || '',
         quantity: m.quantity,
-        unit: m.unit || 'PC',  // 使用 API 返回的单位，默认为 PC
+        unit: m.unit || 'PC',
         unitPrice: m.unitPrice,
         vavePrice: m.vavePrice,
         comments: m.comments || '',
@@ -352,21 +335,63 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
         isOperationKnown: p.hasHistoryData || false
       }));
 
-      // 完成解析
-      clearInterval(progressInterval);
-      setBomData(prev => ({
-        ...prev,
-        [selectedProduct.id]: {
-          ...prev[selectedProduct.id],
-          isParsing: false,
-          isParsed: true,
-          parseProgress: 100,
+      // 检查是否有多产品
+      const detectedProducts = response.summary?.products || [];
+      const totalProducts = response.summary?.total_products || 1;
+
+      if (totalProducts > 1 && detectedProducts.length > 0) {
+        // 显示多产品预览对话框
+        setMultiProductPreview({
+          products: detectedProducts,
+          total_materials: response.summary.total_materials,
           materials,
           processes,
-          isRoutingKnown: false,
-          needsIEReview: materials.filter(m => !m.hasHistoryData).length > 0
-        }
-      }));
+        });
+        setShowMultiProductDialog(true);
+
+        // 清除解析状态
+        setBomData(prev => ({
+          ...prev,
+          [selectedProduct.id]: {
+            ...prev[selectedProduct.id],
+            isParsing: false,
+          }
+        }));
+      } else {
+        // 单产品，正常处理
+        // 模拟解析进度动画
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+          progress += 20;
+          setBomData(prev => ({
+            ...prev,
+            [selectedProduct.id]: {
+              ...prev[selectedProduct.id],
+              parseProgress: Math.min(progress, 90)
+            }
+          }));
+
+          if (progress >= 90) {
+            clearInterval(progressInterval);
+          }
+        }, 100);
+
+        // 完成解析
+        clearInterval(progressInterval);
+        setBomData(prev => ({
+          ...prev,
+          [selectedProduct.id]: {
+            ...prev[selectedProduct.id],
+            isParsing: false,
+            isParsed: true,
+            parseProgress: 100,
+            materials,
+            processes,
+            isRoutingKnown: false,
+            needsIEReview: materials.filter(m => !m.hasHistoryData).length > 0
+          }
+        }));
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '上传失败，请重试';
       setBomData(prev => ({
