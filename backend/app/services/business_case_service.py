@@ -152,6 +152,62 @@ class BusinessCaseService:
 
     # ============ Business Case 计算 ============
 
+    def _calculate_sk_components(
+        self,
+        hk_3_cost: Decimal,
+        net_sales: Decimal,
+        net_price: Decimal,
+        volume: int,
+        tooling_recovery: Decimal,
+        rnd_recovery: Decimal,
+        sa_rate: Decimal,
+        interest_rate: Decimal = Decimal("0.05"),
+        payment_terms_days: int = 90,
+    ) -> dict[str, Decimal]:
+        """计算 SK（完全成本）的各组成部分.
+
+        使用累加法：SK = HK3 + Tooling + R&D + S&A + Interest
+
+        Args:
+            hk_3_cost: 制造成本 HK III
+            net_sales: 净销售额
+            net_price: 净单价
+            volume: 销量
+            tooling_recovery: 模具摊销
+            rnd_recovery: 研发摊销
+            sa_rate: 管销费用率 (默认 2.1%)
+            interest_rate: 年利率 (默认 5%)
+            payment_terms_days: 付款账期天数 (默认 90 天)
+
+        Returns:
+            包含 SK 各组成部分的字典
+        """
+        # 计算 S&A 管销费用
+        overhead_sa = net_sales * sa_rate
+
+        # 计算资金占用成本
+        interest = (
+            net_price
+            * interest_rate
+            * Decimal(str(payment_terms_days / 360))
+            * Decimal(str(volume))
+        )
+
+        # 计算完全成本 SK
+        sk_cost = hk_3_cost + tooling_recovery + rnd_recovery + overhead_sa + interest
+
+        # 计算利润指标
+        db_1 = net_sales - hk_3_cost  # 边际贡献 I
+        db_4 = net_sales - sk_cost    # 净利润 IV
+
+        return {
+            "overhead_sa": overhead_sa.quantize(Decimal("0.01")),
+            "interest": interest.quantize(Decimal("0.01")),
+            "sk_cost": sk_cost.quantize(Decimal("0.01")),
+            "db_1": db_1.quantize(Decimal("0.01")),
+            "db_4": db_4.quantize(Decimal("0.01")),
+        }
+
     async def calculate_business_case(
         self,
         project_id: str,
