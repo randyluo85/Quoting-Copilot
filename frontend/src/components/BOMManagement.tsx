@@ -294,15 +294,6 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
     );
   }
 
-  // 当产品列表变化时，更新 selectedProduct
-  useEffect(() => {
-    if (project.products && project.products.length > 0) {
-      if (!selectedProduct.id || !project.products.find(p => p.id === selectedProduct.id)) {
-        setSelectedProduct(project.products[0]);
-      }
-    }
-  }, [project.products]);
-
   // 获取当前产品的BOM数据
   const currentBomData = bomData[selectedProduct.id];
 
