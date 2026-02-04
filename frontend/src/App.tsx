@@ -148,7 +148,7 @@ export default function App() {
             />
           );
         }
-        return <BOMManagement onNavigate={setCurrentView} project={selectedProject} />;
+        return <BOMManagement onNavigate={setCurrentView} />;
       case 'process':
         return <ProcessAssessment onNavigate={setCurrentView} />;
       case 'cost-calc':
