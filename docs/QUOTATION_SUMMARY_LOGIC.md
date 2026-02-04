@@ -176,7 +176,7 @@ class QuotationSummaryParams(BaseModel):
     base_year: int
     end_year: int
     lta_rate: Decimal = Field(default=Decimal("0.03"), description="年降比例")
-    sk1_factor: Decimal = Field(default=Decimal("1.175"), description="SK1 系数")
+    sa_rate: Decimal = Field(default=Decimal("0.021"), description="管销费用率 (S&A Rate, 默认 2.1%)")
     payment_terms_days: int = Field(default=90, description="付款账期（天）")
     interest_rate: Decimal = Field(default=Decimal("0.05"), description="年利率")
     amortization_strategy: AmortizationStrategy
