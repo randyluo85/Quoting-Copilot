@@ -1200,15 +1200,16 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
         </Card>
 
         {/* Upload BOM */}
-        {!currentBomData?.isUploaded ? (
+        {(!currentBomData?.isUploaded || selectedProduct.id === '') ? (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Upload className="h-5 w-5" />
-                上传 {selectedProduct.name} 的BOM表
+                {selectedProduct.name ? `上传 ${selectedProduct.name} 的BOM表` : '上传 BOM 文件'}
               </CardTitle>
               <CardDescription>
                 支持 Excel (.xlsx, .xls) 或 CSV 格式，AI将自动解析物料清单和工艺清单
+                {project.products.length === 0 && ' · 可直接上传多产品BOM文件，系统将自动识别创建产品'}
               </CardDescription>
             </CardHeader>
             <CardContent>
