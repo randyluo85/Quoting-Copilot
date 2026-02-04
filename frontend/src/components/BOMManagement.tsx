@@ -1083,7 +1083,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
           </CardHeader>
           <CardContent className="p-4">
             {/* 产品 Tab 列表 */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-3">
+            <div className="flex items-center gap-1 overflow-x-auto pb-4">
               {project.products.map((product) => {
                 const isSelected = selectedProduct.id === product.id;
                 return (
