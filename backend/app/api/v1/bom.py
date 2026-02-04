@@ -419,7 +419,7 @@ async def confirm_create_products(
         创建结果摘要
     """
     from app.models.project_product import ProjectProduct
-    from app.models.bom import ProductMaterial
+    from app.models.product_material import ProductMaterial
     import uuid
     from datetime import datetime
 
