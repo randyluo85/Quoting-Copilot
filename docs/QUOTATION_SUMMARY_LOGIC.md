@@ -234,8 +234,8 @@ flowchart TD
     F --> G[计算年降后 VP = Base × 1-LTAⁿ]
     G --> H[计算 HK3 = Material + Production]
     H --> I[计算 SK1 = HK3 + S&A 管销费用]
-    I --> J[计算 Interest = VP × Rate × Days/360]
-    J --> K[计算 SK2 = SK1 + 分摊 + Interest + 物流]
+    I --> J[计算 Working Capital Interest = VP × Rate × Days/360]
+    J --> K[计算 SK2 = SK1 + 分摊 + Working Capital Interest + 物流]
     K --> L[计算 DB4 = VP - SK2 / VP]
     L --> M{DB4 < -5%?}
     M -->|是| N[标记预警]
