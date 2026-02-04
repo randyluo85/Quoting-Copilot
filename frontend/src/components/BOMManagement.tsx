@@ -1348,23 +1348,23 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                   </TabsList>
 
                   <TabsContent value="materials" className="mt-4">
-                    <div className="rounded-lg border border-zinc-200 overflow-hidden overflow-x-auto">
+                    <div className="rounded-lg border border-zinc-200 overflow-x-auto">
                       <Table>
                         <TableHeader className="bg-zinc-50">
                           <TableRow className="border-b-zinc-200 hover:bg-transparent">
-                            <TableHead className="w-12 text-xs font-semibold text-zinc-700">层级</TableHead>
-                            <TableHead className="w-28 text-xs font-semibold text-zinc-700">零件号</TableHead>
-                            <TableHead className="min-w-[120px] text-xs font-semibold text-zinc-700">零件名称</TableHead>
-                            <TableHead className="w-16 text-xs font-semibold text-zinc-700">版本</TableHead>
-                            <TableHead className="w-14 text-xs font-semibold text-zinc-700">类型</TableHead>
-                            <TableHead className="w-14 text-xs font-semibold text-zinc-700">状态</TableHead>
-                            <TableHead className="w-28 text-xs font-semibold text-zinc-700">材料</TableHead>
-                            <TableHead className="w-24 text-xs font-semibold text-zinc-700">供应商</TableHead>
-                            <TableHead className="w-16 text-right text-xs font-semibold text-zinc-700">数量</TableHead>
-                            <TableHead className="w-20 text-right text-xs font-semibold text-zinc-700">单价</TableHead>
-                            <TableHead className="w-20 text-right text-xs font-semibold text-zinc-700">VAVE单价</TableHead>
-                            <TableHead className="min-w-[120px] text-xs font-semibold text-zinc-700">备注</TableHead>
-                            <TableHead className="w-20 text-right text-xs font-semibold text-zinc-700">操作</TableHead>
+                            <TableHead className="w-10 text-xs font-semibold text-zinc-700">层级</TableHead>
+                            <TableHead className="w-24 text-xs font-semibold text-zinc-700">零件号</TableHead>
+                            <TableHead className="min-w-[100px] max-w-[150px] text-xs font-semibold text-zinc-700">零件名称</TableHead>
+                            <TableHead className="w-12 text-xs font-semibold text-zinc-700">版本</TableHead>
+                            <TableHead className="w-12 text-xs font-semibold text-zinc-700">类型</TableHead>
+                            <TableHead className="w-12 text-xs font-semibold text-zinc-700">状态</TableHead>
+                            <TableHead className="w-24 text-xs font-semibold text-zinc-700">材料</TableHead>
+                            <TableHead className="w-20 text-xs font-semibold text-zinc-700">供应商</TableHead>
+                            <TableHead className="w-14 text-right text-xs font-semibold text-zinc-700">数量</TableHead>
+                            <TableHead className="w-16 text-right text-xs font-semibold text-zinc-700">单价</TableHead>
+                            <TableHead className="w-16 text-right text-xs font-semibold text-zinc-700">VAVE</TableHead>
+                            <TableHead className="min-w-[80px] max-w-[120px] text-xs font-semibold text-zinc-700">备注</TableHead>
+                            <TableHead className="w-16 text-right text-xs font-semibold text-zinc-700">操作</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
