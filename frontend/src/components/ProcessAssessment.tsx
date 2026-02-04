@@ -506,7 +506,7 @@ export function ProcessAssessment({ onNavigate }: ProcessAssessmentProps) {
 
       {/* 编辑器抽屉 */}
       <Sheet open={isEditorOpen} onOpenChange={setIsEditorOpen}>
-        <SheetContent className="w-[800px] overflow-y-auto">
+        <SheetContent className="w-[600px] sm:max-w-[600px] overflow-y-auto">
           <SheetHeader>
             <SheetTitle>
               {editingRoute?.id ? '编辑工艺路线' : '新建工艺路线'}
