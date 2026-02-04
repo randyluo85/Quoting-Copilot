@@ -499,26 +499,22 @@ export function ProcessAssessment({ onNavigate }: ProcessAssessmentProps) {
       </div>
 
       {/* 编辑器抽屉 */}
-      <Sheet open={isEditorOpen} onOpenChange={setIsEditorOpen}>
-        <SheetContent className="w-[600px] sm:max-w-[600px] overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>
-              {editingRoute?.id ? '编辑工艺路线' : '新建工艺路线'}
-            </SheetTitle>
-            <SheetDescription>
-              创建和编辑工艺路线，定义工序顺序和成本参数
-            </SheetDescription>
-          </SheetHeader>
-          <ProcessRouteEditor
-            initialData={editingRoute}
-            availableProcesses={availableProcesses}
-            onSave={handleSave}
-            onSubmit={editingRoute?.status === 'draft' ? handleSubmit : undefined}
-            onCancel={() => setIsEditorOpen(false)}
-            isSaving={isSaving}
-          />
-        </SheetContent>
-      </Sheet>
+      <SidePanel
+        open={isEditorOpen}
+        onOpenChange={setIsEditorOpen}
+        title={editingRoute?.id ? '编辑工艺路线' : '新建工艺路线'}
+        description="创建和编辑工艺路线，定义工序顺序和成本参数"
+        width={600}
+      >
+        <ProcessRouteEditor
+          initialData={editingRoute}
+          availableProcesses={availableProcesses}
+          onSave={handleSave}
+          onSubmit={editingRoute?.status === 'draft' ? handleSubmit : undefined}
+          onCancel={() => setIsEditorOpen(false)}
+          isSaving={isSaving}
+        />
+      </SidePanel>
     </div>
   );
 }
