@@ -20,7 +20,7 @@ export function UnderConstruction({
 }: UnderConstructionProps) {
   return (
     <div className="p-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl">
         <div className="mb-8">
           <h1 className="text-2xl mb-1">{title}</h1>
           <p className="text-sm text-zinc-500">{description}</p>
