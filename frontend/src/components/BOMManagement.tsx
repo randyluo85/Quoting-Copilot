@@ -1600,7 +1600,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                     </div>
 
                     {/* Routing Info Card */}
-                    <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="m-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
                       <div className="flex items-start gap-3">
                         <Database className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
                         <div className="flex-1">
@@ -1613,27 +1613,27 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                         </div>
                       </div>
                     </div>
-                  </TabsContent>
-                </Tabs>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
 
-                {/* Inquiry Reminder */}
-                {stats.needInquiry > 0 && (
-                  <div className="mt-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
-                    <div className="flex items-start gap-3">
-                      <AlertCircle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm text-orange-900 mb-1">
-                          需要询价 {stats.needInquiry} 个项目
-                        </p>
-                        <p className="text-xs text-orange-700">
-                          点击"询价"按钮将自动生成询价邮件，包含项目和产品的完整信息。完成所有询价后才能进入下一步。
-                        </p>
-                      </div>
-                    </div>
+            {/* Inquiry Reminder */}
+            {stats.needInquiry > 0 && (
+              <div className="mt-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm text-orange-900 mb-1">
+                      需要询价 {stats.needInquiry} 个项目
+                    </p>
+                    <p className="text-xs text-orange-700">
+                      点击"询价"按钮将自动生成询价邮件，包含项目和产品的完整信息。完成所有询价后才能进入下一步。
+                    </p>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                </div>
+              </div>
+            )}
           </>
         )}
 
