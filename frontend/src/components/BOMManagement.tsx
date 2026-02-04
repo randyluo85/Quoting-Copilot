@@ -140,6 +140,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
   );
   const [bomData, setBomData] = useState<Record<string, ProductBOMData>>({});
   const [fileName, setFileName] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 新增产品状态
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
