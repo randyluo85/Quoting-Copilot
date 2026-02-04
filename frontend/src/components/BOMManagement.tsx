@@ -1348,7 +1348,7 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
 
       {/* 新增产品抽屉 */}
       <Sheet open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
-        <SheetContent className="w-[450px] overflow-y-auto">
+        <SheetContent className="w-[600px] sm:max-w-[600px] overflow-y-auto">
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5" />
