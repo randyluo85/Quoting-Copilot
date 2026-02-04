@@ -1329,15 +1329,15 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="pt-6">
+              <CardContent className="pt-4">
                 <Tabs defaultValue="materials" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 bg-zinc-100/80 p-1 rounded-xl">
-                    <TabsTrigger value="materials" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                      <Package className="h-4 w-4 mr-2" />
+                  <TabsList className="inline-flex h-8 items-center justify-center rounded-lg bg-zinc-100 p-1">
+                    <TabsTrigger value="materials" className="h-7 px-3 text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                      <Package className="h-3.5 w-3.5 mr-1.5" />
                       物料清单 ({currentBomData.materials.length})
                     </TabsTrigger>
-                    <TabsTrigger value="processes" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                      <Settings className="h-4 w-4 mr-2" />
+                    <TabsTrigger value="processes" className="h-7 px-3 text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                      <Settings className="h-3.5 w-3.5 mr-1.5" />
                       工艺清单 ({currentBomData.processes.length})
                     </TabsTrigger>
                   </TabsList>
