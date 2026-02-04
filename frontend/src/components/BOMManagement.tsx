@@ -1436,15 +1436,13 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                                   </SelectContent>
                                 </Select>
                               </TableCell>
-                              <TableCell className="text-xs text-zinc-600">
-                                {material.supplier || (
-                                  <span className="text-zinc-400 italic">未指定</span>
-                                )}
+                              <TableCell className="text-xs text-zinc-600 truncate max-w-[80px]" title={material.supplier || ''}>
+                                {material.supplier || <span className="text-zinc-400 italic">-</span>}
                               </TableCell>
                               <TableCell className="text-right text-sm font-medium text-zinc-700">
-                                {material.quantity} <span className="text-zinc-500">{material.unit}</span>
+                                {material.quantity}<span className="text-zinc-500 ml-0.5">{material.unit}</span>
                               </TableCell>
-                              <TableCell className="text-right">
+                              <TableCell className="text-right text-xs">
                                 {material.hasHistoryData && material.unitPrice ? (
                                   <div className="space-y-0.5">
                                     <div className="font-semibold text-zinc-900">
