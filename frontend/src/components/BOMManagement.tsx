@@ -1569,8 +1569,10 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                                   <span className="text-zinc-300 text-sm">-</span>
                                 )}
                               </TableCell>
-                              <TableCell className="text-xs text-zinc-500 max-w-[200px] truncate" title={process.spec || ''}>
-                                {process.spec || <span className="text-zinc-300">-</span>}
+                              <TableCell className="text-xs text-zinc-500 p-2">
+                                <div className="truncate max-w-[112px]" title={process.spec || ''}>
+                                  {process.spec || <span className="text-zinc-300">-</span>}
+                                </div>
                               </TableCell>
                               <TableCell className="text-right">
                                 {currentBomData.needsIEReview ? (
