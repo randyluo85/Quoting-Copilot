@@ -1081,9 +1081,9 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="p-4">
+          <CardContent className="px-4 pb-4">
             {/* 产品 Tab 列表 */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-4">
+            <div className="flex items-center gap-1 overflow-x-auto pb-3">
               {project.products.map((product) => {
                 const isSelected = selectedProduct.id === product.id;
                 return (
