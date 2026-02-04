@@ -133,6 +133,44 @@ interface ProductBOMData {
 
 export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
   const updateProject = useProjectStore((state) => state.updateProject);
+
+  // 状态声明 - 必须在所有检查之前
+  const [selectedProduct, setSelectedProduct] = useState<Product>(
+    project?.products?.[0] || { id: '', name: '', partNumber: '', annualVolume: 0, description: '' }
+  );
+  const [bomData, setBomData] = useState<Record<string, ProductBOMData>>({});
+  const [fileName, setFileName] = useState('');
+
+  // 新增产品状态
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [isAddingProduct, setIsAddingProduct] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    code: '',
+    routeCode: '',
+    annualVolume: project?.annualVolume || '0',
+    description: '',
+  });
+
+  // 多产品 BOM 解析状态
+  const [multiProductPreview, setMultiProductPreview] = useState<{
+    products: Array<{
+      product_code: string;
+      product_name: string | null;
+      material_count: number;
+    }>;
+    products_grouped?: Array<{
+      product_code: string;
+      product_name: string | null;
+      materials: any[];
+      processes: any[];
+    }>;
+    total_materials: number;
+    materials: any[];
+    processes: any[];
+  } | null>(null);
+  const [showMultiProductDialog, setShowMultiProductDialog] = useState(false);
+
   // 添加空值检查
   if (!project) {
     return (
@@ -180,6 +218,9 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
           products: newProducts,
         };
         updateProject(updatedProject);
+
+        // 更新选中产品
+        setSelectedProduct(newProducts[0]);
 
         // 创建 BOM 数据
         const newBomData: Record<string, ProductBOMData> = {};
@@ -244,9 +285,14 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
     );
   }
 
-  const [selectedProduct, setSelectedProduct] = useState<Product>(project.products[0]);
-  const [bomData, setBomData] = useState<Record<string, ProductBOMData>>({});
-  const [fileName, setFileName] = useState('');
+  // 当产品列表变化时，更新 selectedProduct
+  useEffect(() => {
+    if (project.products && project.products.length > 0) {
+      if (!selectedProduct.id || !project.products.find(p => p.id === selectedProduct.id)) {
+        setSelectedProduct(project.products[0]);
+      }
+    }
+  }, [project.products]);
 
   // 新增产品状态
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
