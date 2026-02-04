@@ -209,3 +209,86 @@ class MaterialDetailResponse(BaseModel):
     updated_at: datetime = Field(..., alias="updatedAt")
 
     model_config = {"populate_by_name": True, "by_alias": True}
+
+
+# ==================== 多产品 BOM 解析 ====================
+
+class ProductInfoSchema(BaseModel):
+    """产品元数据（从 sheet 顶部提取）."""
+    product_code: str
+    product_name: Optional[str] = None
+    product_number: Optional[str] = None
+    product_version: str = "01"
+    customer_version: str = "01"
+    customer_number: Optional[str] = None
+    issue_date: Optional[datetime] = None
+    material_count: int = 0
+    process_count: int = 0
+
+    model_config = {"by_alias": True}
+
+
+class MaterialSchema(BaseModel):
+    """物料 Schema（用于解析结果）."""
+    level: str
+    part_number: str = Field(..., alias="partNumber")
+    part_name: str = Field(..., alias="partName")
+    version: str
+    type: str
+    status: str
+    material: str
+    supplier: str
+    quantity: float
+    unit: str
+    comments: str
+
+    model_config = {"by_alias": True}
+
+
+class ProcessSchema(BaseModel):
+    """工艺 Schema（用于解析结果）."""
+    op_no: str = Field(..., alias="opNo")
+    name: str
+    work_center: str = Field(..., alias="workCenter")
+    standard_time: float = Field(..., alias="standardTime")
+    spec: Optional[str] = None
+
+    model_config = {"by_alias": True}
+
+
+class ProductBOMResultSchema(BaseModel):
+    """单个产品的 BOM 解析结果."""
+    product_info: ProductInfoSchema = Field(..., alias="productInfo")
+    materials: List[MaterialSchema]
+    processes: List[ProcessSchema]
+
+    model_config = {"by_alias": True}
+
+
+class MultiProductBOMParseResultSchema(BaseModel):
+    """多产品 BOM 解析结果."""
+    products: List[ProductBOMResultSchema]
+    total_products: int
+    total_materials: int
+    parse_warnings: List[str] = []
+
+    model_config = {"by_alias": True}
+
+
+class BOMConfirmCreateRequest(BaseModel):
+    """确认创建产品请求."""
+    project_id: str = Field(..., alias="projectId")
+    products: List[ProductBOMResultSchema]
+
+    model_config = {"by_alias": True}
+
+
+class BOMPreviewResponse(BaseModel):
+    """BOM 预览响应."""
+    project_id: str = Field(..., alias="projectId")
+    products: List[ProductBOMResultSchema]
+    total_products: int
+    total_materials: int
+    parse_warnings: List[str] = []
+
+    model_config = {"by_alias": True}
