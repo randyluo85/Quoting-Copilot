@@ -495,16 +495,21 @@ class MultiProductBOMParser:
             issue_date=self._parse_date(issue_date),
         )
 
-    def _parse_date(self, date_str: str | None) -> datetime | None:
-        """解析日期字符串."""
-        if not date_str:
+    def _parse_date(self, date_input: str | datetime | None) -> datetime | None:
+        """解析日期（支持字符串、datetime 对象）."""
+        if not date_input:
             return None
         try:
-            # 处理 Excel 日期序列号
-            if isinstance(date_str, str) and date_str.isdigit():
-                return datetime.fromordinal(int(date_str) + 693594)  # Excel epoch 1900-01-01
+            # 如果已经是 datetime 对象，直接返回
+            if isinstance(date_input, datetime):
+                return date_input
             # 处理字符串日期
-            return datetime.fromisoformat(date_str) if isinstance(date_str, str) else None
+            if isinstance(date_input, str):
+                # 处理 Excel 日期序列号
+                if date_input.isdigit():
+                    return datetime.fromordinal(int(date_input) + 693594)  # Excel epoch 1900-01-01
+                # 处理 ISO 格式日期
+                return datetime.fromisoformat(date_input)
         except (ValueError, TypeError):
             return None
 
