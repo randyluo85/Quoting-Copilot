@@ -1494,6 +1494,90 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* 多产品 BOM 预览对话框 */}
+      {showMultiProductDialog && multiProductPreview && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                检测到多个产品
+              </CardTitle>
+              <CardDescription>
+                AI 在上传的 BOM 文件中检测到 {multiProductPreview.products.length} 个产品，是否自动创建？
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1 overflow-y-auto">
+              <div className="space-y-3">
+                {multiProductPreview.products.map((product, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-3 bg-zinc-50 rounded-lg border"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                        <Package className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{product.product_code}</p>
+                        <p className="text-sm text-zinc-500">
+                          {product.product_name || '未命名'} · {product.material_count} 个物料
+                        </p>
+                      </div>
+                    </div>
+                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-sm text-blue-900">
+                  共 {multiProductPreview.total_materials} 个物料将被导入到各自的产品中
+                </p>
+              </div>
+            </CardContent>
+            <div className="flex justify-end gap-3 p-6 border-t">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowMultiProductDialog(false);
+                  setMultiProductPreview(null);
+                  // 仅导入到当前选中的产品
+                  if (multiProductPreview) {
+                    setBomData(prev => ({
+                      ...prev,
+                      [selectedProduct.id]: {
+                        productId: selectedProduct.id,
+                        isUploaded: true,
+                        isParsing: false,
+                        isParsed: true,
+                        parseProgress: 100,
+                        materials: multiProductPreview.materials,
+                        processes: multiProductPreview.processes,
+                        isRoutingKnown: false,
+                        needsIEReview: multiProductPreview.materials.filter((m: any) => !m.hasHistoryData).length > 0
+                      }
+                    }));
+                  }
+                }}
+              >
+                仅导入当前产品
+              </Button>
+              <Button
+                onClick={() => {
+                  // 创建新产品并分配物料
+                  handleMultiProductConfirm();
+                  setShowMultiProductDialog(false);
+                  setMultiProductPreview(null);
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                创建 {multiProductPreview.products.length} 个产品
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
