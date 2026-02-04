@@ -122,9 +122,12 @@ $$UnitAmort = \frac{I_{total} \times (1 + R_{interest} \times Y_{amort})}{V_{amo
 其中 `(1 + R_{interest} × Y_{amort})` 为 **Capital Interest 因子**。
 
 **示例计算：**
-- 模具费 17 万，分摊 2 年，利率 6%，分摊量 29,750 件
-- 含息总额 = $170,000 \times (1 + 0.06 \times 2) = 190,400$
+- 模具费 17 万，分摊 2 年，资本利率 6%，分摊量 29,750 件
+- Capital Interest 因子 = $1 + 0.06 \times 2 = 1.12$
+- 含息总额 = $170,000 \times 1.12 = 190,400$
 - 单件分摊 = $190,400 / 29,750 = 6.40$ 元
+
+**注意**：这 6.40 元已包含 Capital Interest，在 QS 表的 Tooling 列中列示，**不再额外计算利息**。
 
 ---
 
