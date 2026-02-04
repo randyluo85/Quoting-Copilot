@@ -232,7 +232,7 @@ export function ProcessRouteEditor({
   };
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="w-full px-6">
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
