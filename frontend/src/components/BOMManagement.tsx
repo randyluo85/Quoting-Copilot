@@ -1191,7 +1191,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                     return (
                       <>
                         {/* 物料卡片 */}
-                        <div className="bg-white rounded-lg p-3 border border-zinc-200 min-w-[100px]">
+                        <div className="bg-white rounded-lg p-4 border border-zinc-200 min-w-[150px]">
                           <div className="flex items-center gap-2 mb-2">
                             <Package className="h-4 w-4 text-blue-600" />
                             <span className="text-xs font-medium text-zinc-700">物料</span>
