@@ -502,17 +502,17 @@ export function ProcessAssessment({ onNavigate }: ProcessAssessmentProps) {
         </Card>
       </div>
 
-      {/* 编辑器对话框 */}
-      <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
+      {/* 编辑器抽屉 */}
+      <Sheet open={isEditorOpen} onOpenChange={setIsEditorOpen}>
+        <SheetContent className="w-[800px] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>
               {editingRoute?.id ? '编辑工艺路线' : '新建工艺路线'}
-            </DialogTitle>
-            <DialogDescription>
+            </SheetTitle>
+            <SheetDescription>
               创建和编辑工艺路线，定义工序顺序和成本参数
-            </DialogDescription>
-          </DialogHeader>
+            </SheetDescription>
+          </SheetHeader>
           <ProcessRouteEditor
             initialData={editingRoute}
             availableProcesses={availableProcesses}
