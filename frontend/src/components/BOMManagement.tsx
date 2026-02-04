@@ -352,6 +352,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
             parseProgress: 100,
             materials,
             processes,
+            routingId: `RT-${selectedProduct.partNumber || 'BOM'}-${Date.now().toString().slice(-4)}`,
             isRoutingKnown: (processes || []).length > 0,
             needsIEReview: materials.filter((m: any) => !m.hasHistoryData).length > 0
           };
