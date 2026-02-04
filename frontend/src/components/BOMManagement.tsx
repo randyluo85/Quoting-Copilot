@@ -159,12 +159,51 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
         <div className="max-w-7xl">
           <Card>
             <CardContent className="p-12 text-center">
-              <Package className="h-12 w-12 text-zinc-300 mx-auto mb-4" />
-              <h2 className="text-lg font-medium mb-2">该项目暂无产品</h2>
-              <p className="text-zinc-500 mb-4">请先为项目添加产品信息</p>
-              <Button onClick={() => onNavigate('dashboard')}>
-                返回项目列表
-              </Button>
+              <FileSpreadsheet className="h-16 w-16 text-blue-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold mb-2">上传 BOM 文件开始报价</h2>
+              <p className="text-zinc-500 mb-6 max-w-md mx-auto">
+                支持多产品 BOM 文件上传，系统将自动识别每个产品并分配对应的物料数据。
+              </p>
+              <div className="flex justify-center gap-3">
+                <Button variant="outline" onClick={() => onNavigate('dashboard')}>
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  返回项目列表
+                </Button>
+                <Button onClick={() => document.getElementById('empty-state-bom-upload')?.click()}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  上传 BOM 文件
+                </Button>
+                <input
+                  id="empty-state-bom-upload"
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setFileName(file.name);
+                    // 创建一个临时的产品 ID 用于上传
+                    const tempProductId = `temp-${Date.now()}`;
+                    const tempProduct: Product = {
+                      id: tempProductId,
+                      name: '临时产品',
+                      partNumber: 'TEMP',
+                      annualVolume: parseInt(project.annualVolume) || 100000,
+                      description: '上传 BOM 后自动创建产品',
+                    };
+                    // 添加临时产品到项目中
+                    const updatedProject = {
+                      ...project,
+                      products: [tempProduct],
+                    };
+                    updateProject(updatedProject);
+                    setSelectedProduct(tempProduct);
+                    // 触发文件上传
+                    const event = { target: { files: [file] } } as any;
+                    setTimeout(() => handleFileUpload(event), 100);
+                  }}
+                />
+              </div>
             </CardContent>
           </Card>
         </div>
