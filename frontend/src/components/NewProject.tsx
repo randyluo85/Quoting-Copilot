@@ -231,13 +231,7 @@ export function NewProject({ onNavigate, onProjectCreated }: NewProjectProps) {
             partNumber: p.partNumber,
             annualVolume: p.annualVolume,
             description: p.description
-          })) || [{
-            id: 'P-001',
-            name: formData.projectName,
-            partNumber: 'PART-' + Date.now(),
-            annualVolume: parseInt(formData.annualVolume) || 0,
-            description: formData.description
-          }]
+          })) || []  // 不创建默认产品，由 BOM 上传时创建
         });
 
         // 创建成功，选中项目并通知父组件
