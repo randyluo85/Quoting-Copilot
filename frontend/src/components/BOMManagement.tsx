@@ -180,6 +180,41 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
     }
   }, [project?.products]);
 
+  // 加载项目的 BOM 数据（从后端恢复已保存的数据）
+  useEffect(() => {
+    const loadBOMData = async () => {
+      if (!project?.id || project.products.length === 0) return;
+
+      try {
+        const response = await api.bom.getProjectBOMData(project.id);
+        if (response.status === 'success' && response.products) {
+          const newBomData: Record<string, ProductBOMData> = {};
+
+          for (const productData of response.products) {
+            newBomData[productData.productId] = {
+              productId: productData.productId,
+              isUploaded: productData.isParsed,
+              isParsing: false,
+              isParsed: productData.isParsed,
+              parseProgress: 100,
+              materials: productData.materials || [],
+              processes: productData.processes || [],
+              isRoutingKnown: (productData.processes || []).length > 0,
+              needsIEReview: (productData.materials || []).filter((m: any) => !m.hasHistoryData).length > 0
+            };
+          }
+
+          setBomData(newBomData);
+        }
+      } catch (error) {
+        // 如果加载失败，保持空状态（可能是新项目）
+        console.log('No BOM data found or loading failed:', error);
+      }
+    };
+
+    loadBOMData();
+  }, [project?.id]);
+
   // 添加空值检查
   if (!project) {
     return (
