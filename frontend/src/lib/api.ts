@@ -256,6 +256,10 @@ export const api = {
       return response.json();
     },
 
+    // 获取项目中所有产品的 BOM 数据
+    getProjectBOMData: (projectId: string) =>
+      apiRequest<any>(`/bom/products/${projectId}`),
+
     getMaterials: (projectId: string) =>
       apiRequest<any>(`/bom/${projectId}/materials`),
 
