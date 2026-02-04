@@ -82,6 +82,32 @@ $$
 - 在计算 Payback 时，应将利润中扣除的折旧费加回
 - 即：**现金流 = 净利 + 折旧**
 
+**折旧数据来源（v1.4 更新）：**
+- 折旧率存储在 `process_rates` 表的 `depreciation_rate` 字段中
+- 标准方案使用 `std_depreciation_rate`
+- VAVE 方案使用 `vave_depreciation_rate`
+- 单件折旧额 = `depreciation_rate × (cycle_time / 3600)`
+- 总折旧 = `Σ(各工序单件折旧额 × 产量)`
+
+**计算示例：**
+```python
+# 获取工序折旧率
+process_rate = get_process_rate("INJECTION_001")
+std_depr_rate = process_rate.std_depreciation_rate  # 例如：8.50 元/小时
+
+# 计算单件折旧额
+cycle_time_seconds = 45  # 工时节拍（秒）
+depreciation_per_unit = std_depr_rate * (cycle_time_seconds / 3600)  # 0.10625 元
+
+# 计算总折旧（用于现金流回拨）
+annual_volume = 50000
+total_depreciation = depreciation_per_unit * annual_volume  # 5,312.50 元
+
+# 现金流计算
+net_profit = 150000  # 净利
+cash_flow = net_profit + total_depreciation  # 155,312.50 元
+```
+
 ---
 
 ## 3. 自动化流转：逻辑触发架构
