@@ -226,10 +226,12 @@ class BusinessCaseService:
         计算公式（累加法）:
         - HK3 = Material Cost + Process Cost
         - S&A = Net Sales × sa_rate (管销费用率，默认 2.1%)
-        - Interest = Net Price × interest_rate × (payment_terms_days / 360) × volume
-        - SK = HK3 + Tooling Recovery + R&D Recovery + S&A + Interest
+        - Working Capital Interest = Net Price × rate × (payment_terms_days / 360) × volume
+        - SK = HK3 + Tooling Recovery (含 Capital Interest) + R&D Recovery + S&A + Working Capital Interest
         - DB1 = Net Sales - HK3 (边际贡献 I)
         - DB4 = Net Sales - SK (净利润 IV)
+
+        注意：tooling_recovery 已包含模具分摊中的 Capital Interest，与 Working Capital Interest 是不同概念
         """
         # 保存参数
         bc_params = await self.upsert_params(params)
