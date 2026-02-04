@@ -158,8 +158,12 @@ class QuoteSummaryResponse(BaseModel):
 class BOMMaterialResponse(BaseModel):
     """BOM 上传返回的物料响应（用于前端显示）."""
     id: str  # 格式: M-001
+    level: Optional[str] = None  # BOM 层级（从 BOM 文件解析）
     part_number: str = Field(..., alias="partNumber")
     part_name: str = Field(..., alias="partName")
+    version: Optional[str] = None  # 版本（从 BOM 文件的 "Ver." 列解析）
+    type: Optional[str] = None  # 类型（从 BOM 文件的 "Typ" 列解析）
+    stock_status: Optional[str] = Field(None, alias="stockStatus")  # 库存状态（从 BOM 文件的 "St" 列解析）
     material: Optional[str] = None
     supplier: Optional[str] = None
     quantity: Optional[float] = None
@@ -168,7 +172,7 @@ class BOMMaterialResponse(BaseModel):
     vave_price: Optional[float] = Field(None, alias="vavePrice")
     has_history_data: bool = Field(False, alias="hasHistoryData")
     comments: Optional[str] = None
-    status: StatusLight = StatusLight.RED
+    status: StatusLight = StatusLight.RED  # 数据匹配状态灯（GREEN/YELLOW/RED）
 
     model_config = {"populate_by_name": True, "by_alias": True}
 
