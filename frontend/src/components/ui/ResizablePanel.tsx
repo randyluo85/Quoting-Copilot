@@ -129,11 +129,13 @@ export function SidePanel({
       <aside
         className={cn(
           "fixed top-0 right-0 h-full bg-background border-l shadow-lg z-50 transition-transform duration-300 ease-in-out flex flex-col",
-          open ? "translate-x-0" : "translate-x-full",
           !open && "pointer-events-none",
           className
         )}
-        style={{ width: `${width}px` }}
+        style={{
+          width: `${width}px`,
+          transform: open ? 'translateX(0)' : 'translateX(100%)',
+        }}
       >
         {/* 面板头部 */}
         {(title || description) && (
