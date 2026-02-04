@@ -1073,26 +1073,26 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
           </CardHeader>
           <CardContent className="p-4">
             {/* 产品 Tab 列表 - 横向紧凑布局 */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-1">
+            <div className="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar">
               {project.products.map((product) => {
                 const isSelected = selectedProduct.id === product.id;
                 const productBom = bomData[product.id];
+                const displayName = product.name || product.partNumber || '未命名';
 
                 return (
                   <button
                     key={product.id}
                     onClick={() => setSelectedProduct(product)}
                     className={`
-                      flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium transition-all
+                      flex-shrink-0 px-2 py-1 rounded text-xs font-medium transition-all whitespace-nowrap
                       ${isSelected
                         ? 'bg-blue-600 text-white shadow-sm'
                         : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
                       }
                     `}
+                    title={displayName}
                   >
-                    <span className="truncate max-w-[120px] block">
-                      {product.name || product.partNumber || '未命名'}
-                    </span>
+                    {displayName.length > 12 ? displayName.slice(0, 12) + '...' : displayName}
                   </button>
                 );
               })}
