@@ -228,10 +228,15 @@ class PaybackAnalysis(BaseModel):
 | 表名 | 用途 | 相关字段 |
 |------|------|---------|
 | `materials` | 物料成本查询 | `std_price`, `vave_price` |
-| `process_rates` | 工时费率查询 | `std_mhr`, `vave_mhr` |
+| `process_rates` | 工时费率查询 | `std_mhr_var`, `std_mhr_fix`, **`std_depreciation_rate`** 🔴 |
 | `product_materials` | BOM 行项目 | `std_cost`, `vave_cost` |
 | `product_processes` | 工艺路线 | `cycle_time`, `std_cost`, `vave_cost` |
 | `projects` | 项目基础数据 | `annual_volume`, `target_margin` |
+
+> **🔴 v1.4 折旧数据来源：**
+> - `process_rates.std_depreciation_rate` / `vave_depreciation_rate` 存储折旧率（元/小时）
+> - 单件折旧 = `depreciation_rate × (cycle_time / 3600)`
+> - 用于 Payback 现金流计算：现金流 = 净利 + 折旧
 
 ---
 
