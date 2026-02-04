@@ -542,3 +542,113 @@ async def confirm_create_products(
         "total_products": len(created_products),
         "total_materials": total_materials
     })
+
+
+@router.get("/products/{project_id}")
+async def get_project_bom_data(
+    project_id: str,
+    db: AsyncSession = Depends(get_db)
+):
+    """获取项目中所有产品的 BOM 数据.
+
+    用于前端组件加载时恢复已保存的 BOM 数据
+
+    Args:
+        project_id: 项目 ID
+        db: 数据库会话
+
+    Returns:
+        项目中所有产品的 BOM 数据（物料和工艺）
+    """
+    from app.models.project_product import ProjectProduct
+    from app.models.product_material import ProductMaterial
+    from app.models.product_process import ProductProcess
+    from sqlalchemy import select
+
+    # 查询项目的所有产品
+    stmt = select(ProjectProduct).where(ProjectProduct.project_id == project_id)
+    result = await db.execute(stmt)
+    products = result.scalars().all()
+
+    products_data = []
+
+    for product in products:
+        # 查询该产品的物料
+        material_stmt = select(ProductMaterial).where(
+            ProductMaterial.project_product_id == product.id
+        )
+        material_result = await db.execute(material_stmt)
+        materials = material_result.scalars().all()
+
+        # 查询该产品的工艺（如果表存在）
+        processes = []
+        try:
+            process_stmt = select(ProductProcess).where(
+                ProductProcess.project_product_id == product.id
+            )
+            process_result = await db.execute(process_stmt)
+            processes = process_result.scalars().all()
+        except Exception:
+            # 表可能不存在或查询失败，忽略
+            pass
+
+        # 转换物料数据为前端格式
+        materials_data = []
+        for idx, m in enumerate(materials):
+            # 尝试从 materials 表获取价格
+            price_data = {}
+            if m.material_id:
+                material_codes = [m.material_id]
+                price_lookup = await to_thread(_query_materials_sync, material_codes)
+                price_data = price_lookup.get(m.material_id, {})
+
+            materials_data.append({
+                "id": f"M-{idx + 1:03d}",
+                "level": str(m.material_level) if m.material_level is not None else "",
+                "partNumber": m.material_id or "",
+                "partName": m.material_name or "",
+                "version": "1.0",
+                "type": m.material_type or "原材料",
+                "status": "可用",
+                "material": price_data.get("material", ""),
+                "supplier": price_data.get("supplier", ""),
+                "quantity": float(m.quantity) if m.quantity is not None else 0,
+                "unit": m.unit or "PC",
+                "unitPrice": price_data.get("unit_price"),
+                "vavePrice": price_data.get("vave_price"),
+                "hasHistoryData": price_data.get("has_history_data", False),
+                "comments": m.remarks or ""
+            })
+
+        # 转换工艺数据为前端格式
+        processes_data = []
+        for idx, p in enumerate(processes):
+            processes_data.append({
+                "id": f"P-{idx + 1:03d}",
+                "opNo": p.op_no or f"{idx + 1:03d}",
+                "name": p.process_name or "",
+                "workCenter": p.work_center or "",
+                "standardTime": float(p.cycle_time) if p.cycle_time is not None else 0,
+                "spec": p.specifications,
+                "unit": "件",
+                "quantity": 1,
+                "unitPrice": float(p.std_cost) if p.std_cost is not None else None,
+                "vavePrice": float(p.vave_cost) if p.vave_cost is not None else None,
+                "hasHistoryData": p.std_cost is not None,
+                "isOperationKnown": p.std_cost is not None
+            })
+
+        products_data.append({
+            "productId": product.id,
+            "productName": product.product_name,
+            "productCode": product.product_code,
+            "materials": materials_data,
+            "processes": processes_data,
+            "isParsed": len(materials_data) > 0 or len(processes_data) > 0
+        })
+
+    return JSONResponse(content={
+        "status": "success",
+        "projectId": project_id,
+        "products": products_data
+    })
