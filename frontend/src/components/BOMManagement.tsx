@@ -234,100 +234,144 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
     );
   }
 
-  // 检查项目是否有产品
-  if (!project.products || project.products.length === 0) {
-    // 处理空产品状态下的 BOM 上传
-    const handleEmptyStateUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
+  // 处理空产品状态下的 BOM 上传（与有产品时使用相同的逻辑）
+  const handleBOMUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-      try {
-        // 直接调用 API 解析文件
-        const response = await api.bom.upload(project.id, file);
-        const totalProducts = response.summary?.total_products || 1;
-        const productsGrouped = response.products_grouped || [];
+    setFileName(file.name);
 
-        // 创建新产品
-        const newProducts: Product[] = productsGrouped.map((p, idx) => ({
-          id: `P-${Date.now()}-${idx}`,
-          name: p.product_name || p.product_code,
-          partNumber: p.product_code,
-          annualVolume: parseInt(project.annualVolume) || 100000,
-          description: `从 BOM 文件自动导入`,
+    // 设置解析状态（使用第一个产品的ID，如果是新创建的会使用临时ID）
+    const productId = selectedProduct?.id || 'temp';
+
+    setBomData(prev => ({
+      ...prev,
+      [productId]: {
+        productId: productId,
+        isUploaded: true,
+        isParsing: true,
+        parseProgress: 0,
+        isParsed: false,
+        materials: [],
+        processes: [],
+      }
+    }));
+
+    try {
+      // 调用 API 解析文件
+      const response = await api.bom.upload(project.id, file);
+
+      // 检查是否是多产品
+      const detectedProducts = response.summary?.products || [];
+      const totalProducts = response.summary?.total_products || 1;
+      const productsGrouped = response.products_grouped || [];
+
+      if (totalProducts > 1 && detectedProducts.length > 0) {
+        // 显示多产品预览对话框
+        setMultiProductPreview({
+          products: detectedProducts,
+          products_grouped: productsGrouped,
+          total_materials: response.summary.total_materials,
+          materials: response.materials || [],
+          processes: response.processes || [],
+        });
+        setShowMultiProductDialog(true);
+
+        // 清除解析状态
+        setBomData(prev => {
+          const updated = { ...prev };
+          if (prev[productId]) {
+            updated[productId] = { ...prev[productId], isParsing: false };
+          }
+          return updated;
+        });
+      } else {
+        // 单产品，正常处理
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+          progress += 20;
+          setBomData(prev => {
+            const updated = { ...prev };
+            if (updated[productId]) {
+              updated[productId] = {
+                ...updated[productId],
+                parseProgress: Math.min(progress, 90)
+              };
+            }
+            return updated;
+          });
+
+          if (progress >= 90) {
+            clearInterval(progressInterval);
+          }
+        }, 100);
+
+        clearInterval(progressInterval);
+
+        // 转换响应数据为前端格式
+        const materials = (response.materials || []).map((m: any) => ({
+          id: m.id,
+          level: '一级',
+          partNumber: m.partNumber || '',
+          partName: m.partName || '',
+          version: '1.0',
+          type: '原材料',
+          status: '可用',
+          material: m.material || '',
+          supplier: m.supplier || '',
+          quantity: m.quantity,
+          unit: m.unit || 'PC',
+          unitPrice: m.unitPrice,
+          vavePrice: m.vavePrice,
+          comments: m.comments || '',
+          hasHistoryData: m.hasHistoryData || false,
         }));
 
-        // 更新项目
-        const updatedProject = {
-          ...project,
-          products: newProducts,
-        };
-        updateProject(updatedProject);
+        const processes = (response.processes || []).map((p: any) => ({
+          id: p.id,
+          opNo: p.opNo || '',
+          name: p.name || '',
+          workCenter: p.workCenter || '',
+          standardTime: p.standardTime || 0,
+          spec: p.spec || '',
+          unit: '件',
+          quantity: 1,
+          unitPrice: p.unitPrice,
+          vavePrice: p.vavePrice,
+          hasHistoryData: p.hasHistoryData || false,
+        }));
 
-        // 更新选中产品
-        setSelectedProduct(newProducts[0]);
-
-        // 创建 BOM 数据
-        const newBomData: Record<string, ProductBOMData> = {};
-        productsGrouped.forEach((groupedProduct, idx) => {
-          const product = newProducts[idx];
-          if (product) {
-            newBomData[product.id] = {
-              productId: product.id,
-              isUploaded: true,
-              isParsing: false,
-              isParsed: true,
-              parseProgress: 100,
-              materials: groupedProduct.materials || [],
-              processes: groupedProduct.processes || [],
-              isRoutingKnown: false,
-              needsIEReview: (groupedProduct.materials || []).filter((m: any) => !m.hasHistoryData).length > 0
-            };
-          }
+        setBomData(prev => {
+          const updated = { ...prev };
+          updated[productId] = {
+            ...updated[productId],
+            isParsing: false,
+            isParsed: true,
+            parseProgress: 100,
+            materials,
+            processes,
+            isRoutingKnown: (processes || []).length > 0,
+            needsIEReview: materials.filter((m: any) => !m.hasHistoryData).length > 0
+          };
+          return updated;
         });
-
-        setBomData(newBomData);
-
-        // 显示成功消息
-        alert(`成功从 BOM 文件创建 ${newProducts.length} 个产品！`);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : '上传失败，请重试';
-        alert(`上传失败: ${message}`);
       }
-    };
-
-    return (
-      <div className="px-4 py-8 lg:px-8">
-        <div className="max-w-7xl">
-          <Card>
-            <CardContent className="p-12 text-center">
-              <FileSpreadsheet className="h-16 w-16 text-blue-500 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold mb-2">上传 BOM 文件开始报价</h2>
-              <p className="text-zinc-500 mb-6 max-w-md mx-auto">
-                支持多产品 BOM 文件上传，系统将自动识别每个产品并分配对应的物料数据。
-              </p>
-              <div className="flex justify-center gap-3">
-                <Button variant="outline" onClick={() => onNavigate('dashboard')}>
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  返回项目列表
-                </Button>
-                <Button onClick={() => document.getElementById('empty-state-bom-upload')?.click()}>
-                  <Upload className="h-4 w-4 mr-2" />
-                  上传 BOM 文件
-                </Button>
-                <input
-                  id="empty-state-bom-upload"
-                  type="file"
-                  accept=".xlsx,.xls,.csv"
-                  className="hidden"
-                  onChange={handleEmptyStateUpload}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '上传失败，请重试';
+      setBomData(prev => {
+        const updated = { ...prev };
+        if (updated[productId]) {
+          updated[productId] = {
+            ...updated[productId],
+            isParsing: false,
+            isParsed: false,
+            uploadError: errorMessage
+          };
+        }
+        return updated;
+      });
+    }
+  };
 
   // 获取当前产品的BOM数据
   const currentBomData = bomData[selectedProduct.id];
