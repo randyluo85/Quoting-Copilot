@@ -1221,7 +1221,7 @@ export function BOMManagement({ onNavigate }: BOMManagementProps) {
                         </div>
 
                         {/* 单价卡片 */}
-                        <div className={`rounded-lg p-4 border min-w-[150px] ${unitCost > 0 ? 'bg-green-50 border-green-300' : 'bg-white border-zinc-200'}`}>
+                        <div className={`rounded-lg p-4 border min-w-[250px] ${unitCost > 0 ? 'bg-green-50 border-green-300' : 'bg-white border-zinc-200'}`}>
                           <div className="flex items-center gap-2 mb-2">
                             <DollarSign className={`h-4 w-4 ${unitCost > 0 ? 'text-green-600' : 'text-zinc-400'}`} />
                             <span className={`text-xs font-medium ${unitCost > 0 ? 'text-green-700' : 'text-zinc-700'}`}>单件</span>
