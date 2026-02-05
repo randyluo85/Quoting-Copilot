@@ -84,7 +84,7 @@ $$SK_n = HK\_III_n + Amortization_n (摊销) + S\&A (管销费用)$$
 
 系统必须在后台配置一个 `S&A_Ratio`（如 2%-3%），公式应为：
 
-$$SK_n = HK\_III_n + Recovery_{Tool} + Recovery_{R\&D} + (Net\_Sales_n \times S\&A\_Ratio)$$
+$$SK_n = HK\_III_n + Recovery_{Tool} + Recovery_{R\&D} + (Net\_Sales_n \times (S\&A\_Ratio + Logistics\_Rate + OtherMfg\_Ratio))$$
 
 **验证:**
 $342,658 \times 2.1\% \approx € 7,196 \approx 7,387$ (考虑舍入误差)
