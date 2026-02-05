@@ -69,7 +69,7 @@
 | 业务概念 | 对应表 | 关键字段 |
 |---------|--------|---------|
 | 物料主数据 | `materials` | `id` (物料编码), `std_price`, `vave_price` |
-| 工序费率 | `process_rates` | `process_code`, `std_mhr`, `vave_mhr` |
+| 工序费率 | `process_rates` | `process_code`, `std_mhr_var`, `std_mhr_fix`, `vave_mhr_var`, `vave_mhr_fix` |
 | 项目 | `projects` | `id`, `project_code`, `status`, `annual_volume` |
 | BOM 行 | `product_materials` | `std_cost`, `vave_cost`, `confidence` |
 
