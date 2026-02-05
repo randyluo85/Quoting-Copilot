@@ -200,9 +200,6 @@ class ProcessRate(BaseModel):
     std_mhr_var: Decimal
     std_mhr_fix: Decimal
     std_depreciation_rate: Decimal = Field(default=Decimal("0"))  # v1.4 新增
-    vave_mhr_var: Decimal | None = None
-    vave_mhr_fix: Decimal | None = None
-    vave_depreciation_rate: Decimal = Field(default=Decimal("0"))  # v1.4 新增
     efficiency_factor: Decimal = Field(default=Decimal("1.0"))
 
     @property
@@ -211,32 +208,14 @@ class ProcessRate(BaseModel):
         return self.std_mhr_var + self.std_mhr_fix
 
     @property
-    def vave_mhr_total(self) -> Decimal:
-        """VAVE 总费率"""
-        var = self.vave_mhr_var or self.std_mhr_var
-        fix = self.vave_mhr_fix or self.std_mhr_fix
-        return (var + fix) * self.efficiency_factor
-
-    @property
     def std_depreciation_per_hour(self) -> Decimal:
         """标准折旧额/小时（用于 Payback 现金流计算）"""
         return self.std_depreciation_rate
 
     @property
-    def vave_depreciation_per_hour(self) -> Decimal:
-        """VAVE 折旧额/小时（用于 Payback 现金流计算）"""
-        return self.vave_depreciation_rate
-
-    @property
     def std_fix_excluding_depreciation(self) -> Decimal:
         """标准固定费率（不含折旧）"""
         return self.std_mhr_fix - self.std_depreciation_rate
-
-    @property
-    def vave_fix_excluding_depreciation(self) -> Decimal:
-        """VAVE 固定费率（不含折旧）"""
-        fix = self.vave_mhr_fix or self.std_mhr_fix
-        return fix - self.vave_depreciation_rate
 
 
 class ProductProcess(BaseModel):
