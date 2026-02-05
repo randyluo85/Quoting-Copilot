@@ -439,7 +439,7 @@ flowchart TB
     class MMail,MWait email
 ```
 
-### 5.2 状态流转 v2.0
+### 5.2 状态流转 v2.1
 
 ```mermaid
 stateDiagram-v2
@@ -449,8 +449,9 @@ stateDiagram-v2
     Parsed --> M_Auto: 物料匹配
     Parsed --> P_Auto: 工艺匹配
 
-    M_Auto --> M_Wait: 等待采购
-    M_Wait --> M_Ready: 完成
+    M_Auto --> M_Wait: 等待采购邮件
+    M_Wait --> M_Import: VM 导入报价单
+    M_Import --> M_Ready: 完成
     M_Auto --> M_Ready: 自动完成
 
     P_Auto --> P_Wait: 等待 IE
