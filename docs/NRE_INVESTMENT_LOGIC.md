@@ -265,7 +265,7 @@ class InvestmentCalculationResult(BaseModel):
 
 ```mermaid
 sequenceDiagram
-    participant IE as IE/PE (工程师)
+    participant IE as IE (工程师)
     participant SYS as Dr.aiVOSS 系统
     participant DB as 历史价格库
     participant SALES as Sales (销售)
