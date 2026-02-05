@@ -95,7 +95,7 @@ calculated → sales_input → completed
 | `raw_data` | Object | 原始 Excel 行数据 |
 | `features` | JSON | AI 从 Comments 提取的特征, e.g. `{"bending": 32}` |
 | `match_type` | Enum | `Exact`, `Semantic`, `None` |
-| `status_light` | Enum | `Green`, `Yellow`, `Red` |
+| `status` | Enum | `verified`, `warning`, `missing` |
 | `total_cost` | PricePair Object | 双轨总成本 |
 
 ---
