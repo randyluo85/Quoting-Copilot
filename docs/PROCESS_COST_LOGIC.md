@@ -90,34 +90,7 @@ $$Cost_{std} = (std\_mhr\_var + std\_mhr\_fix + Rate_{labor}) \times \frac{Cycle
 
 ---
 
-## 3. 双轨计价逻辑 (Dual-Track Logic)
-
-Dr.aiVOSS 的核心竞争力在于同时计算 Standard (当前) 和 VAVE (优化) 两套工艺成本。
-
-### 3.1 双轨对比矩阵
-
-| 维度 | 标准计价 (Standard) | 优化计价 (VAVE) | 优化策略说明 |
-|------|-------------------|----------------|-------------|
-| **工时节拍** | 录入的实际 SCT | $SCT \times (1 - 10\%)$ | 假设通过自动化改进缩短节拍 |
-| **稼动率** | 历史平均 Efficiency | 标杆 Efficiency (如 85%) | 提升设备利用率以摊薄固定成本 |
-| **人工配置** | 当前实际人数 | 目标自动化人数 | 减少操作员依赖（如 1人/机 → 0.5人/机） |
-| **报废率** | 历史报废水平 | 目标报废水平 | 通过工艺稳定性降低材料浪费 |
-
-### 3.2 双轨成本计算
-
-**标准方案：**
-$$Cost_{std} = (MHR_{var,std} + MHR_{fix,std} + Rate_{labor,std}) \times \frac{CycleTime_{std}}{3600}$$
-
-**VAVE 方案：**
-$$Cost_{vave} = (MHR_{var,vave} + MHR_{fix,vave} + Rate_{labor,vave}) \times \frac{CycleTime_{vave}}{3600}$$
-
-**节省分析：**
-$$Savings = Cost_{std} - Cost_{vave}$$
-$$Savings\ Rate = \frac{Savings}{Cost_{std}} \times 100\%$$
-
----
-
-## 4. 系统校验与风险预警
+## 3. 系统校验与风险预警
 
 为防止录入错误导致报价亏损，系统需设置以下"软硬闸口"：
 
