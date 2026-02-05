@@ -116,7 +116,6 @@ class TestProjectsAPI:
                 "sales": "销售",
                 "vm": "项目经理",
                 "ie": "工艺",
-                "pe": "产品",
                 "controlling": "财务"
             },
             "targetMargin": 20.0  # 更新为 20%
@@ -192,7 +191,6 @@ class TestProjectsAPIEdgeCases:
                 "sales": "销售",
                 "vm": "经理",
                 "ie": "工艺",
-                "pe": "产品",
                 "controlling": "财务"
             }
         }
@@ -219,7 +217,6 @@ class TestProjectsAPIEdgeCases:
                 "sales": "销售",
                 "vm": "经理",
                 "ie": "工艺",
-                "pe": "产品",
                 "controlling": "财务"
             }
         }
@@ -257,7 +254,6 @@ class TestProjectsAPIErrorCases:
                 "sales": "销售",
                 "vm": "经理",
                 "ie": "工艺",
-                "pe": "产品",
                 "controlling": "财务"
             }
         }
@@ -290,7 +286,6 @@ class TestProjectsAPIErrorCases:
                 "sales": "销售",
                 "vm": "经理",
                 "ie": "工艺",
-                "pe": "产品",
                 "controlling": "财务"
             },
             "targetMargin": "invalid"  # 无效值
@@ -322,7 +317,6 @@ class TestProjectsAPIResponseFormat:
                 "sales": "销售",
                 "vm": "经理",
                 "ie": "工艺",
-                "pe": "产品",
                 "controlling": "财务"
             }
         }
