@@ -288,7 +288,7 @@ flowchart TD
 | `BUSINESS_CASE_LOGIC.md` | 工艺成本汇总为 HK III |
 | `QUOTATION_SUMMARY_LOGIC.md` | 工艺成本影响 SK1/SK2 |
 
-### 8.1 数据流向
+### 7.1 数据流向
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
