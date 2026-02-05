@@ -494,7 +494,7 @@ stateDiagram-v2
 | 场景 | 变更前 | 变更后 |
 |------|--------|--------|
 | 无新工艺 | 系统自动获取工艺费率 | 保持 |
-| 有新工艺 | IE → PE → Controlling 审核 MHR | ✅ IE → **Controlling 创建 MHR 标准** |
+| 有新工艺 | IE → Controlling 审核 MHR | ✅ IE → **Controlling 创建 MHR 标准** |
 
 #### 项目级汇总询价（邮件化）
 **变更前**：按 BOM 行逐个发送询价邮件，同一物料重复询价。
