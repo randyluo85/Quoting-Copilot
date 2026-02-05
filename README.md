@@ -2,27 +2,37 @@
 
 > **产品名称:** Dr.aiVOSS 智能快速报价助手 (Quoting-Copilot)
 > **项目代号:** SmartQuote MVP
-> **核心理念:** 文档驱动 | 双轨核算 | 人机协同
+> **核心理念:** 文档驱动 | 精确核算 | 人机协同
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.3   | 2026-02-02 | 2026-02-04 | Dr.aiVOSS 智能快速报价助手项目说明 | Randy Luo |
+| v1.4   | 2026-02-02 | 2026-02-05 | Dr.aiVOSS 智能快速报价助手项目说明 | Randy Luo |
+
+---
+
+**版本变更记录：**
+| 版本 | 日期 | 变更内容 |
+|------|------|----------|
+| v1.4 | 2026-02-05 | 🆕 新增向量数据库相关文档链接；移除 VAVE 相关内容 |
+| v1.3 | 2026-02-04 | 初始版本 |
+
+---
 
 ## 1. 项目简介 (Vision)
 
 **Dr.aiVOSS 智能快速报价助手 (Quoting-Copilot)** 是一个专为制造业成本工程师和销售经理设计的 AI 智能报价系统。旨在通过简单的 Excel BOM 拖拽，自动化处理复杂的成本核算任务。
 
-**核心差异化：** 本系统采用 **"双轨核算 (Dual-Track Calculation)"** 机制，不仅计算"当前标准成本 (Standard Cost)"，还同时计算基于最佳实践的"VAVE 目标成本 (VAVE Target Cost)"，直接量化降本潜力。
+**核心差异化：** 本系统采用 **"精确成本核算"** 机制，基于物料主数据和工艺费率库，自动计算标准成本，为报价决策提供可靠依据。
 
 ## 2. 核心功能 (Features)
 
-- **双轨知识库:** 维护物料主数据和工艺费率表，支持双价格（标准价 vs 目标价）录入。
+- **标准知识库:** 维护物料主数据和工艺费率表，支持标准成本录入。
 - **AI 智能解析:** 基于 LLM 提取 BOM 中 `Comments` 列的非结构化特征（如："折弯：32次"）。
+- **向量语义匹配:** 当物料号无法精确匹配时，使用向量搜索找到相似历史物料。
 - **红绿灯审核:**
   - 🟢 **Green:** 完全匹配，价格有效。
   - 🟡 **Yellow:** AI 估算或模糊匹配，需人工确认。
   - 🔴 **Red:** 缺数，需人工询价。
-- **价值分析:** 自动计算 Gap (价差)，高亮显示降本空间 >20% 的条目。
 
 ## 3. 技术栈 (Tech Stack)
 
@@ -59,13 +69,10 @@ uv run uvicorn app.main:app --reload --port 8000
 
 ## 5. 核心业务逻辑公式
 
-系统后端必须始终运行两套公式：
+系统后端标准成本计算公式：
 
-**Standard Cost (当前成本):**
-$$ \sum (Qty \times P_{std}) + \sum (CycleTime_{std} \times (MHR_{std} + Labor_{std})) $$
-
-**VAVE Cost (目标成本):**
-$$ \sum (Qty \times P_{vave}) + \sum (CycleTime_{opt} \times (MHR_{vave} + Labor_{vave})) $$
+**Standard Cost (标准成本):**
+$$ Cost_{std} = \sum (Qty \times P_{std}) + \sum (CycleTime \times (MHR_{std} + Labor_{std})) $$
 
 ## 6. 🚀 快速找到你要的文档
 
@@ -77,6 +84,7 @@ $$ \sum (Qty \times P_{vave}) + \sum (CycleTime_{opt} \times (MHR_{vave} + Labor
 | 理解产品需求 | [docs/PRD.md](docs/PRD.md) |
 | 查看数据库设计 | [docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md) |
 | 查找术语定义 | [docs/GLOSSARY.md](docs/GLOSSARY.md) |
+| 向量化架构设计 | [docs/VECTOR_DESIGN.md](docs/VECTOR_DESIGN.md) 🆕 |
 | 部署系统 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
 | 测试指南 | [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) |
 | API 参考 | [docs/API_REFERENCE.md](docs/API_REFERENCE.md) |
@@ -87,11 +95,12 @@ $$ \sum (Qty \times P_{vave}) + \sum (CycleTime_{opt} \times (MHR_{vave} + Labor
 | 文档 | 用途 | 目标读者 |
 |------|------|---------|
 | [docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md) | 数据库结构唯一真理源 | 后端开发、DBA |
+| [docs/VECTOR_DESIGN.md](docs/VECTOR_DESIGN.md) | 向量化数据架构设计 🆕 | 后端开发、算法工程师 |
 | [docs/PAYBACK_LOGIC.md](docs/PAYBACK_LOGIC.md) | 投资回收期计算逻辑与 BOM 映射 | 全体开发者 |
 | [docs/BUSINESS_CASE_LOGIC.md](docs/BUSINESS_CASE_LOGIC.md) | Business Case 计算逻辑 (HK/SK/DB) | 全体开发者 |
 | [docs/QUOTATION_SUMMARY_LOGIC.md](docs/QUOTATION_SUMMARY_LOGIC.md) | Quotation Summary 报价汇总逻辑 | 全体开发者 |
-| [docs/NRE_INVESTMENT_LOGIC.md](docs/NRE_INVESTMENT_LOGIC.md) | NRE 投资成本计算逻辑 (模具/检具/夹具) | IE/PE、后端开发 |
-| [docs/PROCESS_COST_LOGIC.md](docs/PROCESS_COST_LOGIC.md) | 工艺成本计算逻辑 (MHR/双轨计价) | IE/PE、后端开发 |
+| [docs/NRE_INVESTMENT_LOGIC.md](docs/NRE_INVESTMENT_LOGIC.md) | NRE 投资成本计算逻辑 (模具/检具/夹具) | IE、后端开发 |
+| [docs/PROCESS_COST_LOGIC.md](docs/PROCESS_COST_LOGIC.md) | 工艺成本计算逻辑 (MHR) | IE、后端开发 |
 | [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) | 业务逻辑与 API 契约 | 全体开发者 |
 | [CLAUDE.md](CLAUDE.md) | AI 编码协作指南 | AI 助手、开发者 |
 | [README.md](README.md) | 项目概览与入门 | 新成员 |

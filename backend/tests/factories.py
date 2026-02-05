@@ -259,7 +259,6 @@ class ProjectFactory:
                     "sales": "测试销售",
                     "vm": "测试经理",
                     "ie": "测试工艺",
-                    "pe": "测试产品",
                     "controlling": "测试财务",
                 },
             ),
