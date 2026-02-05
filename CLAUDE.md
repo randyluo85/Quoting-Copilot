@@ -15,7 +15,7 @@
 
 ## 🧠 Memory Bank (核心记忆)
 **Project:** Dr.aiVOSS 智能快速报价助手 (Quoting-Copilot) v2.0
-**Context:** 这是一个 AI 辅助的制造业报价系统，核心逻辑是"双轨计价"（标准价 vs VAVE 优化价）。
+**Context:** 这是一个 AI 辅助的制造业报价系统，核心逻辑是"精确成本核算"。
 
 - **👉 CRITICAL RULE:** Before writing any code or answering logic questions, you MUST read `PROJECT_CONTEXT.md`. It is the "Single Source of Truth" for business logic and database schema.
   *(翻译：关键规则——在写任何代码或回答逻辑问题前，你必须阅读 PROJECT_CONTEXT.md。它是业务逻辑和数据库结构的唯一真理。)*
