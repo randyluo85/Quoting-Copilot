@@ -37,18 +37,18 @@
 
 ---
 
-## 2. 双轨计算测试覆盖要求
+## 2. 标准成本计算测试覆盖要求
 
 ### 2.1 核心计算公式测试
 
 **必须覆盖的场景：**
 
-| 场景 | 标准值 | VAVE 值 | 预期节省 |
-|------|--------|---------|----------|
-| 正常计算 | > 0 | > 0 | std > vave |
-| 零节省 | 100 | 100 | savings = 0 |
-| 无 VAVE | 100 | null | savings = 0 |
-| 负值处理 | - | - | 不允许负成本 |
+| 场景 | 标准成本 | 预期结果 |
+|------|----------|----------|
+| 正常计算 | > 0 | 正确计算成本 |
+| 零成本 | 0 | 返回零值 |
+| 数值精度 | 小数位 | 保留2位小数 |
+| 负值处理 | < 0 | 不允许负成本 |
 
 **测试用例示例：**
 
@@ -58,26 +58,17 @@ import pytest
 from decimal import Decimal
 
 def test_price_pair_calculations():
-    """测试双轨价格计算"""
+    """测试标准价格计算"""
     from app.models import PricePair
 
     # 正常计算
-    pair = PricePair(std=Decimal("100.00"), vave=Decimal("85.00"))
-    assert pair.savings == Decimal("15.00")
-    assert pair.savings_rate == Decimal("0.15")
-
-    # 零节省
-    pair = PricePair(std=Decimal("100.00"), vave=Decimal("100.00"))
-    assert pair.savings == Decimal("0.00")
-
-    # 无 VAVE 价格
-    pair = PricePair(std=Decimal("100.00"), vave=None)
-    assert pair.savings == Decimal("0.00")
+    pair = PricePair(std=Decimal("100.00"))
+    assert pair.std == Decimal("100.00")
 
 def test_negative_cost_rejected():
     """测试负成本被拒绝"""
     with pytest.raises(ValidationError):
-        PricePair(std=Decimal("-10.00"), vave=Decimal("5.00"))
+        PricePair(std=Decimal("-10.00"))
 ```
 
 ### 2.2 边界值测试
