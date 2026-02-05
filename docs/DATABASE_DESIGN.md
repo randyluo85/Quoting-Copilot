@@ -121,8 +121,6 @@ erDiagram
         string process_name
         decimal std_mhr_var "标准变动费率"
         decimal std_mhr_fix "标准固定费率"
-        decimal vave_mhr_var "VAVE变动费率"
-        decimal vave_mhr_fix "VAVE固定费率"
         decimal efficiency_factor
     }
 
