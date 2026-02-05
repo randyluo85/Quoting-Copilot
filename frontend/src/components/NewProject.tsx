@@ -95,7 +95,6 @@ export function NewProject({ onNavigate, onProjectCreated }: NewProjectProps) {
     sales: '张三',
     vm: '李四',
     ie: '王五',
-    pe: '赵六',
     controlling: '钱七'
   });
 

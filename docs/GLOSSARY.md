@@ -36,7 +36,6 @@
 | **SOP** | Start of Production | 量产启动时间 | 汽车行业常用术语 |
 | **VM** | Value Management | 价值管理部门，报价流程的核心协调者 | 也称项目经理 |
 | **IE** | Industrial Engineering | 工业工程部门，工艺路线维护者 | 负责工时预估 |
-| **PE** | Product Engineering | 产品工程部门，工艺可行性评估者 | 负责技术审核 |
 | **S&A** | Sales & Administration | 销售与管理费用，管销费用率 | 通常为销售额的 2-3% |
 | **年降** | Sales Reduction | 客户要求的年度价格下降比例 | 通常为 -3% ~ -5% |
 | **节拍工时** | Cycle Time | 完成单件产品所需的生产时长 | 以秒为单位 |

@@ -83,7 +83,6 @@ export function Dashboard({ onNavigate, projects, onSyncFromPM, onSelectProject 
           sales: '张伟',
           vm: '李明',
           ie: '王芳',
-          pe: '刘强',
           controlling: '陈静'
         },
         status: 'draft',

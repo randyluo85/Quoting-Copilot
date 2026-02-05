@@ -61,7 +61,7 @@ erDiagram
 
 ### 3.1 基础投入计算 (Total Investment)
 
-这是最底层的物理成本计算，由 **IE/PE** 负责录入。
+这是最底层的物理成本计算，由 **IE** 负责录入。
 
 #### 逻辑分支 A：标准数量计算
 
@@ -75,7 +75,7 @@ erDiagram
 
 **输入：**
 - $V_{total}$ = 项目生命周期总销量 (来自 Sales)
-- $L_{asset}$ = 资产设计寿命 (来自 PE，如 300,000 模次)
+- $L_{asset}$ = 资产设计寿命 (来自 IE，如 300,000 模次)
 
 **系统逻辑：**
 1. 如果 $L_{asset}$ 为空，默认为无限（不计算重置）
@@ -265,7 +265,7 @@ class InvestmentCalculationResult(BaseModel):
 
 ```mermaid
 sequenceDiagram
-    participant IE as IE/PE (工程师)
+    participant IE as IE (工程师)
     participant SYS as Dr.aiVOSS 系统
     participant DB as 历史价格库
     participant SALES as Sales (销售)
@@ -315,7 +315,7 @@ sequenceDiagram
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    IE/PE 工作台                              │
+│                    IE 工作台                              │
 │  录入: Type, Unit Cost, Quantity, Lifecycle                  │
 └─────────────────────────────────────────────────────────────┘
                               ↓

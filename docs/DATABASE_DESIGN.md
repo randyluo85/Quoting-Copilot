@@ -2,7 +2,7 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.6   | 2026-02-03 | 2026-02-05 | Dr.aiVOSS 数据库设计 | Randy Luo |
+| v1.7   | 2026-02-03 | 2026-02-05 | Dr.aiVOSS 数据库设计 | Randy Luo |
 
 ---
 
@@ -16,6 +16,7 @@
 | 2026-02-04 | v1.4 | 🔴 **破坏性变更**：process_rates 表新增折旧率字段，支持 Payback 现金流计算 | Payback 模块 |
 | 2026-02-05 | v1.5 | 🔴 **破坏性变更**：projects 表新增 factory_id；quote_summaries 表新增 version_number；新增 factories 表；新增 std_investment_costs 表；business_case_params 新增 logistics_rate 和 other_mfg_rate | 多版本报价、工厂管理、系数维护 |
 | 2026-02-05 | v1.6 | 🔴 **破坏性变更**：移除所有 VAVE 相关字段，简化双轨价格为单轨标准成本 | 全部表 |
+| 2026-02-05 | v1.7 | 🔴 **新增功能**：新增向量数据表 material_vectors 和 product_vectors，支持语义匹配和产品复用 | 向量搜索 |
 
 **变更规范：**
 - 任何字段新增/修改/删除必须记录在此
@@ -43,6 +44,13 @@
 │              │ product_processes │ quote_summaries          │
 │              │ 产品工艺路线       │ 报价汇总                   │
 └──────────────┴──────────────┴──────────────────────────────┘
+                              ↓ 语义关联
+┌─────────────────────────────────────────────────────────────┐
+│                   向量数据层 (Vector Data) 🆕 v1.7            │
+├──────────────┬──────────────────────────────────────────────┤
+│ material_vectors│ 物料语义向量 → BOM清洗匹配                 │
+│ product_vectors │ 产品指纹向量 → 历史方案复用                │
+└──────────────┴──────────────────────────────────────────────┘
 ```
 
 ---
@@ -60,8 +68,12 @@ erDiagram
     project_products ||--o| amortization_strategies : "1:1 分摊"
 
     materials ||--o{ product_materials : "1:N 被引用"
+    materials ||--o| material_vectors : "1:1 向量"  -- 🆕 v1.7
+
     cost_centers ||--o{ process_rates : "1:N 所属"
     process_rates ||--o{ product_processes : "1:N 被引用"
+
+    project_products ||--o| product_vectors : "1:1 指纹"  -- 🆕 v1.7
 
     projects ||--o{ quote_summaries : "1:N 多版本"
     projects ||--o| business_case_params : "1:1 参数"
@@ -211,6 +223,24 @@ erDiagram
         decimal sk_cost
         decimal db_1
         decimal db_4
+    }
+
+    material_vectors {  -- 🆕 v1.7
+        char36 id PK
+        varchar50 material_id FK
+        vector embedding "向量(1536维)"
+        text embedding_text
+        varchar50 embedding_model
+        decimal similarity_threshold
+    }
+
+    product_vectors {  -- 🆕 v1.7
+        char36 id PK
+        char36 product_id FK
+        vector embedding "向量(1536维)"
+        text fingerprint_text
+        varchar50 embedding_model
+        decimal similarity_threshold
     }
 ```
 
@@ -510,6 +540,61 @@ std_cost = (cycle_time_std / 3600) × (std_mhr_var + std_mhr_fix + personnel_std
 
 ---
 
+### 3.7 向量数据表 {#vector-tables} 🆕 v1.7
+
+> **技术栈**：PostgreSQL 16 + pgvector 扩展
+> **详细设计**：[VECTOR_DESIGN.md](VECTOR_DESIGN.md)
+
+#### material_vectors（物料向量表）
+
+**用途**：存储物料主数据的语义向量，用于 BOM 物料清洗匹配
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | CHAR(36) | PK | UUID |
+| material_id | VARCHAR(50) | FK, NOT NULL, UNIQUE | 关联 materials.id |
+| embedding | vector(1536) | NOT NULL | 物料语义向量（pgvector） |
+| embedding_text | TEXT | NOT NULL | 用于生成向量的汇集文本（快照） |
+| embedding_model | VARCHAR(50) | DEFAULT 'text-embedding-v4' | 使用的嵌入模型 |
+| similarity_threshold | DECIMAL(3,2) | DEFAULT 0.85 | 相似度阈值 |
+| created_at | DATETIME | DEFAULT NOW() | |
+| updated_at | DATETIME | ON UPDATE NOW() | |
+
+**外键关系**：
+```sql
+FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
+```
+
+**汇集字段规则**：
+- ✅ 包含：`name`, `material`, `remarks`, `material_type`
+- ❌ 排除：`id`, `std_price`, `supplier`, `created_at`
+
+#### product_vectors（产品向量表）
+
+**用途**：存储产品 BOM 指纹向量，用于历史相似产品检索
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | CHAR(36) | PK | UUID |
+| product_id | CHAR(36) | FK, NOT NULL, UNIQUE | 关联 project_products.id |
+| embedding | vector(1536) | NOT NULL | 产品指纹向量（pgvector） |
+| fingerprint_text | TEXT | NOT NULL | 用于生成向量的汇集文本（快照） |
+| embedding_model | VARCHAR(50) | DEFAULT 'text-embedding-v4' | 使用的嵌入模型 |
+| similarity_threshold | DECIMAL(3,2) | DEFAULT 0.80 | 相似度阈值 |
+| created_at | DATETIME | DEFAULT NOW() | |
+| updated_at | DATETIME | ON UPDATE NOW() | |
+
+**外键关系**：
+```sql
+FOREIGN KEY (product_id) REFERENCES project_products(id) ON DELETE CASCADE
+```
+
+**汇集字段规则**：
+- ✅ 包含：`product_name`, Level 1 关键组件名、工艺名称序列、BOM 工艺关键词
+- ❌ 排除：`quantity`, `product_code`, `cycle_time_std`, `std_cost`
+
+---
+
 ## 4. 索引设计 {#indexes}
 
 ```sql
@@ -565,6 +650,15 @@ CREATE INDEX idx_bcp_project ON business_case_params(project_id);
 -- business_case_years (新增)
 CREATE INDEX idx_bcy_project ON business_case_years(project_id);
 CREATE INDEX idx_bcy_year ON business_case_years(year);
+
+-- 🆕 v1.7 向量索引 (pgvector HNSW)
+CREATE INDEX idx_mv_embedding_hnsw
+ON material_vectors USING hnsw (embedding vector_cosine_ops)
+WITH (m = 16, ef_construction = 64);
+
+CREATE INDEX idx_pv_embedding_hnsw
+ON product_vectors USING hnsw (embedding vector_cosine_ops)
+WITH (m = 16, ef_construction = 64);
 ```
 
 ---

@@ -70,7 +70,6 @@ class TestE2EWithDatabase:
                 "sales": "张三",
                 "vm": "李四",
                 "ie": "王五",
-                "pe": "赵六",
                 "controlling": "钱七",
             },
         }

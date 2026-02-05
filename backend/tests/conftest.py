@@ -94,7 +94,6 @@ async def test_project(db_session: AsyncSession):
             "sales": "张三",
             "vm": "李四",
             "ie": "王五",
-            "pe": "赵六",
             "controlling": "钱七"
         },
         status=ProjectStatus.DRAFT,

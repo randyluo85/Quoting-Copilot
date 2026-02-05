@@ -18,7 +18,6 @@ class ProjectOwnerSchema(BaseModel):
     sales: str
     vm: str
     ie: str
-    pe: str
     controlling: str
 
     model_config = {"by_alias": True}

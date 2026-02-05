@@ -2,13 +2,14 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.6   | 2026-02-02 | 2026-02-05 | Dr.aiVOSS AI 协作指南 | Randy Luo |
+| v1.7   | 2026-02-02 | 2026-02-05 | Dr.aiVOSS AI 协作指南 | Randy Luo |
 
 ---
 
 **版本变更记录：**
 | 版本 | 日期 | 变更内容 |
 |------|------|----------|
+| v1.7 | 2026-02-05 | 🆕 新增向量数据架构：material_vectors 和 product_vectors，支持物料语义匹配和产品复用检索 |
 | v1.6 | 2026-02-05 | ✅ Payback 重写：从 VAVE 增量回收期改为项目静态回收期 |
 | v1.5 | 2026-02-05 | 🔴 架构调整：移除双轨计价功能，简化为单一标准成本计算 |
 | v1.4 | 2026-02-05 | v1.5 API 扩展：新增工厂、投资标准库、多版本报价相关端点；v2.1 新增报价单导入端点 |
@@ -56,8 +57,11 @@
 | `product_materials` | BOM 行 | [DATABASE_DESIGN.md §3.2](docs/DATABASE_DESIGN.md#transaction-data) |
 | `product_processes` | 工艺路线 | [DATABASE_DESIGN.md §3.2](docs/DATABASE_DESIGN.md#transaction-data) |
 | `quote_summaries` | 报价汇总（多版本） | [DATABASE_DESIGN.md §3.2](docs/DATABASE_DESIGN.md#transaction-data) |
+| `material_vectors` | 物料语义向量 | [DATABASE_DESIGN.md §3.7](docs/DATABASE_DESIGN.md#vector-tables) 🆕 v1.7 |
+| `product_vectors` | 产品指纹向量 | [DATABASE_DESIGN.md §3.7](docs/DATABASE_DESIGN.md#vector-tables) 🆕 v1.7 |
 
 > 完整设计文档：[docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md)
+> 向量化设计文档：[docs/VECTOR_DESIGN.md](docs/VECTOR_DESIGN.md) 🆕
 
 ## 📝 API Data Models (Pydantic)
 
@@ -120,7 +124,6 @@ interface ProjectOwner {
   sales: string;       // 销售
   vm: string;          // 项目经理
   ie: string;          // 工艺工程师
-  pe: string;          // 产品工程师
   controlling: string; // 财务控制
 }
 
@@ -203,6 +206,10 @@ interface Process {
 | **POST** | **`/factories`** | **🔴 v1.5：创建工厂** | - |
 | **GET** | **`/std-investment-costs`** | **🔴 v1.5：获取投资项标准库** | - |
 | **POST** | **`/std-investment-costs`** | **🔴 v1.5：创建投资项标准** | - |
+| **POST** | **`/vector/materials/search`** | **🆕 v1.7：语义搜索物料** | BOMManagement |
+| **POST** | **`/vector/products/search`** | **🆕 v1.7：搜索相似产品** | - |
+| **POST** | **`/vector/materials/sync`** | **🆕 v1.7：同步物料向量** | - |
+| **POST** | **`/vector/products/sync`** | **🆕 v1.7：同步产品向量** | - |
 
 ### 核心响应模型
 
@@ -325,7 +332,6 @@ interface Process {
       "quantity": 3.5,
       "unit": "kg",
       "stdPrice": 28.50,
-      "vavePrice": 26.80,
       "hasHistoryData": true,
       "status": "verified",
       "comments": "铸造级，符合GB/T 1173标准"
@@ -338,7 +344,6 @@ interface Process {
       "workCenter": "铸造车间",
       "standardTime": 2.5,
       "stdPrice": 45.00,
-      "vavePrice": 42.00,
       "hasHistoryData": true
     }
   ]
@@ -351,10 +356,15 @@ interface Process {
 
 2. **状态标记逻辑:**
    - 如果 `item_code` 在库中完全匹配且有效期内 → **Green**
-   - 如果使用 AI 语义匹配或 AI 估算参数 → **Yellow**
-   - 如果库中无数据 → **Red**
+   - 如果使用 AI 语义匹配（向量相似度 > 85%）或 AI 估算参数 → **Yellow**
+   - 如果库中无数据且向量匹配失败 → **Red**
 
-3. **不确定的逻辑:** 如果遇到 PRD 未定义的逻辑，优先询问用户，不要自行假设。
+3. **向量汇集规则 🆕 v1.7:**
+   - **物料层**：汇集 `name` + `material` + `remarks` + `material_type`，排除 `std_price` 等数值噪音
+   - **产品层**：汇集 `product_name` + Level 1 关键组件 + 工艺名称序列，排除 `quantity` 等数值噪音
+   - 详细规则参考：[docs/VECTOR_DESIGN.md §4](docs/VECTOR_DESIGN.md#field-aggregation)
+
+4. **不确定的逻辑:** 如果遇到 PRD 未定义的逻辑，优先询问用户，不要自行假设。
 
 ## 🧪 Testing Focus
 
