@@ -224,6 +224,24 @@ erDiagram
         decimal db_1
         decimal db_4
     }
+
+    material_vectors {  -- 🆕 v1.7
+        char36 id PK
+        varchar50 material_id FK
+        vector embedding "向量(1536维)"
+        text embedding_text
+        varchar50 embedding_model
+        decimal similarity_threshold
+    }
+
+    product_vectors {  -- 🆕 v1.7
+        char36 id PK
+        char36 product_id FK
+        vector embedding "向量(1536维)"
+        text fingerprint_text
+        varchar50 embedding_model
+        decimal similarity_threshold
+    }
 ```
 
 ---
