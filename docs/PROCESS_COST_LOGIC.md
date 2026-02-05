@@ -117,7 +117,7 @@ $$Cost_{std} = (std\_mhr\_var + std\_mhr\_fix + Rate_{labor}) \times \frac{Cycle
 
 ---
 
-## 5. 数据库设计规范 (Schema)
+## 4. 数据库设计规范 (Schema)
 
 ### 表 1: `cost_centers` (成本中心主数据)
 
