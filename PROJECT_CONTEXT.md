@@ -94,7 +94,7 @@ calculated → sales_input → completed
 | `features` | JSON | AI 从 Comments 提取的特征, e.g. `{"bending": 32}` |
 | `match_type` | Enum | `Exact`, `Semantic`, `None` |
 | `status` | Enum | `verified`, `warning`, `missing` |
-| `total_cost` | PricePair Object | 双轨总成本 |
+| `total_cost` | PricePair Object | 总成本 |
 
 ---
 
