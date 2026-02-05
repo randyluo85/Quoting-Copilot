@@ -119,7 +119,7 @@ def upgrade() -> None:
         'product_materials',
         sa.Column('id', sa.String(length=36), nullable=False),
         sa.Column('project_product_id', sa.String(length=36), nullable=False),
-        sa.Column('material_id', sa.String(length=50), nullable=True),
+        sa.Column('material_id', sa.Integer(), nullable=True),  # 修复：改为 Integer 以匹配 materials.id
         sa.Column('material_level', sa.Integer(), nullable=True),
         sa.Column('material_name', sa.String(length=200), nullable=True),
         sa.Column('material_type', sa.String(length=20), nullable=True),

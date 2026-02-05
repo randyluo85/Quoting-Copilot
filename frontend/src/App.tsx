@@ -85,12 +85,12 @@ export default function App() {
 
   const handleSelectProject = (project: ProjectData) => {
     selectProject(project.id);
-    // 如果是新项目（draft状态），先显示项目确认页面
-    if (project.status === 'draft') {
-      setCurrentView('project-success');
-    } else {
-      // 已有项目直接进入BOM管理
+    // 如果项目已经有产品，直接进入BOM管理
+    // 否则（新建的无产品项目），先显示项目确认页面
+    if (project.products && project.products.length > 0) {
       setCurrentView('bom');
+    } else {
+      setCurrentView('project-success');
     }
   };
 
@@ -148,7 +148,7 @@ export default function App() {
             />
           );
         }
-        return <BOMManagement onNavigate={setCurrentView} project={selectedProject} />;
+        return <BOMManagement onNavigate={setCurrentView} />;
       case 'process':
         return <ProcessAssessment onNavigate={setCurrentView} />;
       case 'cost-calc':

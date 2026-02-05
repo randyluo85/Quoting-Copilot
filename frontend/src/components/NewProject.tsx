@@ -101,6 +101,7 @@ export function NewProject({ onNavigate, onProjectCreated }: NewProjectProps) {
 
   // 获取创建项目的 store 方法
   const createProjectAPI = useProjectStore((state) => state.createProject);
+  const selectProject = useProjectStore((state) => state.selectProject);
 
   const [touched, setTouched] = useState({
     clientName: false,
@@ -230,16 +231,11 @@ export function NewProject({ onNavigate, onProjectCreated }: NewProjectProps) {
             partNumber: p.partNumber,
             annualVolume: p.annualVolume,
             description: p.description
-          })) || [{
-            id: 'P-001',
-            name: formData.projectName,
-            partNumber: 'PART-' + Date.now(),
-            annualVolume: parseInt(formData.annualVolume) || 0,
-            description: formData.description
-          }]
+          })) || []  // 不创建默认产品，由 BOM 上传时创建
         });
 
-        // 创建成功，通知父组件
+        // 创建成功，选中项目并通知父组件
+        selectProject(createdProject.id);
         if (onProjectCreated) {
           onProjectCreated(createdProject.id);
         }

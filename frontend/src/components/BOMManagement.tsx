@@ -3,6 +3,7 @@ import {
   Upload,
   FileSpreadsheet,
   Sparkles,
+  Box,
   CheckCircle2,
   AlertCircle,
   Mail,
@@ -81,7 +82,6 @@ const validatePrice = (materialType: string, unitPrice: number | undefined): Pri
 
 interface BOMManagementProps {
   onNavigate: (view: View) => void;
-  project: ProjectData;
 }
 
 interface Material {
@@ -131,8 +131,94 @@ interface ProductBOMData {
   uploadError?: string; // 上传错误信息
 }
 
-export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
+export function BOMManagement({ onNavigate }: BOMManagementProps) {
+  const project = useProjectStore((state) => state.selectedProject)!;
   const updateProject = useProjectStore((state) => state.updateProject);
+
+  // 状态声明 - 必须在所有检查之前
+  const [selectedProduct, setSelectedProduct] = useState<Product>(
+    project?.products?.[0] || { id: '', name: '', partNumber: '', annualVolume: 0, description: '' }
+  );
+  const [bomData, setBomData] = useState<Record<string, ProductBOMData>>({});
+  const [fileName, setFileName] = useState('');
+
+  // 新增产品状态
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [isAddingProduct, setIsAddingProduct] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    code: '',
+    routeCode: '',
+    annualVolume: project?.annualVolume || '0',
+    description: '',
+  });
+
+  // 多产品 BOM 解析状态
+  const [multiProductPreview, setMultiProductPreview] = useState<{
+    products: Array<{
+      product_code: string;
+      product_name: string | null;
+      material_count: number;
+    }>;
+    products_grouped?: Array<{
+      product_code: string;
+      product_name: string | null;
+      materials: any[];
+      processes: any[];
+    }>;
+    total_materials: number;
+    materials: any[];
+    processes: any[];
+  } | null>(null);
+  const [showMultiProductDialog, setShowMultiProductDialog] = useState(false);
+
+  // 当产品列表变化时，更新 selectedProduct - 必须在条件返回之前
+  useEffect(() => {
+    if (project?.products && project.products.length > 0) {
+      if (!selectedProduct.id || !project.products.find(p => p.id === selectedProduct.id)) {
+        setSelectedProduct(project.products[0]);
+      }
+    }
+  }, [project?.products]);
+
+  // 加载项目的 BOM 数据（从后端恢复已保存的数据）
+  useEffect(() => {
+    const loadBOMData = async () => {
+      if (!project?.id || project.products.length === 0) return;
+
+      try {
+        const response = await api.bom.getProjectBOMData(project.id);
+        if (response.status === 'success' && response.products) {
+          const newBomData: Record<string, ProductBOMData> = {};
+
+          for (const productData of response.products) {
+            const materials = productData.materials || [];
+            const processes = productData.processes || [];
+            newBomData[productData.productId] = {
+              productId: productData.productId,
+              isUploaded: productData.isParsed,
+              isParsing: false,
+              isParsed: productData.isParsed,
+              parseProgress: 100,
+              materials,
+              processes,
+              routingId: productData.routingId || `RT-${productData.productId?.slice(-8) || 'BOM'}-001`,
+              isRoutingKnown: processes.length > 0,
+              needsIEReview: materials.filter((m: any) => !m.hasHistoryData).length > 0
+            };
+          }
+
+          setBomData(newBomData);
+        }
+      } catch (error) {
+        // 如果加载失败，保持空状态（可能是新项目）
+        console.log('No BOM data found or loading failed:', error);
+      }
+    };
+
+    loadBOMData();
+  }, [project?.id]);
+
   // 添加空值检查
   if (!project) {
     return (
@@ -152,45 +238,190 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
     );
   }
 
-  // 检查项目是否有产品
-  if (!project.products || project.products.length === 0) {
-    return (
-      <div className="px-4 py-8 lg:px-8">
-        <div className="max-w-7xl">
-          <Card>
-            <CardContent className="p-12 text-center">
-              <Package className="h-12 w-12 text-zinc-300 mx-auto mb-4" />
-              <h2 className="text-lg font-medium mb-2">该项目暂无产品</h2>
-              <p className="text-zinc-500 mb-4">请先为项目添加产品信息</p>
-              <Button onClick={() => onNavigate('dashboard')}>
-                返回项目列表
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
+  // 处理空产品状态下的 BOM 上传（与有产品时使用相同的逻辑）
+  const handleBOMUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const [selectedProduct, setSelectedProduct] = useState<Product>(project.products[0]);
-  const [bomData, setBomData] = useState<Record<string, ProductBOMData>>({});
-  const [fileName, setFileName] = useState('');
+    setFileName(file.name);
 
-  // 新增产品状态
-  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
-  const [isAddingProduct, setIsAddingProduct] = useState(false);
-  const [newProduct, setNewProduct] = useState({
-    name: '',
-    code: '',
-    routeCode: '',
-    annualVolume: project.annualVolume || '0',
-    description: '',
-  });
+    // 设置解析状态（使用第一个产品的ID，如果是新创建的会使用临时ID）
+    const productId = selectedProduct?.id || 'temp';
 
-  // 调试：监听 isAddProductOpen 变化
-  useEffect(() => {
-    console.log('isAddProductOpen changed to:', isAddProductOpen);
-  }, [isAddProductOpen]);
+    setBomData(prev => ({
+      ...prev,
+      [productId]: {
+        productId: productId,
+        isUploaded: true,
+        isParsing: true,
+        parseProgress: 0,
+        isParsed: false,
+        materials: [],
+        processes: [],
+      }
+    }));
+
+    try {
+      // 调用 API 解析文件
+      const response = await api.bom.upload(project.id, file);
+
+      // 检查是否是多产品
+      const detectedProducts = response.summary?.products || [];
+      const totalProducts = response.summary?.total_products || 1;
+      const productsGrouped = response.products_grouped || [];
+
+      if (totalProducts > 1 && detectedProducts.length > 0) {
+        // 显示多产品预览对话框
+        setMultiProductPreview({
+          products: detectedProducts,
+          products_grouped: productsGrouped,
+          total_materials: response.summary.total_materials,
+          materials: response.materials || [],
+          processes: response.processes || [],
+        });
+        setShowMultiProductDialog(true);
+
+        // 清除解析状态
+        setBomData(prev => {
+          const updated = { ...prev };
+          if (prev[productId]) {
+            updated[productId] = { ...prev[productId], isParsing: false };
+          }
+          return updated;
+        });
+      } else {
+        // 单产品，正常处理
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+          progress += 20;
+          setBomData(prev => {
+            const updated = { ...prev };
+            if (updated[productId]) {
+              updated[productId] = {
+                ...updated[productId],
+                parseProgress: Math.min(progress, 90)
+              };
+            }
+            return updated;
+          });
+
+          if (progress >= 90) {
+            clearInterval(progressInterval);
+          }
+        }, 100);
+
+        clearInterval(progressInterval);
+
+        // 转换响应数据为前端格式
+        const materials = (response.materials || []).map((m: any) => ({
+          id: m.id,
+          level: m.level || '1',
+          partNumber: m.part_number || m.partNumber || '',
+          partName: m.part_name || m.partName || '',
+          version: m.version || '1.0',
+          type: m.type || 'I',
+          status: m.stock_status || m.stockStatus || 'N',  // BOM 文件的 "St" 列
+          material: m.material || '',
+          supplier: m.supplier || '',
+          quantity: m.quantity,
+          unit: m.unit || 'PC',
+          unitPrice: m.unitPrice,
+          vavePrice: m.vavePrice,
+          comments: m.comments || '',
+          hasHistoryData: m.hasHistoryData || false,
+        }));
+
+        const processes = (response.processes || []).map((p: any) => ({
+          id: p.id,
+          opNo: p.opNo || '',
+          name: p.name || '',
+          workCenter: p.workCenter || '',
+          standardTime: p.standardTime || 0,
+          spec: p.spec || '',
+          unit: '件',
+          quantity: 1,
+          unitPrice: p.unitPrice,
+          vavePrice: p.vavePrice,
+          hasHistoryData: p.hasHistoryData || false,
+        }));
+
+        // 先更新本地状态（立即显示）
+        setBomData(prev => {
+          const updated = { ...prev };
+          updated[productId] = {
+            ...updated[productId],
+            isParsing: false,
+            isParsed: true,
+            parseProgress: 100,
+            materials,
+            processes,
+            routingId: `RT-${selectedProduct.partNumber || 'BOM'}-${Date.now().toString().slice(-4)}`,
+            isRoutingKnown: (processes || []).length > 0,
+            needsIEReview: materials.filter((m: any) => !m.hasHistoryData).length > 0
+          };
+          return updated;
+        });
+
+        // 调用 confirmCreate 保存数据到数据库
+        try {
+          // 将数据转换为 confirmCreate 期望的格式
+          const products_grouped = [{
+            product_info: {
+              product_code: selectedProduct.partNumber || selectedProduct.id,
+              product_name: selectedProduct.name,
+              product_number: selectedProduct.partNumber || '',
+              product_version: '01',
+              customer_version: '01',
+              customer_number: null,
+              issue_date: null,
+              material_count: materials.length,
+              process_count: processes.length,
+            },
+            materials: materials.map((m: any) => ({
+              level: m.level || '1',
+              part_number: m.partNumber,
+              part_name: m.partName,
+              version: m.version,
+              type: m.type,
+              status: m.status,
+              material: m.material,
+              supplier: m.supplier,
+              quantity: m.quantity,
+              unit: m.unit,
+              comments: m.comments,
+            })),
+            processes: processes.map((p: any) => ({
+              op_no: p.opNo,
+              name: p.name,
+              work_center: p.workCenter,
+              standard_time: p.standardTime,
+              spec: p.spec,
+            })),
+          }];
+
+          await api.bom.confirmCreate(project.id, products_grouped);
+          console.log('BOM data saved to database successfully');
+        } catch (saveError) {
+          console.error('Failed to save BOM data to database:', saveError);
+          // 不中断用户流程，数据已在本地显示
+        }
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '上传失败，请重试';
+      setBomData(prev => {
+        const updated = { ...prev };
+        if (updated[productId]) {
+          updated[productId] = {
+            ...updated[productId],
+            isParsing: false,
+            isParsed: false,
+            uploadError: errorMessage
+          };
+        }
+        return updated;
+      });
+    }
+  };
 
   // 获取当前产品的BOM数据
   const currentBomData = bomData[selectedProduct.id];
@@ -264,107 +495,107 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
     }
   };
 
-  // 文件上传和AI解析 - 调用真实API
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // 处理多产品确认 - 创建新产品并分配物料
+  const handleMultiProductConfirm = async () => {
+    if (!multiProductPreview) return;
 
-    setFileName(file.name);
-
-    // 设置上传状态
-    setBomData(prev => ({
-      ...prev,
-      [selectedProduct.id]: {
-        productId: selectedProduct.id,
-        isUploaded: true,
-        isParsing: true,
-        parseProgress: 0,
-        isParsed: false,
-        materials: [],
-        processes: [],
-        uploadError: undefined
-      }
+    // 为每个检测到的产品创建新的 Product 对象
+    const newProducts: Product[] = multiProductPreview.products.map((p, idx) => ({
+      id: `P-${Date.now()}-${idx}`,
+      name: p.product_name || p.product_code,
+      partNumber: p.product_code,
+      annualVolume: parseInt(project.annualVolume) || 100000,
+      description: `从 BOM 文件自动导入`,
     }));
 
+    // 为每个新产品分配对应的物料数据
+    const newBomData: Record<string, ProductBOMData> = { ...bomData };
+
+    // 准备发送给 confirmCreate 的数据
+    const products_grouped_for_api = [];
+
+    // 使用 products_grouped 来分配物料
+    if (multiProductPreview.products_grouped && multiProductPreview.products_grouped.length > 0) {
+      multiProductPreview.products_grouped.forEach((groupedProduct: any, idx: number) => {
+        const product = newProducts[idx];
+        if (product) {
+          // 转换物料数据为 API 期望的格式
+          const materials_for_api = (groupedProduct.materials || []).map((m: any) => ({
+            level: m.level || '1',
+            part_number: m.part_number || m.partNumber,
+            part_name: m.part_name || m.partName,
+            version: m.version || '1.0',
+            type: m.type || 'I',
+            status: m.stock_status || m.stockStatus || m.status || 'N',
+            material: m.material || '',
+            supplier: m.supplier || '',
+            quantity: m.quantity,
+            unit: m.unit || 'PC',
+            comments: m.comments || '',
+          }));
+
+          // 转换工艺数据为 API 期望的格式
+          const processes_for_api = (groupedProduct.processes || []).map((p: any) => ({
+            op_no: p.opNo || p.op_no,
+            name: p.name,
+            work_center: p.workCenter || p.work_center || '',
+            standard_time: p.standardTime || p.standard_time || 0,
+            spec: p.spec || '',
+          }));
+
+          products_grouped_for_api.push({
+            product_info: {
+              product_code: groupedProduct.product_code,
+              product_name: groupedProduct.product_name,
+              product_number: groupedProduct.product_number,
+              product_version: '01',
+              customer_version: '01',
+              customer_number: groupedProduct.customer_number,
+              issue_date: null,
+              material_count: materials_for_api.length,
+              process_count: processes_for_api.length,
+            },
+            materials: materials_for_api,
+            processes: processes_for_api,
+          });
+
+          newBomData[product.id] = {
+            productId: product.id,
+            isUploaded: true,
+            isParsing: false,
+            isParsed: true,
+            parseProgress: 100,
+            materials: groupedProduct.materials || [],
+            processes: groupedProduct.processes || [],
+            routingId: `RT-${groupedProduct.product_code || 'BOM'}-${Date.now().toString().slice(-4)}`,
+            isRoutingKnown: (groupedProduct.processes || []).length > 0,
+            needsIEReview: (groupedProduct.materials || []).filter((m: any) => !m.hasHistoryData).length > 0
+          };
+        }
+      });
+    }
+
+    // 调用 API 保存数据到数据库
     try {
-      // 调用真实API上传BOM文件
-      const response = await api.bom.upload(project.id, file);
+      await api.bom.confirmCreate(project.id, products_grouped_for_api);
+      console.log('Multi-product BOM data saved to database successfully');
+    } catch (saveError) {
+      console.error('Failed to save multi-product BOM data to database:', saveError);
+      // 不中断用户流程
+    }
 
-      // 模拟解析进度动画
-      let progress = 0;
-      const progressInterval = setInterval(() => {
-        progress += 20;
-        setBomData(prev => ({
-          ...prev,
-          [selectedProduct.id]: {
-            ...prev[selectedProduct.id],
-            parseProgress: Math.min(progress, 90)
-          }
-        }));
+    // 更新项目的产品列表
+    const updatedProject = {
+      ...project,
+      products: [...project.products, ...newProducts],
+    };
+    updateProject(updatedProject);
 
-        if (progress >= 90) {
-          clearInterval(progressInterval);
-        }
-      }, 100);
+    setBomData(newBomData);
 
-      // 转换API响应为前端格式
-      const materials: Material[] = response.materials.map((m, idx) => ({
-        id: m.id,
-        level: '一级',
-        partNumber: m.partNumber,
-        partName: m.partName,
-        version: '1.0',
-        type: '原材料',
-        status: '可用',
-        material: m.material || '其他',
-        supplier: m.supplier || '',
-        quantity: m.quantity,
-        unit: m.unit || 'PC',  // 使用 API 返回的单位，默认为 PC
-        unitPrice: m.unitPrice,
-        vavePrice: m.vavePrice,
-        comments: m.comments || '',
-        hasHistoryData: m.hasHistoryData
-      }));
-
-      // 从 API 响应获取工艺数据
-      const processes: Process[] = (response.processes || []).map((p, idx) => ({
-        id: p.id,
-        opNo: p.opNo,
-        name: p.name,
-        workCenter: p.workCenter || '',
-        standardTime: p.standardTime || 0,
-        unitPrice: p.unitPrice,
-        vavePrice: p.vavePrice,
-        hasHistoryData: p.hasHistoryData || false,
-        isOperationKnown: p.hasHistoryData || false
-      }));
-
-      // 完成解析
-      clearInterval(progressInterval);
-      setBomData(prev => ({
-        ...prev,
-        [selectedProduct.id]: {
-          ...prev[selectedProduct.id],
-          isParsing: false,
-          isParsed: true,
-          parseProgress: 100,
-          materials,
-          processes,
-          isRoutingKnown: false,
-          needsIEReview: materials.filter(m => !m.hasHistoryData).length > 0
-        }
-      }));
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '上传失败，请重试';
-      setBomData(prev => ({
-        ...prev,
-        [selectedProduct.id]: {
-          ...prev[selectedProduct.id],
-          isParsing: false,
-          isParsed: false,
-          uploadError: errorMessage
-        }
-      }));
+    // 自动选中第一个新产品
+    if (newProducts.length > 0) {
+      setSelectedProduct(newProducts[0]);
     }
   };
 
@@ -790,7 +1021,7 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
 
   return (
     <div className="px-4 py-8 lg:px-8">
-      <div className="w-full space-y-6 overflow-x-auto">
+      <div className="max-w-7xl space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -824,7 +1055,17 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
                   选择产品
                 </CardTitle>
                 <CardDescription>
-                  本项目包含 {project.products.length} 个产品，请选择需要上传BOM表的产品
+                  {project.projectName} {project.id} · 包含 {project.products.length} 个产品
+                  {(() => {
+                    const uploadedCount = project.products.filter(p => bomData[p.id]?.isUploaded).length;
+                    const notUploadedCount = project.products.length - uploadedCount;
+                    return (
+                      <span className="text-zinc-600">
+                        ，已上传BOM表 {uploadedCount} 个
+                        {notUploadedCount > 0 && <span>，未上传BOM表 {notUploadedCount} 个</span>}
+                      </span>
+                    );
+                  })()}
                 </CardDescription>
               </div>
               <Button
@@ -840,83 +1081,180 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
+          <CardContent className="px-4 pt-4 pb-4">
+            {/* 产品 Tab 列表 */}
+            <div className="flex items-center gap-1 overflow-x-auto pb-3">
               {project.products.map((product) => {
                 const isSelected = selectedProduct.id === product.id;
-                const productBom = bomData[product.id];
-                
                 return (
-                  <Card 
+                  <button
                     key={product.id}
-                    className={`cursor-pointer transition-all ${
-                      isSelected 
-                        ? 'border-blue-500 bg-blue-50 shadow-md' 
-                        : 'hover:border-zinc-300 hover:shadow-sm'
-                    }`}
                     onClick={() => setSelectedProduct(product)}
+                    className={`
+                      flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap
+                      ${isSelected
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                      }
+                    `}
                   >
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <p className="font-medium mb-1">{product.name}</p>
-                          <p className="text-xs text-zinc-500 font-mono">{product.partNumber}</p>
-                        </div>
-                        <div className="flex flex-col items-end gap-1">
-                          {productBom?.isParsed && (
-                            <Badge variant="secondary" className="gap-1">
+                    {product.name || product.partNumber || '未命名'}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* 当前产品详情卡片 */}
+            <div className="p-4 bg-zinc-50 rounded-lg border border-zinc-200">
+              <div className="flex items-start justify-between gap-6">
+                {/* 左侧：产品基本信息和状态 */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div>
+                      <p className="font-semibold text-base">{selectedProduct.name}</p>
+                      <p className="text-xs text-zinc-500 font-mono">{selectedProduct.partNumber || '未设置编码'}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {(() => {
+                        const productBom = bomData[selectedProduct.id];
+                        if (productBom?.isParsed) {
+                          return (
+                            <Badge variant="secondary" className="gap-1 text-xs">
                               <CheckCircle2 className="h-3 w-3" />
                               已解析
                             </Badge>
-                          )}
-                          {productBom?.routingId && (
-                            productBom.isRoutingKnown ? (
-                              <Badge variant="secondary" className="gap-1 bg-green-100 text-green-700 border-green-300">
+                          );
+                        }
+                        return null;
+                      })()}
+                      {(() => {
+                        const productBom = bomData[selectedProduct.id];
+                        if (productBom?.routingId) {
+                          if (productBom.isRoutingKnown) {
+                            return (
+                              <Badge className="gap-1 bg-green-100 text-green-700 border-green-300 text-xs">
                                 <CheckCircle2 className="h-3 w-3" />
                                 成熟路线
                               </Badge>
-                            ) : productBom.needsIEReview ? (
-                              <Badge variant="outline" className="gap-1 text-red-600 border-red-300">
+                            );
+                          } else if (productBom.needsIEReview) {
+                            return (
+                              <Badge variant="outline" className="gap-1 text-red-600 border-red-300 text-xs">
                                 <AlertCircle className="h-3 w-3" />
                                 需IE确认
                               </Badge>
-                            ) : (
-                              <Badge variant="outline" className="gap-1 text-orange-600 border-orange-300">
+                            );
+                          } else {
+                            return (
+                              <Badge variant="outline" className="gap-1 text-orange-600 border-orange-300 text-xs">
                                 <AlertTriangle className="h-3 w-3" />
                                 新路线
                               </Badge>
-                            )
-                          )}
+                            );
+                          }
+                        }
+                        return null;
+                      })()}
+                    </div>
+                  </div>
+                  {(() => {
+                    const productBom = bomData[selectedProduct.id];
+                    if (productBom?.routingId) {
+                      return (
+                        <div className="text-xs text-zinc-500">
+                          路线编码：<span className="font-mono text-zinc-600 ml-1">{productBom.routingId}</span>
                         </div>
-                      </div>
-                      <div className="text-xs text-zinc-500">
-                        年量：{product.annualVolume.toLocaleString()} pcs
-                      </div>
-                      {productBom?.routingId && (
-                        <div className="mt-2 pt-2 border-t">
-                          <p className="text-xs text-zinc-400">
-                            路线编码：<span className="font-mono text-zinc-600">{productBom.routingId}</span>
-                          </p>
+                      );
+                    }
+                    return null;
+                  })()}
+                </div>
+
+                {/* 右侧：数据统计卡片 */}
+                <div className="flex gap-4">
+                  {(() => {
+                    const productBom = bomData[selectedProduct.id];
+                    const materials = productBom?.materials || [];
+                    const processes = productBom?.processes || [];
+                    const needInquiry = materials.filter((m: any) => !m.hasHistoryData).length +
+                      processes.filter((p: any) => !p.hasHistoryData).length;
+
+                    // 计算单件成本
+                    const materialCost = materials
+                      .filter((m: any) => m.hasHistoryData && (m.unitPrice || m.vavePrice))
+                      .reduce((sum: number, m: any) => sum + (m.vavePrice || m.unitPrice || 0) * (m.quantity || 0), 0);
+                    const processCost = processes
+                      .filter((p: any) => p.hasHistoryData && (p.unitPrice || p.vavePrice))
+                      .reduce((sum: number, p: any) => sum + (p.vavePrice || p.unitPrice || 0) * (p.quantity || 0), 0);
+                    const unitCost = materialCost + processCost;
+
+                    return (
+                      <>
+                        {/* 物料卡片 */}
+                        <div className="bg-white rounded-lg p-3 border border-zinc-200 min-w-[300px]">
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-1.5">
+                              <Package className="h-4 w-4 text-blue-600" />
+                              <span className="text-xs font-medium text-zinc-700">物料</span>
+                            </div>
+                            <div className="text-2xl font-bold text-blue-600">{materials.length} <span className="text-sm font-normal text-zinc-500">项</span></div>
+                          </div>
                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
+
+                        {/* 工艺卡片 */}
+                        <div className="bg-white rounded-lg p-3 border border-zinc-200 min-w-[300px]">
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-1.5">
+                              <Settings className="h-4 w-4 text-purple-600" />
+                              <span className="text-xs font-medium text-zinc-700">工艺</span>
+                            </div>
+                            <div className="text-2xl font-bold text-purple-600">{processes.length} <span className="text-sm font-normal text-zinc-500">项</span></div>
+                          </div>
+                        </div>
+
+                        {/* 询价卡片 */}
+                        <div className={`rounded-lg p-3 border min-w-[300px] ${needInquiry > 0 ? 'bg-orange-50 border-orange-300' : 'bg-white border-zinc-200'}`}>
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-1.5">
+                              <AlertCircle className={`h-4 w-4 ${needInquiry > 0 ? 'text-orange-600' : 'text-zinc-400'}`} />
+                              <span className={`text-xs font-medium ${needInquiry > 0 ? 'text-orange-700' : 'text-zinc-700'}`}>询价</span>
+                            </div>
+                            <div className={`text-2xl font-bold ${needInquiry > 0 ? 'text-orange-600' : 'text-zinc-600'}`}>{needInquiry} <span className="text-sm font-normal text-zinc-500">项</span></div>
+                          </div>
+                        </div>
+
+                        {/* 单价卡片 */}
+                        <div className={`rounded-lg p-3 border min-w-[300px] ${unitCost > 0 ? 'bg-green-50 border-green-300' : 'bg-white border-zinc-200'}`}>
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-1.5">
+                              <DollarSign className={`h-4 w-4 ${unitCost > 0 ? 'text-green-600' : 'text-zinc-400'}`} />
+                              <span className={`text-xs font-medium ${unitCost > 0 ? 'text-green-700' : 'text-zinc-700'}`}>单件</span>
+                            </div>
+                            <div className={`text-xl font-bold ${unitCost > 0 ? 'text-green-600' : 'text-zinc-600'}`}>
+                              {unitCost > 0 ? `¥${unitCost.toFixed(2)}` : '-'}
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Upload BOM */}
-        {!currentBomData?.isUploaded ? (
+        {(!currentBomData?.isUploaded || selectedProduct.id === '') ? (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Upload className="h-5 w-5" />
-                上传 {selectedProduct.name} 的BOM表
+                {selectedProduct.name ? `上传 ${selectedProduct.name} 的BOM表` : '上传 BOM 文件'}
               </CardTitle>
               <CardDescription>
                 支持 Excel (.xlsx, .xls) 或 CSV 格式，AI将自动解析物料清单和工艺清单
+                {project.products.length === 0 && ' · 可直接上传多产品BOM文件，系统将自动识别创建产品'}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -930,21 +1268,20 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
                 <p className="text-sm text-zinc-500 mb-4">
                   点击或拖拽文件到此区域上传
                 </p>
-                <label htmlFor="bom-upload">
-                  <Button asChild>
-                    <span className="cursor-pointer gap-2">
-                      <Upload className="h-4 w-4" />
-                      选择文件
-                    </span>
-                  </Button>
-                  <Input
-                    id="bom-upload"
-                    type="file"
-                    accept=".xlsx,.xls,.csv"
-                    className="hidden"
-                    onChange={handleFileUpload}
-                  />
+                <label
+                  htmlFor="bom-file-input"
+                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 cursor-pointer"
+                >
+                  <Upload className="h-4 w-4" />
+                  选择文件
                 </label>
+                <input
+                  id="bom-file-input"
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0, overflow: 'hidden', clip: 'rect(0, 0, 0, 0)' }}
+                  onChange={handleBOMUpload}
+                />
               </div>
 
               <div className="mt-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
@@ -989,141 +1326,104 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
           </Card>
         ) : (
           <>
-            {/* Stats */}
-            <div className="grid grid-cols-4 gap-4">
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-zinc-500 mb-1">物料项数</p>
-                      <p className="text-2xl font-semibold">{stats.materials}</p>
-                    </div>
-                    <Package className="h-8 w-8 text-blue-600 opacity-50" />
-                  </div>
-                </CardContent>
-              </Card>
+            {/* Materials & Processes Tabs */}
+            <Tabs defaultValue="materials" className="w-full">
+              <TabsList className="inline-flex h-8 items-center justify-center rounded-lg bg-zinc-100 p-1">
+                <TabsTrigger value="materials" className="h-7 px-3 text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                  <Package className="h-3.5 w-3.5 mr-1.5" />
+                  物料清单 ({currentBomData.materials.length})
+                </TabsTrigger>
+                <TabsTrigger value="processes" className="h-7 px-3 text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                  <Settings className="h-3.5 w-3.5 mr-1.5" />
+                  工艺清单 ({currentBomData.processes.length})
+                </TabsTrigger>
+              </TabsList>
 
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-zinc-500 mb-1">工艺项数</p>
-                      <p className="text-2xl font-semibold">{stats.processes}</p>
-                    </div>
-                    <Settings className="h-8 w-8 text-purple-600 opacity-50" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-zinc-500 mb-1">需询价</p>
-                      <p className="text-2xl font-semibold text-orange-600">{stats.needInquiry}</p>
-                    </div>
-                    <AlertCircle className="h-8 w-8 text-orange-600 opacity-50" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-zinc-500 mb-1">单件成本</p>
-                      <p className="text-2xl font-semibold text-green-600">
-                        ¥{stats.totalCost.toFixed(2)}
-                      </p>
-                    </div>
-                    <DollarSign className="h-8 w-8 text-green-600 opacity-50" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Materials & Processes Tables */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Sparkles className="h-5 w-5 text-purple-600" />
-                      AI 解析结果
-                    </CardTitle>
-                    <CardDescription>
-                      物料清单和工艺清单已从BOM表中识别，数据库查询完成
-                    </CardDescription>
-                  </div>
-                  <Badge variant="secondary" className="gap-1">
-                    <CheckCircle2 className="h-3 w-3" />
-                    {fileName}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="materials" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="materials">
-                      物料清单 ({currentBomData.materials.length})
-                    </TabsTrigger>
-                    <TabsTrigger value="processes">
-                      工艺清单 ({currentBomData.processes.length})
-                    </TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="materials" className="mt-6">
-                    <div className="border rounded-lg overflow-hidden overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-[60px]">层级</TableHead>
-                            <TableHead className="w-[120px]">零件号</TableHead>
-                            <TableHead>零件名称</TableHead>
-                            <TableHead className="w-[60px]">版本</TableHead>
-                            <TableHead className="w-[60px]">类型</TableHead>
-                            <TableHead className="w-[60px]">状态</TableHead>
-                            <TableHead>材料</TableHead>
-                            <TableHead>供应商</TableHead>
-                            <TableHead className="text-right w-[80px]">数量</TableHead>
-                            <TableHead className="text-right w-[100px]">单价</TableHead>
-                            <TableHead className="text-right w-[100px]">VAVE单价</TableHead>
-                            <TableHead className="w-[150px]">备注</TableHead>
-                            <TableHead className="text-right w-[100px]">操作</TableHead>
+              <TabsContent value="materials" className="mt-4">
+                <Card className="border-zinc-200 shadow-sm">
+                  <CardContent className="p-0">
+                    <div className="rounded-lg border border-zinc-200 overflow-x-auto">
+                      <Table className="table-fixed">
+                        <TableHeader className="bg-zinc-50">
+                          <TableRow className="border-b-zinc-200 hover:bg-transparent">
+                            <TableHead className="w-10 text-xs font-semibold text-zinc-700">层级</TableHead>
+                            <TableHead className="w-20 text-xs font-semibold text-zinc-700">零件号</TableHead>
+                            <TableHead className="min-w-[80px] max-w-[120px] text-xs font-semibold text-zinc-700">零件名称</TableHead>
+                            <TableHead className="w-10 text-xs font-semibold text-zinc-700">版本</TableHead>
+                            <TableHead className="w-10 text-xs font-semibold text-zinc-700">类型</TableHead>
+                            <TableHead className="w-10 text-xs font-semibold text-zinc-700">状态</TableHead>
+                            <TableHead className="w-20 text-xs font-semibold text-zinc-700">材料</TableHead>
+                            <TableHead className="w-16 text-xs font-semibold text-zinc-700">供应商</TableHead>
+                            <TableHead className="w-12 text-right text-xs font-semibold text-zinc-700">数量</TableHead>
+                            <TableHead className="w-14 text-right text-xs font-semibold text-zinc-700">单价</TableHead>
+                            <TableHead className="w-14 text-right text-xs font-semibold text-zinc-700">VAVE</TableHead>
+                            <TableHead className="w-20 text-xs font-semibold text-zinc-700">备注</TableHead>
+                            <TableHead className="w-14 text-right text-xs font-semibold text-zinc-700">操作</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {currentBomData.materials.map((material) => (
-                            <TableRow key={material.id}>
-                              <TableCell className="text-xs">
-                                {material.level}
+                          {currentBomData.materials.map((material, idx) => (
+                            <TableRow
+                              key={material.id}
+                              className="border-b-zinc-100 hover:bg-blue-50/50 transition-colors"
+                            >
+                              <TableCell className="text-xs text-zinc-500">
+                                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-zinc-100 text-zinc-600 font-medium">
+                                  {material.level}
+                                </span>
                               </TableCell>
-                              <TableCell className="font-mono text-xs">
+                              <TableCell className="font-mono text-xs text-blue-700 font-medium truncate">
                                 {material.partNumber}
                               </TableCell>
-                              <TableCell className="font-medium text-sm">
+                              <TableCell className="font-medium text-sm text-zinc-900 truncate" title={material.partName}>
                                 {material.partName}
                               </TableCell>
-                              <TableCell className="text-xs text-zinc-500">
-                                {material.version}
+                              <TableCell className="text-xs">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 font-medium border border-indigo-100">
+                                  v{material.version}
+                                </span>
                               </TableCell>
                               <TableCell className="text-xs">
-                                <Badge variant="outline" className="text-xs">
-                                  {material.type}
-                                </Badge>
+                                {material.type === 'F' ? (
+                                  <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100 font-medium">
+                                    自制
+                                  </Badge>
+                                ) : material.type === 'I' ? (
+                                  <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100 font-medium">
+                                    外购
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="font-medium">
+                                    {material.type}
+                                  </Badge>
+                                )}
                               </TableCell>
                               <TableCell className="text-xs">
-                                <Badge variant="secondary" className="text-xs">
-                                  {material.status}
-                                </Badge>
+                                {material.stockStatus === 'N' ? (
+                                  <Badge className="bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-100 font-medium">
+                                    正常
+                                  </Badge>
+                                ) : material.stockStatus === 'C' ? (
+                                  <Badge className="bg-cyan-100 text-cyan-700 border-cyan-200 hover:bg-cyan-100 font-medium">
+                                    确认
+                                  </Badge>
+                                ) : material.stockStatus ? (
+                                  <Badge variant="secondary" className="font-medium">
+                                    {material.stockStatus}
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="secondary" className="font-medium">
+                                    -
+                                  </Badge>
+                                )}
                               </TableCell>
-                              <TableCell className="min-w-[180px]">
+                              <TableCell className="min-w-0">
                                 <Select
                                   value={material.material}
                                   onValueChange={(value) => handleMaterialTypeChange(material.id, value)}
                                 >
-                                  <SelectTrigger className="h-8 text-xs">
-                                    <SelectValue />
+                                  <SelectTrigger className="h-7 text-xs bg-white border-zinc-200 px-2 w-full">
+                                    <SelectValue placeholder="选择" />
                                   </SelectTrigger>
                                   <SelectContent>
                                     {MATERIAL_TYPES.map((type) => (
@@ -1134,50 +1434,52 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
                                   </SelectContent>
                                 </Select>
                               </TableCell>
-                              <TableCell className="text-xs text-zinc-600">
-                                {material.supplier || '-'}
+                              <TableCell className="text-xs text-zinc-600 truncate max-w-[60px]" title={material.supplier || ''}>
+                                {material.supplier || <span className="text-zinc-400 italic">-</span>}
                               </TableCell>
-                              <TableCell className="text-right text-sm">
-                                {material.quantity} {material.unit}
+                              <TableCell className="text-right text-sm font-medium text-zinc-700">
+                                {material.quantity}<span className="text-zinc-500 ml-0.5">{material.unit}</span>
                               </TableCell>
-                              <TableCell className="text-right">
+                              <TableCell className="text-right text-xs">
                                 {material.hasHistoryData && material.unitPrice ? (
-                                  <div className="space-y-1">
-                                    <div className="font-medium">
+                                  <div className="space-y-0.5">
+                                    <div className="font-semibold text-zinc-900">
                                       ¥{material.unitPrice.toFixed(2)}
                                     </div>
                                     {getPriceValidationBadge(material.material, material.unitPrice)}
                                   </div>
                                 ) : (
-                                  <span className="text-zinc-400">-</span>
+                                  <span className="text-zinc-300 text-sm">-</span>
                                 )}
                               </TableCell>
                               <TableCell className="text-right">
                                 {material.hasHistoryData && material.vavePrice ? (
                                   <div className="flex items-center justify-end gap-1">
-                                    <TrendingDown className="h-3 w-3 text-green-600" />
-                                    <span className="font-medium text-green-600">
+                                    <TrendingDown className="h-3.5 w-3.5 text-green-600" />
+                                    <span className="font-semibold text-green-600">
                                       ¥{material.vavePrice.toFixed(2)}
                                     </span>
                                   </div>
                                 ) : (
-                                  <span className="text-zinc-400">-</span>
+                                  <span className="text-zinc-300 text-sm">-</span>
                                 )}
                               </TableCell>
-                              <TableCell className="text-xs text-zinc-500 max-w-[150px] truncate">
-                                {material.comments || '-'}
+                              <TableCell className="text-xs text-zinc-500 p-2">
+                                <div className="truncate max-w-[80px]" title={material.comments || ''}>
+                                  {material.comments || <span className="text-zinc-300">-</span>}
+                                </div>
                               </TableCell>
                               <TableCell className="text-right">
                                 {material.hasHistoryData ? (
-                                  <Badge variant="secondary" className="gap-1">
+                                  <Badge variant="secondary" className="gap-1 bg-green-50 text-green-700 border-green-200 hover:bg-green-50 text-xs">
                                     <CheckCircle2 className="h-3 w-3" />
                                     已匹配
                                   </Badge>
                                 ) : (
-                                  <Button 
-                                    variant="outline" 
+                                  <Button
+                                    variant="outline"
                                     size="sm"
-                                    className="gap-1 text-xs"
+                                    className="gap-1 text-xs h-7 px-2 bg-white hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700"
                                     onClick={() => handleInquiry('material', material)}
                                   >
                                     <Mail className="h-3 w-3" />
@@ -1190,97 +1492,108 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
                         </TableBody>
                       </Table>
                     </div>
-                  </TabsContent>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-                  <TabsContent value="processes" className="mt-6">
-                    <div className="border rounded-lg overflow-hidden overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-[80px]">工序号</TableHead>
-                            <TableHead>工序名称</TableHead>
-                            <TableHead>工作中心</TableHead>
-                            <TableHead className="text-right w-[100px]">标准工时</TableHead>
-                            <TableHead className="text-right w-[100px]">单价</TableHead>
-                            <TableHead className="text-right w-[100px]">VAVE单价</TableHead>
-                            <TableHead>规格要求</TableHead>
-                            <TableHead className="text-right w-[100px]">操作</TableHead>
+              <TabsContent value="processes" className="mt-6">
+                <Card className="border-zinc-200 shadow-sm">
+                  <CardContent className="p-0">
+                    <div className="rounded-xl border border-zinc-200 overflow-hidden overflow-x-auto shadow-sm">
+                      <Table className="table-fixed">
+                        <TableHeader className="bg-gradient-to-r from-purple-50 to-indigo-50/50">
+                          <TableRow className="border-b-zinc-200 hover:bg-transparent">
+                            <TableHead className="w-[90px] text-xs font-semibold text-zinc-700">工序号</TableHead>
+                            <TableHead className="text-xs font-semibold text-zinc-700">工序名称</TableHead>
+                            <TableHead className="text-xs font-semibold text-zinc-700">工作中心</TableHead>
+                            <TableHead className="text-right w-[110px] text-xs font-semibold text-zinc-700">标准工时</TableHead>
+                            <TableHead className="text-right w-[110px] text-xs font-semibold text-zinc-700">单价</TableHead>
+                            <TableHead className="text-right w-[110px] text-xs font-semibold text-zinc-700">VAVE单价</TableHead>
+                            <TableHead className="w-28 text-xs font-semibold text-zinc-700">规格要求</TableHead>
+                            <TableHead className="text-right w-[100px] text-xs font-semibold text-zinc-700">操作</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {currentBomData.processes.map((process) => (
-                            <TableRow key={process.id}>
-                              <TableCell className="font-mono text-sm font-medium">
-                                {process.opNo}
+                            <TableRow
+                              key={process.id}
+                              className="border-b-zinc-100 hover:bg-purple-50/50 transition-colors"
+                            >
+                              <TableCell className="font-mono text-sm">
+                                <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-purple-100 text-purple-700 font-semibold text-xs">
+                                  {process.opNo}
+                                </span>
                               </TableCell>
-                              <TableCell className="font-medium">
+                              <TableCell className="font-medium text-sm text-zinc-900">
                                 {process.name}
                               </TableCell>
                               <TableCell className="text-sm">
-                                <Input 
+                                <Input
                                   value={process.workCenter}
-                                  className="h-8 text-xs"
+                                  className="h-8 text-xs bg-white border-zinc-200"
                                   disabled={currentBomData.isRoutingKnown && process.isOperationKnown}
                                   onChange={(e) => handleWorkCenterChange(process.id, e.target.value)}
                                 />
                               </TableCell>
                               <TableCell className="text-right">
                                 <div className="flex items-center justify-end gap-1">
-                                  <Input 
+                                  <Input
                                     value={process.standardTime}
                                     type="number"
                                     step="0.1"
-                                    className="h-8 w-20 text-xs text-right"
+                                    className="h-8 w-20 text-xs text-right bg-white border-zinc-200"
                                     disabled={currentBomData.isRoutingKnown && process.isOperationKnown}
                                     onChange={(e) => handleStandardTimeChange(process.id, parseFloat(e.target.value))}
                                   />
-                                  <span className="text-xs text-zinc-500">h</span>
+                                  <span className="text-xs text-zinc-500 font-medium">h</span>
                                 </div>
                               </TableCell>
                               <TableCell className="text-right">
                                 {process.hasHistoryData && process.unitPrice ? (
-                                  <span className="font-medium">
+                                  <span className="font-semibold text-zinc-900">
                                     ¥{process.unitPrice.toFixed(2)}
                                   </span>
                                 ) : (
-                                  <span className="text-zinc-400">-</span>
+                                  <span className="text-zinc-300 text-sm">-</span>
                                 )}
                               </TableCell>
                               <TableCell className="text-right">
                                 {process.hasHistoryData && process.vavePrice ? (
                                   <div className="flex items-center justify-end gap-1">
-                                    <TrendingDown className="h-3 w-3 text-green-600" />
-                                    <span className="font-medium text-green-600">
+                                    <TrendingDown className="h-3.5 w-3.5 text-green-600" />
+                                    <span className="font-semibold text-green-600">
                                       ¥{process.vavePrice.toFixed(2)}
                                     </span>
                                   </div>
                                 ) : (
-                                  <span className="text-zinc-400">-</span>
+                                  <span className="text-zinc-300 text-sm">-</span>
                                 )}
                               </TableCell>
-                              <TableCell className="text-xs text-zinc-500 max-w-[200px] truncate">
-                                {process.spec || '-'}
+                              <TableCell className="text-xs text-zinc-500 p-2">
+                                <div className="truncate max-w-[112px]" title={process.spec || ''}>
+                                  {process.spec || <span className="text-zinc-300">-</span>}
+                                </div>
                               </TableCell>
                               <TableCell className="text-right">
                                 {currentBomData.needsIEReview ? (
-                                  <Button 
-                                    variant="outline" 
+                                  <Button
+                                    variant="outline"
                                     size="sm"
-                                    className="gap-1 text-xs text-purple-600 border-purple-300"
+                                    className="gap-1 text-xs h-8 bg-white hover:bg-purple-50 hover:border-purple-300 hover:text-purple-700"
                                   >
                                     <Settings className="h-3 w-3" />
                                     IE确认
                                   </Button>
                                 ) : process.hasHistoryData ? (
-                                  <Badge variant="secondary" className="gap-1">
+                                  <Badge variant="secondary" className="gap-1 bg-green-50 text-green-700 border-green-200 hover:bg-green-50">
                                     <CheckCircle2 className="h-3 w-3" />
                                     已匹配
                                   </Badge>
                                 ) : (
-                                  <Button 
-                                    variant="outline" 
+                                  <Button
+                                    variant="outline"
                                     size="sm"
-                                    className="gap-1 text-xs"
+                                    className="gap-1 text-xs h-8 bg-white hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700"
                                     onClick={() => handleInquiry('process', process)}
                                   >
                                     <Mail className="h-3 w-3" />
@@ -1293,9 +1606,9 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
                         </TableBody>
                       </Table>
                     </div>
-                    
+
                     {/* Routing Info Card */}
-                    <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="m-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
                       <div className="flex items-start gap-3">
                         <Database className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
                         <div className="flex-1">
@@ -1308,27 +1621,27 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
                         </div>
                       </div>
                     </div>
-                  </TabsContent>
-                </Tabs>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
 
-                {/* Inquiry Reminder */}
-                {stats.needInquiry > 0 && (
-                  <div className="mt-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
-                    <div className="flex items-start gap-3">
-                      <AlertCircle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm text-orange-900 mb-1">
-                          需要询价 {stats.needInquiry} 个项目
-                        </p>
-                        <p className="text-xs text-orange-700">
-                          点击"询价"按钮将自动生成询价邮件，包含项目和产品的完整信息。完成所有询价后才能进入下一步。
-                        </p>
-                      </div>
-                    </div>
+            {/* Inquiry Reminder */}
+            {stats.needInquiry > 0 && (
+              <div className="mt-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm text-orange-900 mb-1">
+                      需要询价 {stats.needInquiry} 个项目
+                    </p>
+                    <p className="text-xs text-orange-700">
+                      点击"询价"按钮将自动生成询价邮件，包含项目和产品的完整信息。完成所有询价后才能进入下一步。
+                    </p>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                </div>
+              </div>
+            )}
           </>
         )}
 
@@ -1456,6 +1769,113 @@ export function BOMManagement({ onNavigate, project }: BOMManagementProps) {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* 多产品 BOM 预览 */}
+      {showMultiProductDialog && multiProductPreview && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-purple-600" />
+                    检测到多个产品
+                  </CardTitle>
+                  <CardDescription>
+                    识别到 <span className="font-semibold text-purple-600">{multiProductPreview.products.length}</span> 个产品，
+                    共 <span className="font-semibold">{multiProductPreview.total_materials}</span> 个物料
+                  </CardDescription>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  setShowMultiProductDialog(false);
+                  setMultiProductPreview(null);
+                }}>
+                  ✕
+                </Button>
+              </div>
+            </CardHeader>
+
+            <CardContent className="flex-1 overflow-y-auto">
+              {/* 产品表格 */}
+              {multiProductPreview.products.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-12">#</TableHead>
+                      <TableHead>产品代码</TableHead>
+                      <TableHead>产品名称</TableHead>
+                      <TableHead className="w-20 text-right">物料数</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {multiProductPreview.products.map((product, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell className="text-zinc-400">{idx + 1}</TableCell>
+                        <TableCell className="font-medium">{product.product_code}</TableCell>
+                        <TableCell className="text-zinc-600">{product.product_name || <span className="italic text-zinc-400">未命名</span>}</TableCell>
+                        <TableCell className="text-right">{product.material_count}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="text-center py-12 text-zinc-400 border rounded-lg border-dashed">
+                  未检测到产品
+                </div>
+              )}
+            </CardContent>
+
+            <div className="flex justify-between px-6 py-4 border-t bg-zinc-50">
+              <Button variant="outline" onClick={() => {
+                setShowMultiProductDialog(false);
+                setMultiProductPreview(null);
+              }}>
+                取消
+              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowMultiProductDialog(false);
+                    setMultiProductPreview(null);
+                    if (multiProductPreview) {
+                      const materials = multiProductPreview.materials || [];
+                      const processes = multiProductPreview.processes || [];
+                      setBomData(prev => ({
+                        ...prev,
+                        [selectedProduct.id]: {
+                          productId: selectedProduct.id,
+                          isUploaded: true,
+                          isParsing: false,
+                          isParsed: true,
+                          parseProgress: 100,
+                          materials,
+                          processes,
+                          routingId: `RT-${selectedProduct.partNumber || 'BOM'}-${Date.now().toString().slice(-4)}`,
+                          isRoutingKnown: processes.length > 0,
+                          needsIEReview: materials.filter((m: any) => !m.hasHistoryData).length > 0
+                        }
+                      }));
+                    }
+                  }}
+                >
+                  仅导入当前
+                </Button>
+                <Button
+                  onClick={() => {
+                    handleMultiProductConfirm();
+                    setShowMultiProductDialog(false);
+                    setMultiProductPreview(null);
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  创建 {multiProductPreview.products.length} 个产品
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

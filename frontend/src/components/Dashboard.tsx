@@ -100,14 +100,15 @@ export function Dashboard({ onNavigate, projects, onSyncFromPM, onSelectProject 
 
   // 过滤项目
   const filteredProjects = projects.filter(project => {
-    const matchesSearch = 
+    // 如果搜索为空，匹配所有项目
+    const matchesSearch = !searchQuery || searchQuery.trim() === '' ||
       project.projectName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.asacNumber.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesTab = activeTab === 'all' || project.status === activeTab;
-    
+
     return matchesSearch && matchesTab;
   });
 
