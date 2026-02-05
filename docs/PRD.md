@@ -644,7 +644,7 @@ Total Cost（总成本）
 
 ---
 
-### 7.8 DB I & DB IV (Deckungsbeitrag) - 边际贡献
+### 6.7 DB I & DB IV (Deckungsbeitrag) - 边际贡献
 
 **DB I - 边际贡献 I（生产毛利）：**
 - **意义：** 衡量工厂生产这个产品赚不赚钱，不考虑研发和模具分摊
