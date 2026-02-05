@@ -160,18 +160,15 @@ $$Cost_{std} = (std\_mhr\_var + std\_mhr\_fix + Rate_{labor}) \times \frac{Cycle
 | `project_product_id` | CHAR(36) | FK, 关联产品 | - |
 | `process_code` | VARCHAR(50) | FK, 工序编码 | INJECTION_001 |
 | `sequence_order` | INT | 工序顺序 | 10 |
-| `cycle_time_std` | INT | 标准工时（秒） | 45 |
-| `cycle_time_vave` | INT | VAVE 工时（秒） | 40 |
-| `personnel_std` | DECIMAL(4,2) | 标准人工配置 | 1.0 |
-| `personnel_vave` | DECIMAL(4,2) | VAVE 人工配置 | 0.5 |
+| `cycle_time` | INT | 标准工时（秒） | 45 |
+| `personnel` | DECIMAL(4,2) | 标准人工配置 | 1.0 |
 | `std_cost` | DECIMAL(12,4) | 标准成本 | 3.3750 |
-| `vave_cost` | DECIMAL(12,4) | VAVE 成本 | 2.8000 |
 | `remarks` | TEXT | 备注 | - |
 | `created_at` | DATETIME | 创建时间 | DEFAULT NOW() |
 
 ---
 
-## 6. 数据模型定义
+## 5. 数据模型定义
 
 ### 6.1 Pydantic 模型
 
