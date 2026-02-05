@@ -232,7 +232,6 @@ erDiagram
 | material | VARCHAR(100) | | 材料描述 |
 | supplier | VARCHAR(200) | | 供应商 |
 | std_price | DECIMAL(10,4) | | 标准单价 |
-| vave_price | DECIMAL(10,4) | | VAVE 单价 |
 | remarks | TEXT | | 备注 |
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
