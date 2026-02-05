@@ -50,6 +50,8 @@
 
 ```mermaid
 erDiagram
+    factories ||--o{ projects : "1:N 关联"
+    factories ||--o{ cost_centers : "1:N 所属"
     projects ||--o{ project_products : "1:N 包含"
     project_products ||--o{ product_materials : "1:N 使用"
     project_products ||--o{ product_processes : "1:N 工艺路线"
@@ -60,15 +62,24 @@ erDiagram
     cost_centers ||--o{ process_rates : "1:N 所属"
     process_rates ||--o{ product_processes : "1:N 被引用"
 
-    projects ||--|| quote_summaries : "1:1 汇总"
+    projects ||--o{ quote_summaries : "1:N 多版本"
     projects ||--o| business_case_params : "1:1 参数"
     business_case_params ||--o{ business_case_years : "1:N 年度"
+
+    factories {
+        varchar20 id PK "工厂代码"
+        string name
+        string location
+        decimal cost_coefficient "成本系数"
+        string status
+    }
 
     projects {
         char36 id PK
         string project_name
         string project_code "AS/AC编号"
         string customer_name
+        varchar20 factory_id FK "所属工厂"
         int annual_volume
         string status
         decimal target_margin
@@ -76,6 +87,7 @@ erDiagram
 
     cost_centers {
         varchar20 id PK "成本中心代码"
+        varchar20 factory_id FK "所属工厂"
         string name
         decimal net_production_hours
         decimal efficiency_rate
