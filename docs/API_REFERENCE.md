@@ -340,18 +340,7 @@
 
 ## 4. 数据模型定义
 
-### 4.1 PricePair（双轨价格）
-
-```typescript
-interface PricePair {
-  std: number;        // 标准价格
-  vave: number;       // VAVE 价格
-  savings: number;    // 节省空间 (std - vave)
-  savings_rate: number; // 节省率 (savings / std)
-}
-```
-
-### 4.2 MaterialStatus（物料状态）
+### 4.1 MaterialStatus（物料状态）
 
 ```typescript
 type MaterialStatus = 'verified' | 'warning' | 'missing';
@@ -362,10 +351,7 @@ interface Material {
   part_name: string;
   quantity: number;
   unit: string;
-  std_price?: number;
-  vave_price?: number;
-  savings?: number;
-  savings_rate?: number;
+  unit_price?: number;
   has_history_data: boolean;
   status: MaterialStatus;
   confidence: number; // 0-100
