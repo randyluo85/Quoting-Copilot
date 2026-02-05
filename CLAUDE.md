@@ -332,7 +332,6 @@ interface Process {
       "quantity": 3.5,
       "unit": "kg",
       "stdPrice": 28.50,
-      "vavePrice": 26.80,
       "hasHistoryData": true,
       "status": "verified",
       "comments": "铸造级，符合GB/T 1173标准"
@@ -345,7 +344,6 @@ interface Process {
       "workCenter": "铸造车间",
       "standardTime": 2.5,
       "stdPrice": 45.00,
-      "vavePrice": 42.00,
       "hasHistoryData": true
     }
   ]
