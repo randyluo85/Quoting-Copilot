@@ -540,6 +540,61 @@ std_cost = (cycle_time_std / 3600) × (std_mhr_var + std_mhr_fix + personnel_std
 
 ---
 
+### 3.7 向量数据表 {#vector-tables} 🆕 v1.7
+
+> **技术栈**：PostgreSQL 16 + pgvector 扩展
+> **详细设计**：[VECTOR_DESIGN.md](VECTOR_DESIGN.md)
+
+#### material_vectors（物料向量表）
+
+**用途**：存储物料主数据的语义向量，用于 BOM 物料清洗匹配
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | CHAR(36) | PK | UUID |
+| material_id | VARCHAR(50) | FK, NOT NULL, UNIQUE | 关联 materials.id |
+| embedding | vector(1536) | NOT NULL | 物料语义向量（pgvector） |
+| embedding_text | TEXT | NOT NULL | 用于生成向量的汇集文本（快照） |
+| embedding_model | VARCHAR(50) | DEFAULT 'text-embedding-ada-002' | 使用的嵌入模型 |
+| similarity_threshold | DECIMAL(3,2) | DEFAULT 0.85 | 相似度阈值 |
+| created_at | DATETIME | DEFAULT NOW() | |
+| updated_at | DATETIME | ON UPDATE NOW() | |
+
+**外键关系**：
+```sql
+FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
+```
+
+**汇集字段规则**：
+- ✅ 包含：`name`, `material`, `remarks`, `material_type`
+- ❌ 排除：`id`, `std_price`, `supplier`, `created_at`
+
+#### product_vectors（产品向量表）
+
+**用途**：存储产品 BOM 指纹向量，用于历史相似产品检索
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | CHAR(36) | PK | UUID |
+| product_id | CHAR(36) | FK, NOT NULL, UNIQUE | 关联 project_products.id |
+| embedding | vector(1536) | NOT NULL | 产品指纹向量（pgvector） |
+| fingerprint_text | TEXT | NOT NULL | 用于生成向量的汇集文本（快照） |
+| embedding_model | VARCHAR(50) | DEFAULT 'text-embedding-ada-002' | 使用的嵌入模型 |
+| similarity_threshold | DECIMAL(3,2) | DEFAULT 0.80 | 相似度阈值 |
+| created_at | DATETIME | DEFAULT NOW() | |
+| updated_at | DATETIME | ON UPDATE NOW() | |
+
+**外键关系**：
+```sql
+FOREIGN KEY (product_id) REFERENCES project_products(id) ON DELETE CASCADE
+```
+
+**汇集字段规则**：
+- ✅ 包含：`product_name`, Level 1 关键组件名、工艺名称序列、BOM 工艺关键词
+- ❌ 排除：`quantity`, `product_code`, `cycle_time_std`, `std_cost`
+
+---
+
 ## 4. 索引设计 {#indexes}
 
 ```sql
