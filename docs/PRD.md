@@ -421,22 +421,14 @@ flowchart TB
     SDec -->|是| Export[生成报价单]
     Export --> End([结束: 发送客户])
 
-    %% 样式：深色文字 + 浅色背景
+    %% 样式：不超过3种颜色
     classDef startEnd fill:#1e293b,stroke:#0f172a,stroke-width:2px,color:#fff
-    classDef decision fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#1e293b
-    classDef auto fill:#ecfdf5,stroke:#10b981,stroke-width:1px,color:#1e293b
-    classDef manual fill:#fef3c7,stroke:#f59e0b,stroke-width:1px,color:#1e293b
-    classDef system fill:#dbeafe,stroke:#3b82f6,stroke-width:1px,color:#1e293b
-    classDef review fill:#f3e8ff,stroke:#a855f7,stroke-width:1px,color:#1e293b
-    classDef email fill:#fee2e2,stroke:#ef4444,stroke-width:1px,color:#1e293b
+    classDef process fill:#dbeafe,stroke:#3b82f6,stroke-width:1px,color:#1e293b
+    classDef highlight fill:#fef3c7,stroke:#f59e0b,stroke-width:1px,color:#1e293b
 
     class Start,End startEnd
-    class MBranch,PBranch,SDec decision
-    class MAuto,PAuto,Calc,CalcQSBC auto
-    class PIE,PPE,PControl,SEdit,MImport manual
-    class Project,Upload,Parse,Notify,Export system
-    class Sales review
-    class MMail,MWait email
+    class MBranch,PBranch,SDec,MAuto,PAuto,Calc,CalcQSBC,PIE,PControl,Project,Upload,Parse,Notify,Export process
+    class SEdit,MImport,Sales,MMail,MWait highlight
 ```
 
 ### 5.2 状态流转 v2.1
