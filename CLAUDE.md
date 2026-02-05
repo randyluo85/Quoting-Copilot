@@ -206,6 +206,10 @@ interface Process {
 | **POST** | **`/factories`** | **🔴 v1.5：创建工厂** | - |
 | **GET** | **`/std-investment-costs`** | **🔴 v1.5：获取投资项标准库** | - |
 | **POST** | **`/std-investment-costs`** | **🔴 v1.5：创建投资项标准** | - |
+| **POST** | **`/vector/materials/search`** | **🆕 v1.7：语义搜索物料** | BOMManagement |
+| **POST** | **`/vector/products/search`** | **🆕 v1.7：搜索相似产品** | - |
+| **POST** | **`/vector/materials/sync`** | **🆕 v1.7：同步物料向量** | - |
+| **POST** | **`/vector/products/sync`** | **🆕 v1.7：同步产品向量** | - |
 
 ### 核心响应模型
 
