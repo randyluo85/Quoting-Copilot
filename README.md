@@ -74,6 +74,7 @@ $$ Cost_{std} = \sum (Qty \times P_{std}) + \sum (CycleTime \times (MHR_{std} + 
 | 理解产品需求 | [docs/PRD.md](docs/PRD.md) |
 | 查看数据库设计 | [docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md) |
 | 查找术语定义 | [docs/GLOSSARY.md](docs/GLOSSARY.md) |
+| 向量化架构设计 | [docs/VECTOR_DESIGN.md](docs/VECTOR_DESIGN.md) 🆕 |
 | 部署系统 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
 | 测试指南 | [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) |
 | API 参考 | [docs/API_REFERENCE.md](docs/API_REFERENCE.md) |
