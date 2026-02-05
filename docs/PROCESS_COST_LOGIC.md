@@ -170,7 +170,7 @@ $$Cost_{std} = (std\_mhr\_var + std\_mhr\_fix + Rate_{labor}) \times \frac{Cycle
 
 ## 5. 数据模型定义
 
-### 6.1 Pydantic 模型
+### 5.1 Pydantic 模型
 
 ```python
 from decimal import Decimal
