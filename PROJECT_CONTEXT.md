@@ -61,11 +61,16 @@
 | 项目 | `projects` | `id`, `project_code`, `status`, `annual_volume` |
 | BOM 行 | `product_materials` | `std_cost`, `vave_cost`, `confidence` |
 
-**状态流转（projects.status）：**
+**状态流转（projects.status）v2.0：**
 ```
 draft → parsing → (waiting_price | waiting_ie) → waiting_mhr →
-calculated → sales_review → controlling_review → approved
+calculated → sales_input → completed
 ```
+
+**v2.0 变更说明：**
+- 移除 `controlling_review` 状态
+- 新增 `sales_input` 状态（Sales 输入商业参数）
+- Sales 完成计算后直接进入 `completed` 状态，可导出报价单
 
 完整表结构、索引、约束请参考 [`docs/DATABASE_DESIGN.md`](docs/DATABASE_DESIGN.md)。
 
