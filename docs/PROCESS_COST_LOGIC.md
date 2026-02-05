@@ -353,7 +353,7 @@ flowchart TD
 | POST | `/api/v1/process-cost/calculate` | 计算工艺成本 |
 | GET | `/api/v1/process-cost/{project_product_id}` | 获取产品工艺成本 |
 
-### 10.4 响应示例
+### 9.4 响应示例
 
 ```json
 {
@@ -362,19 +362,12 @@ flowchart TD
     {
       "process_code": "INJECTION_001",
       "sequence_order": 10,
-      "cycle_time_std": 45,
-      "cycle_time_vave": 40,
-      "personnel_std": 1.0,
-      "personnel_vave": 0.5,
-      "std_cost": 3.3750,
-      "vave_cost": 2.8000,
-      "savings": 0.5750,
-      "savings_rate": 17.04
+      "cycle_time": 45,
+      "personnel": 1.0,
+      "std_cost": 3.3750
     }
   ],
   "total_std_cost": 3.3750,
-  "total_vave_cost": 2.8000,
-  "total_savings": 0.5750,
   "validation": {
     "is_valid": true,
     "warnings": [],
