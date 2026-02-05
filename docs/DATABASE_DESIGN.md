@@ -482,7 +482,7 @@ vave_cost = (cycle_time_vave / 3600) × (vave_mhr_var + vave_mhr_fix + personnel
 
 ---
 
-### 3.5 Business Case 相关表 {#business-case-tables}
+### 3.6 Business Case 相关表 {#business-case-tables}
 
 #### business_case_params（Business Case 参数）🔴 新增
 
@@ -496,8 +496,15 @@ vave_cost = (cycle_time_vave / 3600) × (vave_mhr_var + vave_mhr_fix + personnel
 | exchange_rate | DECIMAL(8,4) | | 汇率 |
 | amortization_mode | VARCHAR(50) | | total_volume_based/fixed_3_years |
 | sa_rate | DECIMAL(5,4) | DEFAULT 0.0210 | 管销费用率 ~2.1% |
+| **logistics_rate** | **DECIMAL(5,4)** | | **🔴 v1.5 新增：物流包装费率** |
+| **other_mfg_rate** | **DECIMAL(5,4)** | | **🔴 v1.5 新增：其他制造费用系数** |
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
+
+**v1.5 变更说明：**
+- 新增 `logistics_rate` 物流包装费率（由 Controlling 维护）
+- 新增 `other_mfg_rate` 其他制造费用系数（由 Controlling 维护）
+- SK = HK III + S&A + 物流包装 + 其他制造费用
 
 #### business_case_years（Business Case 年度数据）🔴 新增
 
