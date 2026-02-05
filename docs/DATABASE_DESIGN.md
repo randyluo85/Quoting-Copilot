@@ -166,6 +166,7 @@ erDiagram
     quote_summaries {
         char36 id PK
         char36 project_id FK
+        decimal version_number "版本号"
         decimal total_std_cost
         decimal total_vave_cost
         decimal total_savings
@@ -178,6 +179,18 @@ erDiagram
         decimal db_4
     }
 
+    std_investment_costs {
+        char36 id PK
+        varchar20 item_type "MOLD/GAUGE/JIG/FIXTURE"
+        string material_type "材质"
+        decimal tonnage "吨位"
+        varchar20 complexity "复杂度"
+        decimal std_cost_min "成本下限"
+        decimal std_cost_max "成本上限"
+        string currency
+        string status
+    }
+
     business_case_params {
         char36 id PK
         char36 project_id FK
@@ -185,8 +198,10 @@ erDiagram
         decimal rnd_invest
         decimal base_price
         decimal exchange_rate
+        decimal sa_rate "管销费用率"
+        decimal logistics_rate "物流包装费率"
+        decimal other_mfg_rate "其他制造费用系数"
         varchar20 amortization_mode
-        decimal sa_rate
     }
 
     business_case_years {
