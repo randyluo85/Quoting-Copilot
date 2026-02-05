@@ -537,22 +537,7 @@ VM 点击"一键询价" → VM 发邮件给采购 → 采购联系供应商 → 
 
 ## 6. 业务概念详解
 
-### 7.1 双轨计价 (Dual-Track Pricing)
-
-**定义：** 同一物料/工艺同时计算两个价格：
-- **Standard Price（标准价）**：当前正常的采购成本/生产成本
-- **VAVE Price（优化价）**：通过 VAVE（Value Analysis/Value Engineering）优化后的理想成本
-
-**业务价值：**
-- 帮助企业在竞标中了解"底线价格"
-- 识别高水分的供应商/工艺
-- 持续优化成本结构
-
-> **详细计算逻辑：** [docs/PROCESS_COST_LOGIC.md](PROCESS_COST_LOGIC.md) §3 双轨计价逻辑
-
----
-
-### 7.2 QS (Quote Summary) - 报价摘要
+### 6.1 QS (Quote Summary) - 报价摘要
 
 **定义：** 客户视角的报价总览
 
