@@ -338,7 +338,7 @@ flowchart TD
 | POST | `/api/v1/cost-centers` | 创建成本中心 |
 | PUT | `/api/v1/cost-centers/{id}` | 更新成本中心 |
 
-### 10.2 工艺费率管理
+### 9.2 工艺费率管理
 
 | 方法 | 端点 | 功能 |
 |------|------|------|
