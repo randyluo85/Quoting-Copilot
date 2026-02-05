@@ -236,10 +236,10 @@
 
 | SPEC 维度 | 内容 |
 |-----------|------|
-| **Specific（具体功能）** | 维护物料主数据，支持双价格录入（Standard Price / VAVE Price） |
+| **Specific（具体功能）** | 维护物料主数据，支持标准价格录入 |
 | **Performance（性能指标）** | • 查询响应：< 500 ms<br/>• 支持数据量：> 10,000 条<br/>• 批量导入：> 1000 条/次 |
 | **Executable（验收标准）** | • 支持物料号唯一性校验<br/>• 支持物料分类（原材料/外购件/半成品）<br/>• 价格变更时记录历史版本<br/>• 支持物料号模糊搜索 |
-| **Complete（完整定义）** | **数据字段**：物料号、物料名、规格、材质、单位、Standard Price、VAVE Price、供应商、更新时间<br/>**操作**：Create / Read / Update / Delete / Batch Import |
+| **Complete（完整定义）** | **数据字段**：物料号、物料名、规格、材质、单位、Standard Price、供应商、更新时间<br/>**操作**：Create / Read / Update / Delete / Batch Import |
 
 ---
 
