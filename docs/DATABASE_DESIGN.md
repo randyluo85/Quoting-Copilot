@@ -392,6 +392,7 @@ vave_cost = (cycle_time_vave / 3600) × (vave_mhr_var + vave_mhr_fix + personnel
 | 字段 | 类型 | 约束 | 说明 |
 |------|------|------|------|
 | id | VARCHAR(20) | PK | 成本中心代码 |
+| **factory_id** | **VARCHAR(20)** | **FK** | **🔴 v1.5 新增：所属工厂** |
 | name | VARCHAR(100) | NOT NULL | 成本中心名称 |
 | net_production_hours | DECIMAL(8,2) | | 年度额定生产小时数 |
 | efficiency_rate | DECIMAL(5,4) | | 稼动率 0-1 |
