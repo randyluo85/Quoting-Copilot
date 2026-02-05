@@ -377,7 +377,7 @@
 
 ## 5. 报价流程
 
-### 5.1 标准流程（主流程）v2.0
+### 5.1 标准流程（主流程）v2.1
 
 ```mermaid
 flowchart TB
@@ -391,9 +391,10 @@ flowchart TB
 
     %% 物料分支（左侧）
     MBranch -->|已存在| MAuto[自动获取价格]
-    MBranch -->|新物料| MMail[邮件通知采购]
-    MMail --> MPrice[采购维护价格]
-    MPrice --> MAuto
+    MBranch -->|新物料| MMail[🔴 系统自动发邮件给采购]
+    MMail --> MWait[等待采购邮件回复]
+    MWait --> MImport[VM 导入报价单]
+    MImport --> MAuto
 
     %% 工艺分支（右侧）
     PBranch -->|已存在| PAuto[自动获取费率]
@@ -427,13 +428,15 @@ flowchart TB
     classDef manual fill:#fef3c7,stroke:#f59e0b,stroke-width:1px,color:#1e293b
     classDef system fill:#dbeafe,stroke:#3b82f6,stroke-width:1px,color:#1e293b
     classDef review fill:#f3e8ff,stroke:#a855f7,stroke-width:1px,color:#1e293b
+    classDef email fill:#fee2e2,stroke:#ef4444,stroke-width:1px,color:#1e293b
 
     class Start,End startEnd
     class MBranch,PBranch,SDec decision
     class MAuto,PAuto,Calc,CalcQSBC auto
-    class MMail,MPrice,PIE,PPE,PControl,SEdit manual
+    class PIE,PPE,PControl,SEdit,MImport manual
     class Project,Upload,Parse,Notify,Export system
     class Sales review
+    class MMail,MWait email
 ```
 
 ### 5.2 状态流转 v2.0
