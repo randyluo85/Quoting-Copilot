@@ -68,8 +68,12 @@ erDiagram
     project_products ||--o| amortization_strategies : "1:1 分摊"
 
     materials ||--o{ product_materials : "1:N 被引用"
+    materials ||--o| material_vectors : "1:1 向量"  -- 🆕 v1.7
+
     cost_centers ||--o{ process_rates : "1:N 所属"
     process_rates ||--o{ product_processes : "1:N 被引用"
+
+    project_products ||--o| product_vectors : "1:1 指纹"  -- 🆕 v1.7
 
     projects ||--o{ quote_summaries : "1:N 多版本"
     projects ||--o| business_case_params : "1:1 参数"
