@@ -346,7 +346,7 @@ flowchart TD
 | POST | `/api/v1/process-rates` | 创建工序费率 |
 | PUT | `/api/v1/process-rates/{id}` | 更新工序费率 |
 
-### 10.3 工艺成本计算
+### 9.3 工艺成本计算
 
 | 方法 | 端点 | 功能 |
 |------|------|------|
