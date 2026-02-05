@@ -629,7 +629,7 @@ Total Cost（总成本）
 
 ---
 
-### 7.7 SK (Selbstkosten) - 完全成本
+### 6.6 SK (Selbstkosten) - 完全成本
 
 **定义：** 包含一切分摊后的真实总成本
 
