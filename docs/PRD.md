@@ -374,7 +374,7 @@
 
 ## 5. 报价流程
 
-### 5.1 标准流程（主流程）
+### 5.1 标准流程（主流程）v2.0
 
 ```mermaid
 flowchart TB
@@ -396,27 +396,25 @@ flowchart TB
     PBranch -->|已存在| PAuto[自动获取费率]
     PBranch -->|新工艺| PIE[IE 维护路线]
     PIE --> PPE[PE 评估可行性]
-    PPE --> PControl[Controlling 审核 MHR]
+    PPE --> PControl[Controlling 创建 MHR 标准]
     PControl --> PAuto
 
     %% 汇合计算
-    MAuto --> Calc[系统计算双轨成本]
+    MAuto --> Calc[VM 完成成本计算]
     PAuto --> Calc
 
-    %% 审核流程（从上到下，无交叉）
-    Calc --> Sales[Sales 审核 QS/BC<br/>输入利润率]
-    Sales --> SDec{确认?}
+    Calc --> CalcFull[物料 + 工艺<br/>+ 投资 + 研发]
+    CalcFull --> Notify[通知 Sales 介入]
 
+    %% Sales 输入商业参数
+    Notify --> Sales[Sales 输入商业参数<br/>单价/汇率/年降/利润率]
+    Sales --> CalcQSBC[计算 QS/BC/Payback]
+
+    CalcQSBC --> SDec{确认?}
     SDec -->|否| SEdit[返回修改]
-    SEdit --> Calc
+    SEdit --> Sales
 
-    SDec -->|是| Control[Controlling 审核<br/>成本与利润率]
-    Control --> CDec{通过?}
-
-    CDec -->|否| CEdit[返回 Sales]
-    CEdit --> Sales
-
-    CDec -->|是| Export[生成报价单]
+    SDec -->|是| Export[生成报价单]
     Export --> End([结束: 发送客户])
 
     %% 样式：深色文字 + 浅色背景
@@ -428,14 +426,14 @@ flowchart TB
     classDef review fill:#f3e8ff,stroke:#a855f7,stroke-width:1px,color:#1e293b
 
     class Start,End startEnd
-    class MBranch,PBranch,SDec,CDec decision
-    class MAuto,PAuto,Calc auto
-    class MMail,MPrice,PIE,PPE,PControl,SEdit,CEdit manual
-    class Project,Upload,Parse,Export system
-    class Sales,Control review
+    class MBranch,PBranch,SDec decision
+    class MAuto,PAuto,Calc,CalcQSBC auto
+    class MMail,MPrice,PIE,PPE,PControl,SEdit manual
+    class Project,Upload,Parse,Notify,Export system
+    class Sales review
 ```
 
-### 5.2 状态流转
+### 5.2 状态流转 v2.0
 
 ```mermaid
 stateDiagram-v2
@@ -451,24 +449,24 @@ stateDiagram-v2
 
     P_Auto --> P_Wait: 等待 IE
     P_Wait --> P_PE: PE 评估
-    P_PE --> P_Ctrl: Controlling 审核
+    P_PE --> P_Ctrl: Controlling 创建 MHR
     P_Ctrl --> P_Ready: 完成
     P_Auto --> P_Ready: 自动完成
 
-    M_Ready --> Calc: 计算双轨成本
+    M_Ready --> Calc: VM 计算成本
     P_Ready --> Calc
 
-    Calc --> Sales: Sales 审核
-    Sales --> Ctrl: Controlling 审核
+    Calc --> FullCalc: 完整计算<br/>(物料+工艺+投资+研发)
+    FullCalc --> Sales: Sales 输入商业参数
 
-    Ctrl --> Done: 完成
-    Sales --> Calc: 返回修改
-    Ctrl --> Sales: 返回修改
+    Sales --> QSBC: 计算 QS/BC/Payback
+    QSBC --> Done: 直接导出
+    Sales --> FullCalc: 返回修改
 
     Done --> [*]
 ```
 
-### 5.3 角色参与矩阵
+### 5.3 角色参与矩阵 v2.0
 
 | 流程节点 | Sales | VM | Controlling | IE | PE | 采购 |
 |----------|-------|----|-------------|----|----|----|
@@ -479,10 +477,11 @@ stateDiagram-v2
 | 工艺费率匹配 | ❌ | 🔶 自动 | ❌ | ❌ | ❌ | ❌ |
 | 新工艺路线维护 | ❌ | ❌ | ❌ | ✅ 主导 | ❌ | ❌ |
 | 可行性评估 | ❌ | ❌ | ❌ | ❌ | ✅ 主导 | ❌ |
-| 审核 MHR（新工艺） | ❌ | ❌ | ✅ 主导 | ❌ | ❌ | ❌ |
-| 双轨成本计算 | ❌ | 🔶 自动 | ❌ | ❌ | ❌ | ❌ |
-| **审核 QS/BC/Payback** | ✅ **主导**<br/>输入利润率 | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **最终审核并释放** | ❌ | ❌ | ✅ **主导** | ❌ | ❌ | ❌ |
+| **创建 MHR 标准（新工艺）** | ❌ | ❌ | ✅ **主导** | ❌ | ❌ | ❌ |
+| **完成成本计算** | ❌ | ✅ **主导**<br/>物料+工艺+投资+研发 | ❌ | ❌ | ❌ | ❌ |
+| **输入商业参数** | ✅ **主导**<br/>单价/汇率/年降/利润率 | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **计算 QS/BC/Payback** | ✅ **主导** | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **导出报价单** | ✅ **主导** | ❌ | ❌ | ❌ | ❌ | ❌ |
 
 *注：🔶 表示系统自动执行*
 
