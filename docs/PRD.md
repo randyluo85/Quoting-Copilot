@@ -225,10 +225,10 @@
 
 | SPEC 维度 | 内容 |
 |-----------|------|
-| **Specific（具体功能）** | 根据 BOM 数据和知识库，自动计算每个工序的 Standard Cost 和 VAVE Cost |
-| **Performance（性能指标）** | • 计算时间：< 2 秒/100 行 BOM<br/>• 计算精度：小数点后 2 位<br/>• 双轨成本一致性：100%（所有项目必须同时计算两套成本） |
+| **Specific（具体功能）** | 根据 BOM 数据和知识库，自动计算每个工序的 Standard Cost |
+| **Performance（性能指标）** | • 计算时间：< 2 秒/100 行 BOM<br/>• 计算精度：小数点后 2 位 |
 | **Executable（验收标准）** | • 物料有历史价格时自动填充<br/>• 工艺有对应 MHR 时自动计算成本<br/>• 新物料/新工艺标记为"待确认"<br/>• 计算结果实时展示，支持参数调整后重新计算 |
-| **Complete（完整定义）** | **输入**：BOM 数据 + 物料库 + 工艺费率库<br/>**公式**：`Cost_std = (Material × Qty) + (CycleTime_std / 3600) × (std_mhr_var + std_mhr_fix + personnel_std × labor_rate)`<br/>`Cost_vave = (Material × Qty) + (CycleTime_vave / 3600) × (vave_mhr_var + vave_mhr_fix + personnel_vave × labor_rate)`<br/>**输出**：双轨成本（Standard / VAVE）+ 节省金额 + 节省率 |
+| **Complete（完整定义）** | **输入**：BOM 数据 + 物料库 + 工艺费率库<br/>**公式**：`Cost = (Material × Qty) + (CycleTime / 3600) × (mhr_var + mhr_fix + personnel × labor_rate)`<br/>**输出**：Standard Cost |
 
 ---
 
