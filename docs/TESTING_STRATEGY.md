@@ -126,11 +126,10 @@ def test_api_response_structure():
     assert "project_name" in data
     assert "status" in data
 
-    # 双轨价格字段
+    # 标准成本字段
     if "quote" in data:
         assert "std_cost" in data["quote"]
-        assert "vave_cost" in data["quote"]
-        assert "savings" in data["quote"]
+        assert "total_cost" in data["quote"]
 ```
 
 ### 4.2 错误码测试
