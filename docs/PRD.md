@@ -678,7 +678,7 @@ Total Cost（总成本）
 
 ---
 
-### 7.10 S&A (Sales & Administration) - 管销费用
+### 6.9 S&A (Sales & Administration) - 管销费用
 
 **定义：** 销售与管理费用的分摊
 
