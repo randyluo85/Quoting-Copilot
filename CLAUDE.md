@@ -222,16 +222,13 @@ interface Process {
 }
 ```
 
-**MaterialResponse（物料响应，含双价格）**
+**MaterialResponse（物料响应）**
 ```json
 {
   "id": "M-001",
   "partNumber": "A356-T6",
   "partName": "铝合金",
-  "stdPrice": 28.50,
-  "vavePrice": 26.80,
-  "savings": 1.70,
-  "savingsRate": 0.0596,
+  "unitPrice": 28.50,
   "hasHistoryData": true,
   "status": "verified"
 }
@@ -241,9 +238,9 @@ interface Process {
 ```json
 {
   "productId": "P-001",
-  "materialCost": {"std": 210.95, "vave": 198.25, "savings": 12.70},
-  "processCost": {"std": 264.00, "vave": 242.80, "savings": 21.20},
-  "totalCost": {"std": 474.95, "vave": 441.05, "savings": 33.90}
+  "materialCost": 210.95,
+  "processCost": 264.00,
+  "totalCost": 474.95
 }
 ```
 
