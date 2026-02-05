@@ -101,7 +101,7 @@ $$Cost_{std} = (std\_mhr\_var + std\_mhr\_fix + Rate_{labor}) \times \frac{Cycle
 | Net production hours = 0 | 禁止计算，弹出 `#DIV/0!` 预警 |
 | Efficiency % = 0 | 禁止计算，提示"稼动率不能为0" |
 
-### 4.2 阈值拦截 (Threshold Validation)
+### 3.2 阈值拦截 (Threshold Validation)
 
 | 条件 | 触发动作 |
 |------|---------|
