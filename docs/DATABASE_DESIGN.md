@@ -162,9 +162,6 @@ erDiagram
         char36 project_id FK
         decimal version_number "版本号"
         decimal total_std_cost
-        decimal total_vave_cost
-        decimal total_savings
-        decimal savings_rate
         decimal quoted_price
         decimal actual_margin
         decimal hk_3_cost
