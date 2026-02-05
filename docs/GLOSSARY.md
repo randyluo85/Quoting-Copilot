@@ -19,12 +19,7 @@
 
 | 中文术语 | 英文术语 | 定义 | 示例/备注 |
 |----------|----------|------|-----------|
-| **双轨计价** | Dual-Track Pricing | 同时计算标准价与 VAVE 优化价的计价机制 | 核心业务逻辑 |
-| **VAVE** | Value Analysis/Value Engineering | 价值工程/价值分析，通过优化设计降低成本的方法 | 也称"价值优化" |
 | **标准价** | Standard Price/Std | 当前正常的采购成本或生产成本 | 对应数据库 `std_price` |
-| **VAVE价** | VAVE Price | 通过价值优化后的理想成本 | 对应数据库 `vave_price` |
-| **节省空间** | Savings Gap | 标准价与 VAVE 价的差额 | `savings = std - vave` |
-| **节省率** | Savings Rate | 节省空间占标准价的比例 | `savings_rate = savings / std × 100%` |
 | **BOM** | Bill of Materials | 物料清单，产品所需材料的明细列表 | 通常以 Excel 格式上传 |
 | **MHR** | Machine Hour Rate | 机时费率，每小时机器运行的综合成本 | v1.3 拆分为变动费率(var)和固定费率(fix)；MHR = var + fix + personnel × labor_rate |
 | **MHR_var** | Machine Hour Rate Variable | 机时变动费率（与产量相关） | 含能源、耗材、维护等 |
