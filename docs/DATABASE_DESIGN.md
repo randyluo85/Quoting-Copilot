@@ -375,6 +375,18 @@ vave_cost = (cycle_time_vave / 3600) × (vave_mhr_var + vave_mhr_fix + personnel
 
 ### 3.3 主数据扩展表 {#master-data-extension}
 
+#### factories（工厂主数据）🔴 v1.5 新增
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | VARCHAR(20) | PK | 工厂代码 |
+| name | VARCHAR(100) | NOT NULL | 工厂名称 |
+| location | VARCHAR(200) | | 地理位置 |
+| cost_coefficient | DECIMAL(8,4) | | 成本系数 |
+| status | VARCHAR(20) | DEFAULT 'ACTIVE' | ACTIVE/INACTIVE |
+| created_at | DATETIME | DEFAULT NOW() | |
+| updated_at | DATETIME | ON UPDATE NOW() | |
+
 #### cost_centers（成本中心主数据）🔴 新增
 
 | 字段 | 类型 | 约束 | 说明 |
