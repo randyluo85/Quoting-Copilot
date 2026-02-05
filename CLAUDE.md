@@ -183,10 +183,19 @@ interface Process {
 | POST | `/bom/upload` | 上传并解析 BOM 文件 | BOMManagement |
 | GET | `/bom/{projectId}/materials` | 获取物料清单 | BOMManagement |
 | GET | `/bom/{projectId}/processes` | 获取工艺清单 | BOMManagement |
+| **POST** | **`/procurement/summary/{projectId}`** | **🔴 v1.5：生成项目级采购询价汇总** | BOMManagement |
+| **POST** | **`/procurement/send-request`** | **🔴 v1.5：发送询价邮件** | BOMManagement |
 | POST | `/cost/calculate` | 执行成本核算 | CostCalculation |
 | GET | `/cost/{projectId}` | 获取成本结果 | CostCalculation |
-| GET | `/quotation/{projectId}` | 获取报价摘要 | QuoteSummary |
+| **GET** | **`/quotations/{projectId}`** | **🔴 v1.5：获取项目所有版本报价** | QuoteSummary |
+| **GET** | **`/quotations/{projectId}/{version}`** | **🔴 v1.5：获取指定版本报价** | QuoteSummary |
+| **POST** | **`/quotations/{projectId}`** | **🔴 v1.5：Sales 输入商业参数并计算 QS/BC/Payback** | QuoteSummary |
+| **PUT** | **`/quotations/{id}/submit`** | **🔴 v1.5：提交报价版本** | QuoteSummary |
 | POST | `/quotation/generate` | 生成报价单 | QuotationOutput |
+| **GET** | **`/factories`** | **🔴 v1.5：获取工厂列表** | - |
+| **POST** | **`/factories`** | **🔴 v1.5：创建工厂** | - |
+| **GET** | **`/std-investment-costs`** | **🔴 v1.5：获取投资项标准库** | - |
+| **POST** | **`/std-investment-costs`** | **🔴 v1.5：创建投资项标准** | - |
 
 ### 核心响应模型
 
