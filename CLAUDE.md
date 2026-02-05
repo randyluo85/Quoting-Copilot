@@ -199,7 +199,7 @@ interface Process {
 
 ### 核心响应模型
 
-**ProjectResponse（项目响应）**
+**ProjectResponse（项目响应）v1.5**
 ```json
 {
   "id": "PRJ-2024-001",
@@ -208,7 +208,9 @@ interface Process {
   "clientName": "博世汽车部件（苏州）有限公司",
   "projectName": "发动机缸体零部件报价",
   "annualVolume": "120000",
-  "status": "in-progress",
+  "factoryId": "F001",
+  "factoryName": "苏州工厂",
+  "status": "sales_input",
   "products": [...],
   "owners": {...}
 }
