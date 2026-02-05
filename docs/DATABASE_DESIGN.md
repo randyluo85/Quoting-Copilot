@@ -248,9 +248,6 @@ erDiagram
 | **std_mhr_var** | DECIMAL(10,2) | | **🔴 v1.3 新增：标准变动费率** |
 | **std_mhr_fix** | DECIMAL(10,2) | | **🔴 v1.3 新增：标准固定费率** |
 | **std_depreciation_rate** | DECIMAL(8,4) | | **🔴 v1.4 新增：标准折旧率** |
-| **vave_mhr_var** | DECIMAL(10,2) | | **🔴 v1.3 新增：VAVE变动费率** |
-| **vave_mhr_fix** | DECIMAL(10,2) | | **🔴 v1.3 新增：VAVE固定费率** |
-| **vave_depreciation_rate** | DECIMAL(8,4) | | **🔴 v1.4 新增：VAVE折旧率** |
 | efficiency_factor | DECIMAL(4,2) | DEFAULT 1.0 | 效率系数 |
 | remarks | TEXT | | 备注 |
 | created_at | DATETIME | DEFAULT NOW() | |
