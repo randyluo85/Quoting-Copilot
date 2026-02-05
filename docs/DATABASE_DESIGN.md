@@ -103,7 +103,6 @@ erDiagram
         string name
         string material_type "自制/外购"
         decimal std_price
-        decimal vave_price
     }
 
     product_materials {
