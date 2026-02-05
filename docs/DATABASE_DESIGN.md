@@ -2,7 +2,7 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.3   | 2026-02-03 | 2026-02-03 | Dr.aiVOSS 数据库设计 | Randy Luo |
+| v1.6   | 2026-02-03 | 2026-02-05 | Dr.aiVOSS 数据库设计 | Randy Luo |
 
 ---
 
@@ -14,6 +14,8 @@
 | 2026-02-03 | v1.2 | 修复前端技术栈描述；更新产品名称 | 全部 |
 | 2026-02-03 | v1.3 | 🔴 **破坏性变更**：新增5张表；process_rates 表 MHR 拆分为 var/fix | 全部 |
 | 2026-02-04 | v1.4 | 🔴 **破坏性变更**：process_rates 表新增折旧率字段，支持 Payback 现金流计算 | Payback 模块 |
+| 2026-02-05 | v1.5 | 🔴 **破坏性变更**：projects 表新增 factory_id；quote_summaries 表新增 version_number；新增 factories 表；新增 std_investment_costs 表；business_case_params 新增 logistics_rate 和 other_mfg_rate | 多版本报价、工厂管理、系数维护 |
+| 2026-02-05 | v1.6 | 🔴 **破坏性变更**：移除所有 VAVE 相关字段，简化双轨价格为单轨标准成本 | 全部表 |
 
 **变更规范：**
 - 任何字段新增/修改/删除必须记录在此
@@ -49,6 +51,8 @@
 
 ```mermaid
 erDiagram
+    factories ||--o{ projects : "1:N 关联"
+    factories ||--o{ cost_centers : "1:N 所属"
     projects ||--o{ project_products : "1:N 包含"
     project_products ||--o{ product_materials : "1:N 使用"
     project_products ||--o{ product_processes : "1:N 工艺路线"
@@ -59,15 +63,24 @@ erDiagram
     cost_centers ||--o{ process_rates : "1:N 所属"
     process_rates ||--o{ product_processes : "1:N 被引用"
 
-    projects ||--|| quote_summaries : "1:1 汇总"
+    projects ||--o{ quote_summaries : "1:N 多版本"
     projects ||--o| business_case_params : "1:1 参数"
     business_case_params ||--o{ business_case_years : "1:N 年度"
+
+    factories {
+        varchar20 id PK "工厂代码"
+        string name
+        string location
+        decimal cost_coefficient "成本系数"
+        string status
+    }
 
     projects {
         char36 id PK
         string project_name
         string project_code "AS/AC编号"
         string customer_name
+        varchar20 factory_id FK "所属工厂"
         int annual_volume
         string status
         decimal target_margin
@@ -75,6 +88,7 @@ erDiagram
 
     cost_centers {
         varchar20 id PK "成本中心代码"
+        varchar20 factory_id FK "所属工厂"
         string name
         decimal net_production_hours
         decimal efficiency_rate
@@ -89,7 +103,6 @@ erDiagram
         string name
         string material_type "自制/外购"
         decimal std_price
-        decimal vave_price
     }
 
     product_materials {
@@ -99,7 +112,6 @@ erDiagram
         int material_level
         decimal quantity
         decimal std_cost
-        decimal vave_cost
     }
 
     process_rates {
@@ -109,8 +121,6 @@ erDiagram
         string process_name
         decimal std_mhr_var "标准变动费率"
         decimal std_mhr_fix "标准固定费率"
-        decimal vave_mhr_var "VAVE变动费率"
-        decimal vave_mhr_fix "VAVE固定费率"
         decimal efficiency_factor
     }
 
@@ -120,11 +130,8 @@ erDiagram
         varchar50 process_code FK
         int sequence_order
         int cycle_time_std "标准工时(秒)"
-        int cycle_time_vave "VAVE工时(秒)"
         decimal personnel_std
-        decimal personnel_vave
         decimal std_cost
-        decimal vave_cost
     }
 
     investment_items {
@@ -153,16 +160,26 @@ erDiagram
     quote_summaries {
         char36 id PK
         char36 project_id FK
+        decimal version_number "版本号"
         decimal total_std_cost
-        decimal total_vave_cost
-        decimal total_savings
-        decimal savings_rate
         decimal quoted_price
         decimal actual_margin
         decimal hk_3_cost
         decimal sk_cost
         decimal db_1
         decimal db_4
+    }
+
+    std_investment_costs {
+        char36 id PK
+        varchar20 item_type "MOLD/GAUGE/JIG/FIXTURE"
+        string material_type "材质"
+        decimal tonnage "吨位"
+        varchar20 complexity "复杂度"
+        decimal std_cost_min "成本下限"
+        decimal std_cost_max "成本上限"
+        string currency
+        string status
     }
 
     business_case_params {
@@ -172,8 +189,10 @@ erDiagram
         decimal rnd_invest
         decimal base_price
         decimal exchange_rate
+        decimal sa_rate "管销费用率"
+        decimal logistics_rate "物流包装费率"
+        decimal other_mfg_rate "其他制造费用系数"
         varchar20 amortization_mode
-        decimal sa_rate
     }
 
     business_case_years {
@@ -213,7 +232,6 @@ erDiagram
 | material | VARCHAR(100) | | 材料描述 |
 | supplier | VARCHAR(200) | | 供应商 |
 | std_price | DECIMAL(10,4) | | 标准单价 |
-| vave_price | DECIMAL(10,4) | | VAVE 单价 |
 | remarks | TEXT | | 备注 |
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
@@ -230,9 +248,6 @@ erDiagram
 | **std_mhr_var** | DECIMAL(10,2) | | **🔴 v1.3 新增：标准变动费率** |
 | **std_mhr_fix** | DECIMAL(10,2) | | **🔴 v1.3 新增：标准固定费率** |
 | **std_depreciation_rate** | DECIMAL(8,4) | | **🔴 v1.4 新增：标准折旧率** |
-| **vave_mhr_var** | DECIMAL(10,2) | | **🔴 v1.3 新增：VAVE变动费率** |
-| **vave_mhr_fix** | DECIMAL(10,2) | | **🔴 v1.3 新增：VAVE固定费率** |
-| **vave_depreciation_rate** | DECIMAL(8,4) | | **🔴 v1.4 新增：VAVE折旧率** |
 | efficiency_factor | DECIMAL(4,2) | DEFAULT 1.0 | 效率系数 |
 | remarks | TEXT | | 备注 |
 | created_at | DATETIME | DEFAULT NOW() | |
@@ -253,6 +268,7 @@ erDiagram
 | project_code | VARCHAR(50) | | AS/AC 编号 |
 | customer_name | VARCHAR(200) | NOT NULL | 客户名称 |
 | customer_code | VARCHAR(50) | | 客户编号 |
+| **factory_id** | **VARCHAR(20)** | **FK** | **🔴 v1.5 新增：所属工厂** |
 | annual_volume | INT | | 年量 |
 | status | VARCHAR(20) | NOT NULL | 状态值 |
 | owner | VARCHAR(50) | | 负责人 |
@@ -261,11 +277,16 @@ erDiagram
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
 
-**状态值流转:**
+**状态值流转 v2.0:**
 ```
 draft → parsing → (waiting_price | waiting_ie) → (waiting_mhr) →
-calculated → sales_review → controlling_review → approved
+calculated → sales_input → completed
 ```
+
+**v1.5 变更说明：**
+- 移除 `controlling_review` 状态
+- 新增 `sales_input` 状态（Sales 输入商业参数）
+- 新增 `factory_id` 字段关联工厂
 
 #### project_products（项目-产品关联）
 
@@ -293,7 +314,6 @@ calculated → sales_review → controlling_review → approved
 | quantity | DECIMAL(10,3) | | 数量 |
 | unit | VARCHAR(10) | | 单位 |
 | std_cost | DECIMAL(12,4) | | 标准成本 |
-| vave_cost | DECIMAL(12,4) | | VAVE 成本 |
 | confidence | DECIMAL(5,2) | | 匹配置信度 0-100 |
 | ai_suggestion | TEXT | | AI 建议 |
 | remarks | TEXT | | 备注（BOM Comments） |
@@ -308,20 +328,15 @@ calculated → sales_review → controlling_review → approved
 | process_code | VARCHAR(50) | FK, NOT NULL | 工序编码 |
 | sequence_order | INT | NOT NULL | 工序顺序 |
 | **cycle_time_std** | INT | | **🔴 新增：标准工时（秒）** |
-| **cycle_time_vave** | INT | | **🔴 新增：VAVE 工时（秒）** |
 | **personnel_std** | DECIMAL(4,2) | DEFAULT 1.0 | **🔴 新增：标准人工配置（人/机）** |
-| **personnel_vave** | DECIMAL(4,2) | | **🔴 新增：VAVE 人工配置** |
 | std_mhr | DECIMAL(10,2) | | MHR 快照（保留兼容） |
-| vave_mhr | DECIMAL(10,2) | | MHR 快照（保留兼容） |
 | std_cost | DECIMAL(12,4) | | 标准成本 |
-| vave_cost | DECIMAL(12,4) | | VAVE 成本 |
 | remarks | TEXT | | 备注 |
 | created_at | DATETIME | DEFAULT NOW() | |
 
 **扩展成本计算公式:**
 ```
 std_cost = (cycle_time_std / 3600) × (std_mhr_var + std_mhr_fix + personnel_std × labor_rate)
-vave_cost = (cycle_time_vave / 3600) × (vave_mhr_var + vave_mhr_fix + personnel_vave × labor_rate)
 ```
 
 #### quote_summaries（报价汇总）
@@ -330,10 +345,8 @@ vave_cost = (cycle_time_vave / 3600) × (vave_mhr_var + vave_mhr_fix + personnel
 |------|------|------|------|
 | id | CHAR(36) | PK | UUID |
 | project_id | CHAR(36) | FK, NOT NULL | 关联项目 |
+| **version_number** | **DECIMAL(3,1)** | **DEFAULT 1.0** | **🔴 v1.5 新增：版本号** |
 | total_std_cost | DECIMAL(14,4) | | 总标准成本 |
-| total_vave_cost | DECIMAL(14,4) | | 总 VAVE 成本 |
-| total_savings | DECIMAL(14,4) | | 节省金额 |
-| savings_rate | DECIMAL(5,2) | | 节省率(%) |
 | quoted_price | DECIMAL(14,4) | | 报价 |
 | actual_margin | DECIMAL(5,2) | | 实际利润率(%) |
 | **hk_3_cost** | DECIMAL(14,4) | | **🔴 新增：HK III 制造成本** |
@@ -343,15 +356,33 @@ vave_cost = (cycle_time_vave / 3600) × (vave_mhr_var + vave_mhr_fix + personnel
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
 
+**v1.5 变更说明：**
+- 新增 `version_number` 字段支持多版本报价
+- 更新 UNIQUE 约束为 `(project_id, version_number)`
+- 一个项目可以有多条报价记录（v1.0, v1.1, v1.2...）
+
 ---
 
 ### 3.3 主数据扩展表 {#master-data-extension}
+
+#### factories（工厂主数据）🔴 v1.5 新增
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | VARCHAR(20) | PK | 工厂代码 |
+| name | VARCHAR(100) | NOT NULL | 工厂名称 |
+| location | VARCHAR(200) | | 地理位置 |
+| cost_coefficient | DECIMAL(8,4) | | 成本系数 |
+| status | VARCHAR(20) | DEFAULT 'ACTIVE' | ACTIVE/INACTIVE |
+| created_at | DATETIME | DEFAULT NOW() | |
+| updated_at | DATETIME | ON UPDATE NOW() | |
 
 #### cost_centers（成本中心主数据）🔴 新增
 
 | 字段 | 类型 | 约束 | 说明 |
 |------|------|------|------|
 | id | VARCHAR(20) | PK | 成本中心代码 |
+| **factory_id** | **VARCHAR(20)** | **FK** | **🔴 v1.5 新增：所属工厂** |
 | name | VARCHAR(100) | NOT NULL | 成本中心名称 |
 | net_production_hours | DECIMAL(8,2) | | 年度额定生产小时数 |
 | efficiency_rate | DECIMAL(5,4) | | 稼动率 0-1 |
@@ -364,7 +395,35 @@ vave_cost = (cycle_time_vave / 3600) × (vave_mhr_var + vave_mhr_fix + personnel
 
 ---
 
-### 3.4 NRE 投资相关表 {#nre-tables}
+### 3.4 投资标准库表 {#investment-standards}
+
+#### std_investment_costs（投资项标准库）🔴 v1.5 新增
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | CHAR(36) | PK | UUID |
+| item_type | VARCHAR(20) | NOT NULL | MOLD/GAUGE/JIG/FIXTURE |
+| material_type | VARCHAR(100) | | 模具材质 |
+| tonnage | DECIMAL(8,2) | | 吨位 |
+| complexity | VARCHAR(20) | | 复杂度：LOW/MEDIUM/HIGH |
+| std_cost_min | DECIMAL(12,2) | | 标准成本下限 |
+| std_cost_max | DECIMAL(12,2) | | 标准成本上限 |
+| currency | VARCHAR(10) | DEFAULT 'CNY' | 币种 |
+| status | VARCHAR(20) | DEFAULT 'ACTIVE' | ACTIVE/INACTIVE |
+| effective_date | DATETIME | | 生效日期 |
+| expiry_date | DATETIME | | 失效日期 |
+| remarks | TEXT | | 备注 |
+| created_at | DATETIME | DEFAULT NOW() | |
+| updated_at | DATETIME | ON UPDATE NOW() | |
+
+**用途说明：**
+- 用于校验投资成本的合理性
+- 根据类型、材质、吨位、复杂度查询标准成本范围
+- 当投资项超出标准范围 ±20% 时发出预警
+
+---
+
+### 3.5 NRE 投资相关表 {#nre-tables}
 
 #### investment_items（投资项明细）🔴 新增
 
@@ -401,7 +460,7 @@ vave_cost = (cycle_time_vave / 3600) × (vave_mhr_var + vave_mhr_fix + personnel
 
 ---
 
-### 3.5 Business Case 相关表 {#business-case-tables}
+### 3.6 Business Case 相关表 {#business-case-tables}
 
 #### business_case_params（Business Case 参数）🔴 新增
 
@@ -415,8 +474,15 @@ vave_cost = (cycle_time_vave / 3600) × (vave_mhr_var + vave_mhr_fix + personnel
 | exchange_rate | DECIMAL(8,4) | | 汇率 |
 | amortization_mode | VARCHAR(50) | | total_volume_based/fixed_3_years |
 | sa_rate | DECIMAL(5,4) | DEFAULT 0.0210 | 管销费用率 ~2.1% |
+| **logistics_rate** | **DECIMAL(5,4)** | | **🔴 v1.5 新增：物流包装费率** |
+| **other_mfg_rate** | **DECIMAL(5,4)** | | **🔴 v1.5 新增：其他制造费用系数** |
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
+
+**v1.5 变更说明：**
+- 新增 `logistics_rate` 物流包装费率（由 Controlling 维护）
+- 新增 `other_mfg_rate` 其他制造费用系数（由 Controlling 维护）
+- SK = HK III + S&A + 物流包装 + 其他制造费用
 
 #### business_case_years（Business Case 年度数据）🔴 新增
 
@@ -452,6 +518,7 @@ CREATE INDEX idx_projects_status ON projects(status);
 CREATE INDEX idx_projects_customer ON projects(customer_code);
 CREATE INDEX idx_projects_code ON projects(project_code);
 CREATE INDEX idx_projects_created ON projects(created_at DESC);
+CREATE INDEX idx_projects_factory ON projects(factory_id); -- 🔴 v1.5 新增
 
 -- project_products
 CREATE INDEX idx_pp_project ON project_products(project_id);
@@ -470,9 +537,18 @@ CREATE INDEX idx_pproc_sequence ON product_processes(project_product_id, sequenc
 
 -- quote_summaries
 CREATE INDEX idx_qs_project ON quote_summaries(project_id);
+CREATE UNIQUE INDEX idx_qs_project_version ON quote_summaries(project_id, version_number); -- 🔴 v1.5 更新
+
+-- factories (v1.5 新增)
+CREATE INDEX idx_factories_status ON factories(status);
 
 -- cost_centers (新增)
 CREATE INDEX idx_cc_status ON cost_centers(status);
+CREATE INDEX idx_cc_factory ON cost_centers(factory_id); -- 🔴 v1.5 新增
+
+-- std_investment_costs (v1.5 新增)
+CREATE INDEX idx_std_inv_type ON std_investment_costs(item_type);
+CREATE INDEX idx_std_inv_status ON std_investment_costs(status);
 
 -- investment_items (新增)
 CREATE INDEX idx_inv_project ON investment_items(project_id);

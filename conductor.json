@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "setup": "cd frontend && npm install && cd .. && cd backend && uv sync && cd .. && ( [ ! -f .env ] && cp .env.example .env ) && ( [ ! -f backend/.env ] && cp backend/.env.example backend/.env ) && docker-compose up -d",
-    "run": "cd backend && uvicorn app.main:app --reload --port 8000 & cd frontend && npm run dev"
+    "setup": "bash scripts/setup.sh",
+    "run": "bash scripts/run.sh"
   },
   "runScriptMode": "nonconcurrent"
 }

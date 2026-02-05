@@ -256,6 +256,20 @@ export const api = {
       return response.json();
     },
 
+    // 确认创建产品及 BOM 数据（保存到数据库）
+    confirmCreate: (projectId: string, productsGrouped: any[]) =>
+      apiRequest<any>('/bom/confirm-create', {
+        method: 'POST',
+        body: JSON.stringify({
+          projectId: projectId,
+          products: productsGrouped,
+        }),
+      }),
+
+    // 获取项目中所有产品的 BOM 数据
+    getProjectBOMData: (projectId: string) =>
+      apiRequest<any>(`/bom/products/${projectId}`),
+
     getMaterials: (projectId: string) =>
       apiRequest<any>(`/bom/${projectId}/materials`),
 

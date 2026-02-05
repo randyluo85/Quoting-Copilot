@@ -1,6 +1,8 @@
 """BOM 文件解析服务."""
 
 from typing import NamedTuple
+from dataclasses import dataclass
+from datetime import datetime
 from openpyxl import load_workbook
 
 
@@ -317,3 +319,209 @@ class BOMParser:
             )
 
         return processes
+
+
+# ==================== 多产品 BOM 解析 ====================
+
+@dataclass
+class ProductInfo:
+    """产品元数据（从 sheet 顶部提取）."""
+    product_code: str          # 从 sheet 名称获取
+    product_name: str | None   # 从 "Product Name" 字段提取
+    product_number: str | None # 从 "Product Number" 字段提取
+    product_version: str       # 默认 "01"
+    customer_version: str      # 默认 "01"
+    customer_number: str | None # 从 "Customer Number" 字段提取
+    issue_date: datetime | None # 从 "Issue Date" 字段提取
+    material_count: int = 0
+    process_count: int = 0
+
+
+@dataclass
+class ProductBOMResult:
+    """单个产品的 BOM 解析结果."""
+    product_info: ProductInfo
+    materials: list[ParsedMaterial]
+    processes: list[ParsedProcess]
+
+
+@dataclass
+class MultiProductBOMParseResult:
+    """多产品 BOM 解析结果."""
+    products: list[ProductBOMResult]
+    total_products: int
+    total_materials: int
+    parse_warnings: list[str]
+
+
+class MultiProductBOMParser:
+    """多产品 BOM 解析器.
+
+    用于解析包含多个产品的 BOM 文件，每个 sheet 代表一个产品。
+    """
+
+    def __init__(self):
+        """初始化解析器."""
+        # 复用现有的 BOMParser 方法
+        self._base_parser = BOMParser()
+
+    def parse_excel_file(self, file_content: bytes) -> MultiProductBOMParseResult:
+        """解析多产品 Excel BOM 文件.
+
+        Args:
+            file_content: Excel 文件的字节内容
+
+        Returns:
+            MultiProductBOMParseResult: 解析后的多产品结果
+        """
+        import io
+
+        wb = load_workbook(filename=io.BytesIO(file_content), read_only=True)
+        results = []
+        warnings = []
+
+        for sheet_name in wb.sheetnames:
+            ws = wb[sheet_name]
+
+            # 检测 sheet 类型，跳过非物料 sheet
+            sheet_type = self._base_parser._detect_sheet_type(ws)
+            if sheet_type != "material":
+                continue
+
+            # 1. 提取产品元数据
+            product_info = self._extract_product_metadata(ws, sheet_name)
+
+            # 2. 解析物料列表
+            materials = self._parse_materials_for_product(ws)
+            product_info.material_count = len(materials)
+
+            # 3. 工艺路线暂为空
+            processes = []
+            product_info.process_count = 0
+
+            results.append(ProductBOMResult(
+                product_info=product_info,
+                materials=materials,
+                processes=processes
+            ))
+
+        return MultiProductBOMParseResult(
+            products=results,
+            total_products=len(results),
+            total_materials=sum(r.product_info.material_count for r in results),
+            parse_warnings=warnings
+        )
+
+    def _extract_product_metadata(self, worksheet, sheet_name: str) -> ProductInfo:
+        """从 sheet 顶部提取产品元数据.
+
+        Sheet 实际结构（基于 W04_BOM_.xlsx 分析）:
+        Row 2 (index 1): Product Name (col 5), Product Version (col 11) -> 值在 col 13
+        Row 3 (index 2): Product Number (col 5) -> 值在 col 6, Customer Version (col 11) -> 值在 col 13
+        Row 4 (index 3): Customer Number (col 5) -> 值在 col 6, Issue Date (col 11) -> 值在 col 13
+        """
+        product_code = sheet_name.strip()
+        product_name = None
+        product_number = None
+        product_version = "01"
+        customer_version = "01"
+        customer_number = None
+        issue_date = None
+
+        # 检查前 10 行，寻找包含关键标签的行
+        for row_idx in range(1, min(11, worksheet.max_row)):
+            row = worksheet[row_idx]
+            row_values = [cell.value for cell in row]
+
+            for col_idx, cell_value in enumerate(row_values):
+                if cell_value and isinstance(cell_value, str):
+                    key = cell_value.rstrip(':').strip().lower()
+
+                    # Product Name: 标签在 col 5, 值可能在 col 6 或 7
+                    if 'product name' in key and col_idx == 5:
+                        # 尝试 col 6, 7 找值
+                        for val_col in [6, 7]:
+                            if len(row_values) > val_col and row_values[val_col]:
+                                val = str(row_values[val_col]).strip()
+                                if val and val != 'Product Name':
+                                    product_name = val
+                                    break
+
+                    # Product Number: 标签在 col 5, 值在 col 6
+                    elif 'product number' in key and col_idx == 5:
+                        if len(row_values) > 6 and row_values[6]:
+                            val = str(row_values[6]).strip()
+                            if val and val != 'Product Number':
+                                product_number = val
+
+                    # Product Version: 标签在 col 11, 值在 col 13
+                    elif 'product version' in key and col_idx == 11:
+                        if len(row_values) > 13 and row_values[13]:
+                            val = str(row_values[13]).strip()
+                            if val:
+                                product_version = val
+
+                    # Customer Version: 标签在 col 11, 值在 col 13
+                    elif 'customer version' in key and col_idx == 11:
+                        if len(row_values) > 13 and row_values[13]:
+                            val = str(row_values[13]).strip()
+                            if val:
+                                customer_version = val
+
+                    # Customer Number: 标签在 col 5, 值在 col 6
+                    elif 'customer number' in key and col_idx == 5:
+                        if len(row_values) > 6 and row_values[6]:
+                            val = str(row_values[6]).strip()
+                            if val and val != 'Customer Number':
+                                customer_number = val
+
+                    # Issue Date: 标签在 col 11, 值在 col 13
+                    elif 'issue date' in key and col_idx == 11:
+                        if len(row_values) > 13 and row_values[13]:
+                            val = row_values[13]
+                            # 处理 Excel 日期格式
+                            if isinstance(val, datetime):
+                                issue_date = val.isoformat()
+                            else:
+                                issue_date = str(val)
+
+        return ProductInfo(
+            product_code=product_code,
+            product_name=product_name,
+            product_number=product_number,
+            product_version=product_version,
+            customer_version=customer_version,
+            customer_number=customer_number,
+            issue_date=self._parse_date(issue_date),
+        )
+
+    def _parse_date(self, date_input: str | datetime | None) -> datetime | None:
+        """解析日期（支持字符串、datetime 对象）."""
+        if not date_input:
+            return None
+        try:
+            # 如果已经是 datetime 对象，直接返回
+            if isinstance(date_input, datetime):
+                return date_input
+            # 处理字符串日期
+            if isinstance(date_input, str):
+                # 处理 Excel 日期序列号
+                if date_input.isdigit():
+                    return datetime.fromordinal(int(date_input) + 693594)  # Excel epoch 1900-01-01
+                # 处理 ISO 格式日期
+                return datetime.fromisoformat(date_input)
+        except (ValueError, TypeError):
+            return None
+
+    def _parse_materials_for_product(self, worksheet) -> list[ParsedMaterial]:
+        """为单个产品解析物料.
+
+        Args:
+            worksheet: 工作表对象
+
+        Returns:
+            list[ParsedMaterial]: 物料列表
+        """
+        # 使用现有的智能列检测
+        header_row, mapping = self._base_parser._detect_column_mapping(worksheet)
+        return self._base_parser._parse_material_sheet(worksheet, header_row, mapping)

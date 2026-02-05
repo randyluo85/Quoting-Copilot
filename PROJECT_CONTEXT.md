@@ -2,12 +2,21 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v2.2   | 2026-02-02 | 2026-02-03 | Dr.aiVOSS 核心契约 (不可变) | Randy Luo |
+| v2.4   | 2026-02-02 | 2026-02-05 | Dr.aiVOSS 核心契约 (不可变) | Randy Luo |
 
 ---
 
-**版本:** v2.2 (MVP)
-**最后更新:** 2026-02-03
+**版本变更记录：**
+| 版本 | 日期 | 变更内容 |
+|------|------|----------|
+| v2.4 | 2026-02-05 | 🔴 移除双轨核算理念，简化为单一标准成本计算 |
+| v2.3 | 2026-02-05 | 🔴 v2.0 流程变更：VM/Sales/Controlling 职责重新划分；移除 Controlling 审核；新增多版本报价支持；v2.1 采购询价邮件化 |
+| v2.2 | 2026-02-03 | 初始版本 |
+
+---
+
+**版本:** v2.4 (MVP)
+**最后更新:** 2026-02-05
 **状态:** 🔴 核心契约 (不可变)
 **适用范围:** Dr.aiVOSS 智能快速报价助手 全团队
 
@@ -19,13 +28,17 @@
 |------|-----|
 | **产品名称** | Dr.aiVOSS 智能快速报价助手 (Quoting-Copilot) |
 | **项目代号** | SmartQuote MVP |
-| **核心形态** | BOM 成本核算与 VAVE 决策辅助工具 (非单纯的 Chatbot) |
-| **核心理念** | **双轨核算 (Dual-Track Calculation)** —— 系统必须始终同时计算并展示"当前标准成本 (Std)"与"VAVE 目标成本 (VAVE)"，以量化降本潜力 |
+| **核心形态** | BOM 成本核算与决策辅助工具 (非单纯的 Chatbot) |
+| **核心理念** | **精确成本核算** —— 系统通过智能解析 BOM 和工艺路线，精确计算标准成本，为报价决策提供可靠依据 |
 
-**用户角色:**
+**用户角色 v2.0:**
 
-- **Admin (成本工程师):** 数据的守护者。负责维护 `Material_Master` 和 `Process_Rates`。
-- **User (销售经理):** 数据的消费者。负责上传 BOM，审核 AI 结果，导出报价单。
+- **VM (Value Management):** 成本报价协调者。负责创建项目、上传 BOM、完成所有成本计算（物料+工艺+投资+研发）、通知 Sales 介入。
+- **Sales (销售经理):** 商业参数把控者。负责发起项目、输入商业参数（单价/汇率/年降/利润率）、计算 QS/BC/Payback、直接导出报价单。
+- **Controlling (成本控制):** MHR 标准维护者。负责创建/维护 MHR 标准、维护 SK/HK 转换系数（S&A、物流包装、其他制造费用）。
+- **IE (工艺工程师):** 工艺路线维护者。负责维护工艺路线模板、预估新工艺的标准工时。
+- **PE (产品工程师):** 可行性评估者。负责评估图纸中的工艺可行性。
+- **Procurement (采购):** 供应商价格维护者。负责维护供应商物料价格。
 
 ---
 
@@ -38,12 +51,9 @@
 所有涉及金额的计算，必须使用此结构：
 
 ```json
-// PricePair: 双轨价格封装
+// PricePair: 价格封装
 {
-  "std": "Decimal (标准成本)",
-  "vave": "Decimal (目标成本)",
-  "savings": "Decimal (std - vave)",
-  "savings_rate": "Float (savings / std)"
+  "std": "Decimal (标准成本)"
 }
 ```
 
@@ -56,16 +66,21 @@
 
 | 业务概念 | 对应表 | 关键字段 |
 |---------|--------|---------|
-| 物料主数据 | `materials` | `id` (物料编码), `std_price`, `vave_price` |
-| 工序费率 | `process_rates` | `process_code`, `std_mhr`, `vave_mhr` |
-| 项目 | `projects` | `id`, `project_code`, `status`, `annual_volume` |
-| BOM 行 | `product_materials` | `std_cost`, `vave_cost`, `confidence` |
+| 物料主数据 | `materials` | `id` (物料编码), `std_price` |
+| 工序费率 | `process_rates` | `process_code`, `std_mhr_var`, `std_mhr_fix` |
+| 项目 | `projects` | `id`, `project_code`, `status`, `annual_volume`, `factory_id` |
+| BOM 行 | `product_materials` | `std_cost`, `confidence` |
 
-**状态流转（projects.status）：**
+**状态流转（projects.status）v2.0：**
 ```
 draft → parsing → (waiting_price | waiting_ie) → waiting_mhr →
-calculated → sales_review → controlling_review → approved
+calculated → sales_input → completed
 ```
+
+**v2.0 变更说明：**
+- 移除 `controlling_review` 状态
+- 新增 `sales_input` 状态（Sales 输入商业参数）
+- Sales 完成计算后直接进入 `completed` 状态，可导出报价单
 
 完整表结构、索引、约束请参考 [`docs/DATABASE_DESIGN.md`](docs/DATABASE_DESIGN.md)。
 
@@ -78,24 +93,19 @@ calculated → sales_review → controlling_review → approved
 | `raw_data` | Object | 原始 Excel 行数据 |
 | `features` | JSON | AI 从 Comments 提取的特征, e.g. `{"bending": 32}` |
 | `match_type` | Enum | `Exact`, `Semantic`, `None` |
-| `status_light` | Enum | `Green`, `Yellow`, `Red` |
-| `total_cost` | PricePair Object | 双轨总成本 |
+| `status` | Enum | `verified`, `warning`, `missing` |
+| `total_cost` | PricePair Object | 总成本 |
 
 ---
 
 ## 3. 🧠 核心业务逻辑 (Business Logic)
 
-### 3.1 双轨计算公式 (The Golden Formula)
+### 3.1 成本计算公式 (The Cost Calculation Formula)
 
-后端计算服务必须严格执行以下两套公式并行计算：
+后端计算服务必须严格执行以下公式：
 
-**Standard Cost (当前):**
+**Standard Cost (标准成本):**
 $$ Cost_{std} = (Qty \times MaterialPrice_{std}) + \sum (CycleTime \times (MHR_{std} + Labor_{std})) $$
-
-**VAVE Cost (目标):**
-$$ Cost_{vave} = (Qty \times MaterialPrice_{vave}) + \sum (CycleTime_{opt} \times (MHR_{vave} + Labor_{vave})) $$
-
-> **注:** `CycleTime_opt` 由 AI 基于最佳实践推荐，或默认为 `CycleTime * 0.9`。
 
 ### 3.2 红绿灯置信度逻辑 (Traffic Light Logic)
 

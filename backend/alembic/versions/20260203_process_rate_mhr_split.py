@@ -27,18 +27,18 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """添加 MHR 拆分字段和成本中心外键."""
 
-    # 添加成本中心外键列
+    # 添加成本中心外键列（暂时不创建外键约束，因为 cost_centers 表尚未创建）
     op.add_column(
         'process_rates',
         sa.Column('cost_center_id', sa.String(length=20), nullable=True)
     )
 
-    # 创建外键约束
-    op.create_foreign_key(
-        'fk_process_rates_cost_center',
-        'process_rates', 'cost_centers',
-        ['cost_center_id'], ['id']
-    )
+    # TODO: 创建外键约束到 cost_centers 表（待该表创建后）
+    # op.create_foreign_key(
+    #     'fk_process_rates_cost_center',
+    #     'process_rates', 'cost_centers',
+    #     ['cost_center_id'], ['id']
+    # )
 
     # 添加标准费率拆分列
     op.add_column(
@@ -84,6 +84,6 @@ def downgrade() -> None:
     op.drop_column('process_rates', 'std_mhr_fix')
     op.drop_column('process_rates', 'std_mhr_var')
 
-    # 删除外键约束和列
-    op.drop_constraint('fk_process_rates_cost_center', 'process_rates', type_='foreignkey')
+    # 删除成本中心列（外键约束暂时未创建）
+    # op.drop_constraint('fk_process_rates_cost_center', 'process_rates', type_='foreignkey')
     op.drop_column('process_rates', 'cost_center_id')

@@ -28,6 +28,8 @@ async def list_projects(
     Returns:
         项目列表
     """
+    from app.models.project_product import ProjectProduct
+
     query = select(Project)
     if status_filter:
         query = query.where(Project.status == status_filter)
@@ -35,28 +37,49 @@ async def list_projects(
     result = await db.execute(query.order_by(Project.created_at.desc()))
     projects = result.scalars().all()
 
-    responses = [
-        ProjectResponse(
-            id=p.id,
-            asac_number=p.asac_number,
-            customer_number=p.customer_number,
-            product_version=p.product_version,
-            customer_version=p.customer_version,
-            client_name=p.client_name,
-            project_name=p.project_name,
-            annual_volume=str(p.annual_volume),
-            description=p.description or "",
-            products=p.products,
-            owners=p.owners,
-            status=p.status,
-            target_margin=p.target_margin,
-            owner=p.owner,
-            remarks=p.remarks,
-            created_date=p.created_at.isoformat(),
-            updated_date=p.updated_at.isoformat(),
+    responses = []
+    for p in projects:
+        # 从 project_products 表获取产品列表
+        products_result = await db.execute(
+            select(ProjectProduct)
+            .where(ProjectProduct.project_id == p.id)
+            .order_by(ProjectProduct.created_at)
         )
-        for p in projects
-    ]
+        db_products = products_result.scalars().all()
+
+        # 转换为前端格式
+        products = [
+            {
+                "id": db_p.id,
+                "name": db_p.product_name,
+                "partNumber": db_p.product_code or "",
+                "annualVolume": p.annual_volume,
+                "description": "",
+            }
+            for db_p in db_products
+        ]
+
+        responses.append(
+            ProjectResponse(
+                id=p.id,
+                asac_number=p.asac_number,
+                customer_number=p.customer_number,
+                product_version=p.product_version,
+                customer_version=p.customer_version,
+                client_name=p.client_name,
+                project_name=p.project_name,
+                annual_volume=str(p.annual_volume),
+                description=p.description or "",
+                products=products,
+                owners=p.owners,
+                status=p.status,
+                target_margin=p.target_margin,
+                owner=p.owner,
+                remarks=p.remarks,
+                created_date=p.created_at.isoformat(),
+                updated_date=p.updated_at.isoformat(),
+            )
+        )
     return JSONResponse(content=[r.model_dump(by_alias=True) for r in responses])
 
 
@@ -150,11 +173,33 @@ async def get_project(
     Returns:
         项目详情
     """
+    from app.models.project_product import ProjectProduct
+
     result = await db.execute(select(Project).where(Project.id == project_id))
     project = result.scalar_one_or_none()
 
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
+
+    # 从 project_products 表获取产品列表
+    products_result = await db.execute(
+        select(ProjectProduct)
+        .where(ProjectProduct.project_id == project_id)
+        .order_by(ProjectProduct.created_at)
+    )
+    db_products = products_result.scalars().all()
+
+    # 转换为前端格式
+    products = [
+        {
+            "id": db_p.id,
+            "name": db_p.product_name,
+            "partNumber": db_p.product_code or "",
+            "annualVolume": project.annual_volume,
+            "description": "",
+        }
+        for db_p in db_products
+    ]
 
     response = ProjectResponse(
         id=project.id,
@@ -166,7 +211,7 @@ async def get_project(
         project_name=project.project_name,
         annual_volume=str(project.annual_volume),
         description=project.description or "",
-        products=project.products,
+        products=products,
         owners=project.owners,
         status=project.status,
         target_margin=project.target_margin,

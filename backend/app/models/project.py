@@ -34,7 +34,9 @@ class Project(Base):
     owners: Mapped[dict] = mapped_column(JSON)
 
     status: Mapped[ProjectStatus] = mapped_column(
-        SQLEnum(ProjectStatus), default=ProjectStatus.DRAFT, index=True
+        SQLEnum(ProjectStatus, values_callable=lambda obj: [e.value for e in obj]),
+        default=ProjectStatus.DRAFT,
+        index=True
     )
 
     # 新增字段（符合设计规范）

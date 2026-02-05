@@ -1,7 +1,7 @@
 """BOM API 路由."""
 
 from sqlalchemy import select
-from fastapi import APIRouter, Depends, UploadFile, File, Form
+from fastapi import APIRouter, Depends, UploadFile, File, Form, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker, Session
@@ -9,8 +9,13 @@ from asyncio import to_thread
 import pymysql
 
 from app.db.session import get_db
-from app.services.bom_parser import BOMParser
-from app.schemas.bom import BOMMaterialResponse, BOMProcessResponse
+from app.services.bom_parser import BOMParser, MultiProductBOMParser
+from app.schemas.bom import (
+    BOMMaterialResponse, BOMProcessResponse,
+    ProductInfoSchema, MaterialSchema, ProcessSchema,
+    ProductBOMResultSchema, MultiProductBOMParseResultSchema,
+    BOMConfirmCreateRequest, BOMPreviewResponse
+)
 from app.schemas.common import StatusLight
 from app.models.material import Material
 from app.models.process_rate import ProcessRate
@@ -189,21 +194,22 @@ async def upload_bom(
     project_id: str = Form(...),
     db: AsyncSession = Depends(get_db),
 ):
-    """上传并解析 BOM 文件，自动关联历史价格数据.
+    """上传并解析 BOM 文件，支持多产品 BOM，自动关联历史价格数据.
 
     解析流程：
-    1. 解析 Excel 文件获取物料和工艺列表
+    1. 使用 MultiProductBOMParser 解析 Excel 文件（支持多 Sheet）
     2. 根据物料编码查询历史价格（std_price, vave_price）
     3. 根据工艺名称查询历史费率（std_hourly_rate, vave_hourly_rate）
     4. 设置状态：GREEN=完全匹配，YELLOW=AI估算，RED=无数据
+    5. 汇总所有产品的物料和工艺返回
 
     Args:
-        file: Excel BOM 文件
+        file: Excel BOM 文件（可以是单产品或多产品）
         project_id: 项目 ID
         db: 数据库会话
 
     Returns:
-        解析结果，包含物料和工艺列表（含价格）
+        解析结果，包含所有产品的物料和工艺列表（含价格）
     """
     import time
     start_time = time.time()
@@ -212,13 +218,28 @@ async def upload_bom(
     content = await file.read()
     print(f"[DEBUG] File read time: {time.time() - start_time:.3f}s")
 
-    # 解析 Excel
-    parser = BOMParser()
+    # 使用多产品解析器解析 Excel
+    parser = MultiProductBOMParser()
     parse_result = parser.parse_excel_file(content)
     print(f"[DEBUG] Parse Excel time: {time.time() - start_time:.3f}s")
+    print(f"[DEBUG] Detected {parse_result.total_products} products, {parse_result.total_materials} materials")
 
-    # 批量查询物料历史价格（使用同步方式在线程池执行）
-    material_codes = [m.part_number for m in parse_result.materials if m.part_number]
+    # 汇总所有产品的物料和工艺
+    all_materials = []
+    all_processes = []
+    material_idx = 0
+    process_idx = 0
+
+    for product in parse_result.products:
+        # 收集所有物料
+        for m in product.materials:
+            all_materials.append(m)
+        # 收集所有工艺
+        for p in product.processes:
+            all_processes.append(p)
+
+    # 批量查询物料历史价格
+    material_codes = [m.part_number for m in all_materials if m.part_number]
     print(f"[DEBUG] Querying materials: {material_codes}")
 
     materials_with_price = await to_thread(_query_materials_sync, material_codes)
@@ -226,7 +247,7 @@ async def upload_bom(
 
     # 转换物料响应，自动填充价格
     materials = []
-    for idx, m in enumerate(parse_result.materials):
+    for idx, m in enumerate(all_materials):
         # 尝试从历史数据获取价格
         price_data = materials_with_price.get(m.part_number, {})
 
@@ -241,12 +262,16 @@ async def upload_bom(
         materials.append(
             BOMMaterialResponse(
                 id=f"M-{idx + 1:03d}",
+                level=m.level,
                 part_number=m.part_number or "",
                 part_name=m.part_name or "",
+                version=m.version,
+                type=m.type,
+                stock_status=m.status,
                 material=m.material or price_data.get("material", ""),
                 supplier=m.supplier or price_data.get("supplier", ""),
                 quantity=m.quantity,
-                unit=m.unit,  # 从 BOM 文件解析的单位
+                unit=m.unit,
                 unit_price=price_data.get("unit_price"),
                 vave_price=price_data.get("vave_price"),
                 has_history_data=price_data.get("has_history_data", False),
@@ -255,23 +280,20 @@ async def upload_bom(
             )
         )
 
-    # 获取解析后的工艺数据（从Excel的工艺工作表）
-    print(f"[DEBUG] Parsed processes from Excel: {len(parse_result.processes)}")
-    for p in parse_result.processes:
-        print(f"[DEBUG]   - {p.op_no}: {p.name} @ {p.work_center}, {p.standard_time}h")
+    # 获取解析后的工艺数据
+    print(f"[DEBUG] Parsed processes from Excel: {len(all_processes)}")
 
-    # 直接使用解析出的工艺数据查询费率
-    process_names = [p.name for p in parse_result.processes if p.name]
+    # 查询工艺费率
+    process_names = [p.name for p in all_processes if p.name]
     print(f"[DEBUG] Querying processes: {process_names}")
 
     processes_with_rate = await to_thread(_query_processes_sync, process_names)
     print(f"[DEBUG] Processes query time: {time.time() - start_time:.3f}s, found: {len(processes_with_rate)}")
 
-    # 构建工艺响应 - 使用 Excel 解析的数据
+    # 构建工艺响应
     processes = []
-    for idx, p in enumerate(parse_result.processes):
+    for idx, p in enumerate(all_processes):
         rate_data = processes_with_rate.get(p.name, {})
-        print(f"[DEBUG] Process {p.name}: rate_data={rate_data}")
 
         # 计算工序总成本：费率 × 标准工时
         standard_time = p.standard_time or 1.0
@@ -300,6 +322,42 @@ async def upload_bom(
 
     print(f"[DEBUG] Total time: {time.time() - start_time:.3f}s")
 
+    # 按产品分组物料和工艺数据
+    # 注意：需要按产品顺序重新分配带价格的物料数据
+    products_grouped = []
+    global_material_idx = 0
+    global_process_idx = 0
+
+    for product in parse_result.products:
+        # 获取该产品的原始物料数量
+        product_material_count = len(product.materials)
+
+        # 从全局物料列表中取出该产品的物料（按顺序）
+        product_materials = []
+        for _ in range(product_material_count):
+            if global_material_idx < len(materials):
+                product_materials.append(materials[global_material_idx].model_dump(by_alias=True))
+                global_material_idx += 1
+
+        # 获取该产品的工艺
+        product_process_count = len(product.processes)
+        product_processes = []
+        for _ in range(product_process_count):
+            if global_process_idx < len(processes):
+                product_processes.append(processes[global_process_idx].model_dump(by_alias=True))
+                global_process_idx += 1
+
+        products_grouped.append({
+            "product_code": product.product_info.product_code,
+            "product_name": product.product_info.product_name,
+            "product_number": product.product_info.product_number,
+            "customer_number": product.product_info.customer_number,
+            "material_count": len(product_materials),
+            "process_count": len(product_processes),
+            "materials": product_materials,
+            "processes": product_processes,
+        })
+
     return JSONResponse(
         content={
             "parseId": f"parse-{project_id}",
@@ -311,6 +369,295 @@ async def upload_bom(
                 "matched_materials": sum(1 for m in materials if m.has_history_data),
                 "total_processes": len(processes),
                 "matched_processes": sum(1 for p in processes if p.has_history_data),
+                "total_products": parse_result.total_products,
+                "products": [
+                    {
+                        "product_code": p.product_info.product_code,
+                        "product_name": p.product_info.product_name,
+                        "material_count": p.product_info.material_count,
+                    }
+                    for p in parse_result.products
+                ],
             },
+            # 按产品分组的数据
+            "products_grouped": products_grouped,
         }
     )
+
+
+# ==================== 多产品 BOM 解析 API ====================
+
+@router.post("/parse-preview")
+async def parse_bom_preview(
+    file: UploadFile = File(...),
+    project_id: str = Query(..., alias="projectId"),
+    db: AsyncSession = Depends(get_db)
+):
+    """解析多产品 BOM 文件，返回预览结果（不创建数据）.
+
+    两步流程的第一步：上传 → 解析 → 返回预览
+
+    Args:
+        file: Excel BOM 文件
+        project_id: 关联的项目 ID
+
+    Returns:
+        BOMPreviewResponse: 包含所有产品的预览数据
+    """
+    content = await file.read()
+
+    parser = MultiProductBOMParser()
+    result = parser.parse_excel_file(content)
+
+    # 转换为 Schema 格式
+    products_schema = []
+    for product in result.products:
+        materials_schema = [
+            MaterialSchema(
+                level=m.level,
+                part_number=m.part_number,
+                part_name=m.part_name,
+                version=m.version,
+                type=m.type,
+                status=m.status,
+                material=m.material,
+                supplier=m.supplier,
+                quantity=m.quantity,
+                unit=m.unit,
+                comments=m.comments
+            )
+            for m in product.materials
+        ]
+
+        processes_schema = [
+            ProcessSchema(
+                op_no=p.op_no,
+                name=p.name,
+                work_center=p.work_center,
+                standard_time=p.standard_time,
+                spec=p.spec
+            )
+            for p in product.processes
+        ]
+
+        products_schema.append(ProductBOMResultSchema(
+            product_info=ProductInfoSchema(
+                product_code=product.product_info.product_code,
+                product_name=product.product_info.product_name,
+                product_number=product.product_info.product_number,
+                product_version=product.product_info.product_version,
+                customer_version=product.product_info.customer_version,
+                customer_number=product.product_info.customer_number,
+                issue_date=product.product_info.issue_date,
+                material_count=product.product_info.material_count,
+                process_count=product.product_info.process_count
+            ),
+            materials=materials_schema,
+            processes=processes_schema
+        ))
+
+    response = BOMPreviewResponse(
+        project_id=project_id,
+        products=products_schema,
+        total_products=result.total_products,
+        total_materials=result.total_materials,
+        parse_warnings=result.parse_warnings
+    )
+
+    return JSONResponse(content=response.model_dump(by_alias=True, mode='json'))
+
+
+@router.post("/confirm-create")
+async def confirm_create_products(
+    request: BOMConfirmCreateRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """确认创建产品及 BOM 数据.
+
+    两步流程的第二步：确认 → 创建产品 + 物料
+
+    Args:
+        request: 包含产品和物料数据的创建请求
+
+    Returns:
+        创建结果摘要
+    """
+    from app.models.project_product import ProjectProduct
+    from app.models.product_material import ProductMaterial
+    import uuid
+    from datetime import datetime
+
+    created_products = []
+    total_materials = 0
+
+    for product_data in request.products:
+        # 1. 创建 ProjectProduct 记录
+        product_id = str(uuid.uuid4())
+        project_product = ProjectProduct(
+            id=product_id,
+            project_id=request.project_id,
+            product_name=product_data.product_info.product_name or product_data.product_info.product_code,
+            product_code=product_data.product_info.product_code,
+            product_version=product_data.product_info.product_version,
+            route_code=None,  # 工艺路线代码待后续添加
+            bom_file_path=None,
+            created_at=datetime.utcnow()
+        )
+        db.add(project_product)
+
+        # 先 flush 确保 ProjectProduct 插入到数据库（满足外键约束）
+        await db.flush()
+
+        # 2. 创建 ProductMaterial 记录
+        for material_data in product_data.materials:
+            material_id = str(uuid.uuid4())
+            product_material = ProductMaterial(
+                id=material_id,
+                project_product_id=product_id,
+                material_id=None,  # 关联到 materials 表的 ID（后续可匹配）
+                part_number=material_data.part_number,
+                material_level=int(material_data.level) if str(material_data.level).isdigit() else None,
+                version=material_data.version,
+                stock_status=material_data.status,
+                material_name=material_data.part_name,
+                material_type=material_data.type,
+                supplier=material_data.supplier,
+                quantity=float(material_data.quantity),
+                unit=material_data.unit,
+                std_cost=None,  # 待后续成本计算填充
+                vave_cost=None,
+                confidence=None,
+                remarks=material_data.comments,
+                created_at=datetime.utcnow()
+            )
+            db.add(product_material)
+            total_materials += 1
+
+        created_products.append({
+            "id": product_id,
+            "product_code": product_data.product_info.product_code,
+            "product_name": product_data.product_info.product_name,
+            "material_count": len(product_data.materials)
+        })
+
+    # 提交所有更改
+    await db.commit()
+
+    return JSONResponse(content={
+        "status": "success",
+        "message": f"成功创建 {len(created_products)} 个产品，共 {total_materials} 条物料记录",
+        "created_products": created_products,
+        "total_products": len(created_products),
+        "total_materials": total_materials
+    })
+
+
+@router.get("/products/{project_id}")
+async def get_project_bom_data(
+    project_id: str,
+    db: AsyncSession = Depends(get_db)
+):
+    """获取项目中所有产品的 BOM 数据.
+
+    用于前端组件加载时恢复已保存的 BOM 数据
+
+    Args:
+        project_id: 项目 ID
+        db: 数据库会话
+
+    Returns:
+        项目中所有产品的 BOM 数据（物料和工艺）
+    """
+    from app.models.project_product import ProjectProduct
+    from app.models.product_material import ProductMaterial
+    from app.models.product_process import ProductProcess
+    from sqlalchemy import select
+
+    # 查询项目的所有产品
+    stmt = select(ProjectProduct).where(ProjectProduct.project_id == project_id)
+    result = await db.execute(stmt)
+    products = result.scalars().all()
+
+    products_data = []
+
+    for product in products:
+        # 查询该产品的物料
+        material_stmt = select(ProductMaterial).where(
+            ProductMaterial.project_product_id == product.id
+        )
+        material_result = await db.execute(material_stmt)
+        materials = material_result.scalars().all()
+
+        # 查询该产品的工艺（如果表存在）
+        processes = []
+        try:
+            process_stmt = select(ProductProcess).where(
+                ProductProcess.project_product_id == product.id
+            )
+            process_result = await db.execute(process_stmt)
+            processes = process_result.scalars().all()
+        except Exception:
+            # 表可能不存在或查询失败，忽略
+            pass
+
+        # 转换物料数据为前端格式
+        materials_data = []
+        for idx, m in enumerate(materials):
+            # 尝试从 materials 表获取价格
+            price_data = {}
+            if m.material_id:
+                material_codes = [m.material_id]
+                price_lookup = await to_thread(_query_materials_sync, material_codes)
+                price_data = price_lookup.get(m.material_id, {})
+
+            materials_data.append({
+                "id": f"M-{idx + 1:03d}",
+                "level": str(m.material_level) if m.material_level is not None else "",
+                "partNumber": m.part_number or "",
+                "partName": m.material_name or "",
+                "version": m.version or "1.0",
+                "type": m.material_type or "I",
+                "stockStatus": m.stock_status or "N",
+                "material": price_data.get("material", ""),
+                "supplier": m.supplier or price_data.get("supplier", ""),
+                "quantity": float(m.quantity) if m.quantity is not None else 0,
+                "unit": m.unit or "PC",
+                "unitPrice": price_data.get("unit_price"),
+                "vavePrice": price_data.get("vave_price"),
+                "hasHistoryData": price_data.get("has_history_data", False),
+                "comments": m.remarks or "",
+                "status": "GREEN" if price_data.get("has_history_data") else "RED"
+            })
+
+        # 转换工艺数据为前端格式
+        processes_data = []
+        for idx, p in enumerate(processes):
+            processes_data.append({
+                "id": f"P-{idx + 1:03d}",
+                "opNo": str(p.sequence_order) if p.sequence_order is not None else f"{idx + 1:03d}",
+                "name": p.process_code or "",
+                "workCenter": "",
+                "standardTime": float(p.cycle_time_std or p.cycle_time or 0) / 3600,  # 转换为小时
+                "spec": p.remarks,
+                "unit": "件",
+                "quantity": 1,
+                "unitPrice": float(p.std_cost) if p.std_cost is not None else None,
+                "vavePrice": float(p.vave_cost) if p.vave_cost is not None else None,
+                "hasHistoryData": p.std_cost is not None,
+                "isOperationKnown": p.std_cost is not None
+            })
+
+        products_data.append({
+            "productId": product.id,
+            "productName": product.product_name,
+            "productCode": product.product_code,
+            "materials": materials_data,
+            "processes": processes_data,
+            "isParsed": len(materials_data) > 0 or len(processes_data) > 0
+        })
+
+    return JSONResponse(content={
+        "status": "success",
+        "projectId": project_id,
+        "products": products_data
+    })

@@ -2,7 +2,16 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.2   | 2026-02-03 | 2026-02-04 | 工艺成本计算逻辑 | Randy Luo |
+| v1.4   | 2026-02-03 | 2026-02-05 | 工艺成本计算逻辑 | Randy Luo |
+
+---
+
+**版本变更记录：**
+| 版本 | 日期 | 变更内容 |
+|------|------|----------|
+| v1.4 | 2026-02-05 | 移除双轨计价逻辑，仅保留 Standard Cost 计算；简化 MHR 费率模型 |
+| v1.3 | 2026-02-05 | 同步 v2.0 流程变更：移除 Controlling 审核；新增 sales_input 状态；MHR 费率拆分为 var/fix |
+| v1.2 | 2026-02-04 | 初始版本 |
 
 ---
 
@@ -47,7 +56,7 @@ $$H_{effective} = Net\ production\ hours \times Efficiency\%$$
 
 ### 2.2 MHR (机时费率) 拆解逻辑
 
-MHR 被拆分为变动与固定两个维度，以支持 VAVE 的敏感度分析。
+MHR 被拆分为变动与固定两个维度。
 
 #### 机器变动费率 (MHR Variable)
 
@@ -75,58 +84,31 @@ $$Rate_{labor} = Average\ Wages\ per\ Hour \times Personnel\ per\ machine$$
 
 对于报价单中的每一行工艺，成本计算如下：
 
-$$Cost_{process} = (MHR_{var} + MHR_{fix} + Rate_{labor}) \times \frac{Cycle\ Time}{3600}$$
+$$Cost_{std} = (std\_mhr\_var + std\_mhr\_fix + Rate_{labor}) \times \frac{Cycle\ Time}{3600}$$
 
 > **注意：** Cycle Time 以秒为单位，需除以 3600 转换为小时
 
 ---
 
-## 3. 双轨计价逻辑 (Dual-Track Logic)
-
-Dr.aiVOSS 的核心竞争力在于同时计算 Standard (当前) 和 VAVE (优化) 两套工艺成本。
-
-### 3.1 双轨对比矩阵
-
-| 维度 | 标准计价 (Standard) | 优化计价 (VAVE) | 优化策略说明 |
-|------|-------------------|----------------|-------------|
-| **工时节拍** | 录入的实际 SCT | $SCT \times (1 - 10\%)$ | 假设通过自动化改进缩短节拍 |
-| **稼动率** | 历史平均 Efficiency | 标杆 Efficiency (如 85%) | 提升设备利用率以摊薄固定成本 |
-| **人工配置** | 当前实际人数 | 目标自动化人数 | 减少操作员依赖（如 1人/机 → 0.5人/机） |
-| **报废率** | 历史报废水平 | 目标报废水平 | 通过工艺稳定性降低材料浪费 |
-
-### 3.2 双轨成本计算
-
-**标准方案：**
-$$Cost_{std} = (MHR_{var,std} + MHR_{fix,std} + Rate_{labor,std}) \times \frac{CycleTime_{std}}{3600}$$
-
-**VAVE 方案：**
-$$Cost_{vave} = (MHR_{var,vave} + MHR_{fix,vave} + Rate_{labor,vave}) \times \frac{CycleTime_{vave}}{3600}$$
-
-**节省分析：**
-$$Savings = Cost_{std} - Cost_{vave}$$
-$$Savings\ Rate = \frac{Savings}{Cost_{std}} \times 100\%$$
-
----
-
-## 4. 系统校验与风险预警
+## 3. 系统校验与风险预警
 
 为防止录入错误导致报价亏损，系统需设置以下"软硬闸口"：
 
-### 4.1 除零保护 (Zero Division Protection)
+### 3.1 除零保护 (Zero Division Protection)
 
 | 条件 | 触发动作 |
 |------|---------|
 | Net production hours = 0 | 禁止计算，弹出 `#DIV/0!` 预警 |
 | Efficiency % = 0 | 禁止计算，提示"稼动率不能为0" |
 
-### 4.2 阈值拦截 (Threshold Validation)
+### 3.2 阈值拦截 (Threshold Validation)
 
 | 条件 | 触发动作 |
 |------|---------|
 | $MHR_{total}$ 偏离同类成本中心均值 $\pm 15\%$ | 自动标记为"需重点审核" |
 | 产能利用率超过 110% | 提示"需增加投资成本（如新扩产线）" |
 
-### 4.3 同步性检查 (Data Consistency)
+### 3.3 同步性检查 (Data Consistency)
 
 | 条件 | 触发动作 |
 |------|---------|
@@ -135,7 +117,7 @@ $$Savings\ Rate = \frac{Savings}{Cost_{std}} \times 100\%$$
 
 ---
 
-## 5. 数据库设计规范 (Schema)
+## 4. 数据库设计规范 (Schema)
 
 ### 表 1: `cost_centers` (成本中心主数据)
 
@@ -162,9 +144,6 @@ $$Savings\ Rate = \frac{Savings}{Cost_{std}} \times 100\%$$
 | `std_mhr_var` | DECIMAL(10,2) | 标准变动费率 | 45.00 |
 | `std_mhr_fix` | DECIMAL(10,2) | 标准固定费率 | 30.00 |
 | `std_depreciation_rate` | DECIMAL(8,4) | **🔴 v1.4 新增：标准折旧率** | 8.50 |
-| `vave_mhr_var` | DECIMAL(10,2) | VAVE 变动费率 | 42.00 |
-| `vave_mhr_fix` | DECIMAL(10,2) | VAVE 固定费率 | 28.00 |
-| `vave_depreciation_rate` | DECIMAL(8,4) | **🔴 v1.4 新增：VAVE 折旧率** | 7.50 |
 | `efficiency_factor` | DECIMAL(4,2) | 效率系数 | 1.00 |
 | `created_at` | DATETIME | 创建时间 | DEFAULT NOW() |
 
@@ -181,20 +160,17 @@ $$Savings\ Rate = \frac{Savings}{Cost_{std}} \times 100\%$$
 | `project_product_id` | CHAR(36) | FK, 关联产品 | - |
 | `process_code` | VARCHAR(50) | FK, 工序编码 | INJECTION_001 |
 | `sequence_order` | INT | 工序顺序 | 10 |
-| `cycle_time_std` | INT | 标准工时（秒） | 45 |
-| `cycle_time_vave` | INT | VAVE 工时（秒） | 40 |
-| `personnel_std` | DECIMAL(4,2) | 标准人工配置 | 1.0 |
-| `personnel_vave` | DECIMAL(4,2) | VAVE 人工配置 | 0.5 |
+| `cycle_time` | INT | 标准工时（秒） | 45 |
+| `personnel` | DECIMAL(4,2) | 标准人工配置 | 1.0 |
 | `std_cost` | DECIMAL(12,4) | 标准成本 | 3.3750 |
-| `vave_cost` | DECIMAL(12,4) | VAVE 成本 | 2.8000 |
 | `remarks` | TEXT | 备注 | - |
 | `created_at` | DATETIME | 创建时间 | DEFAULT NOW() |
 
 ---
 
-## 6. 数据模型定义
+## 5. 数据模型定义
 
-### 6.1 Pydantic 模型
+### 5.1 Pydantic 模型
 
 ```python
 from decimal import Decimal
@@ -224,9 +200,6 @@ class ProcessRate(BaseModel):
     std_mhr_var: Decimal
     std_mhr_fix: Decimal
     std_depreciation_rate: Decimal = Field(default=Decimal("0"))  # v1.4 新增
-    vave_mhr_var: Decimal | None = None
-    vave_mhr_fix: Decimal | None = None
-    vave_depreciation_rate: Decimal = Field(default=Decimal("0"))  # v1.4 新增
     efficiency_factor: Decimal = Field(default=Decimal("1.0"))
 
     @property
@@ -235,32 +208,14 @@ class ProcessRate(BaseModel):
         return self.std_mhr_var + self.std_mhr_fix
 
     @property
-    def vave_mhr_total(self) -> Decimal:
-        """VAVE 总费率"""
-        var = self.vave_mhr_var or self.std_mhr_var
-        fix = self.vave_mhr_fix or self.std_mhr_fix
-        return (var + fix) * self.efficiency_factor
-
-    @property
     def std_depreciation_per_hour(self) -> Decimal:
         """标准折旧额/小时（用于 Payback 现金流计算）"""
         return self.std_depreciation_rate
 
     @property
-    def vave_depreciation_per_hour(self) -> Decimal:
-        """VAVE 折旧额/小时（用于 Payback 现金流计算）"""
-        return self.vave_depreciation_rate
-
-    @property
     def std_fix_excluding_depreciation(self) -> Decimal:
         """标准固定费率（不含折旧）"""
         return self.std_mhr_fix - self.std_depreciation_rate
-
-    @property
-    def vave_fix_excluding_depreciation(self) -> Decimal:
-        """VAVE 固定费率（不含折旧）"""
-        fix = self.vave_mhr_fix or self.std_mhr_fix
-        return fix - self.vave_depreciation_rate
 
 
 class ProductProcess(BaseModel):
@@ -269,21 +224,14 @@ class ProductProcess(BaseModel):
     project_product_id: str
     process_code: str
     sequence_order: int
-    cycle_time_std: int = Field(gt=0, description="标准工时（秒）")
-    cycle_time_vave: int | None = Field(None, description="VAVE 工时（秒）")
-    personnel_std: Decimal = Field(default=Decimal("1.0"), ge=0)
-    personnel_vave: Decimal | None = Field(None, ge=0)
+    cycle_time: int = Field(gt=0, description="标准工时（秒）")
+    personnel: Decimal = Field(default=Decimal("1.0"), ge=0)
 
-    def calculate_cost(self, rate: ProcessRate, labor_rate: Decimal, use_vave: bool = False) -> Decimal:
+    def calculate_cost(self, rate: ProcessRate, labor_rate: Decimal) -> Decimal:
         """计算工艺成本"""
-        if use_vave:
-            mhr = rate.vave_mhr_total
-            cycle_time = self.cycle_time_vave or self.cycle_time_std
-            personnel = self.personnel_vave or self.personnel_std
-        else:
-            mhr = rate.std_mhr_total
-            cycle_time = self.cycle_time_std
-            personnel = self.personnel_std
+        mhr = rate.std_mhr_total
+        cycle_time = self.cycle_time
+        personnel = self.personnel
 
         # 成本 = (MHR + Labor) × (CycleTime / 3600)
         labor_cost = labor_rate * personnel
@@ -312,7 +260,7 @@ class ProcessCostValidation(BaseModel):
 
 ---
 
-## 7. 计算流程图
+## 6. 计算流程图
 
 ```mermaid
 flowchart TD
@@ -321,21 +269,16 @@ flowchart TD
     C --> D[计算 MHR 变动与固定费率]
     D --> E[计算人工费率 = Wages × Personnel]
     E --> F[读取工艺路线]
-    F --> G{双轨计算?}
-    G -->|是| H[计算标准成本]
-    G -->|否| I[仅计算标准成本]
-    H --> J[计算 VAVE 成本]
-    I --> K[输出工艺成本]
-    J --> K
-    K --> L{校验阈值}
-    L -->|超限| M[标记预警]
-    L -->|正常| N[结束]
-    M --> N
+    F --> G[计算标准成本]
+    G --> H{校验阈值}
+    H -->|超限| I[标记预警]
+    H -->|正常| J[结束]
+    I --> J
 ```
 
 ---
 
-## 8. 与其他文档的关联
+## 7. 与其他文档的关联
 
 | 文档 | 关联点 |
 |------|--------|
@@ -345,7 +288,7 @@ flowchart TD
 | `BUSINESS_CASE_LOGIC.md` | 工艺成本汇总为 HK III |
 | `QUOTATION_SUMMARY_LOGIC.md` | 工艺成本影响 SK1/SK2 |
 
-### 8.1 数据流向
+### 7.1 数据流向
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -364,11 +307,6 @@ flowchart TD
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
-│                 双轨成本对比                                  │
-│  输出: Std Cost, VAVE Cost, Savings                         │
-└─────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────┐
 │                 Business Case                                │
 │  汇总: HK III = Σ Process Cost                              │
 └─────────────────────────────────────────────────────────────┘
@@ -376,23 +314,23 @@ flowchart TD
 
 ---
 
-## 9. 开发实施 Checklist
+## 8. 开发实施 Checklist
 
 | 任务 | 责任方 | 状态 |
 |------|--------|------|
 | 后端：实现 `CostCenter` CRUD 接口 | 后端开发 | ⬜ |
 | 后端：实现 MHR 费率拆解计算逻辑 | 后端开发 | ⬜ |
-| 后端：实现双轨工艺成本计算引擎 | 后端开发 | ⬜ |
+| 后端：实现工艺成本计算引擎 | 后端开发 | ⬜ |
 | 后端：实现阈值校验与预警机制 | 后端开发 | ⬜ |
 | 前端：开发成本中心参数维护页面 | 前端开发 | ⬜ |
-| 前端：开发工艺录入卡片（支持双轨输入） | 前端开发 | ⬜ |
+| 前端：开发工艺录入卡片 | 前端开发 | ⬜ |
 | 前端：实现实时成本计算预览 | 前端开发 | ⬜ |
 
 ---
 
-## 10. API 端点定义
+## 9. API 端点定义
 
-### 10.1 成本中心管理
+### 9.1 成本中心管理
 
 | 方法 | 端点 | 功能 |
 |------|------|------|
@@ -400,7 +338,7 @@ flowchart TD
 | POST | `/api/v1/cost-centers` | 创建成本中心 |
 | PUT | `/api/v1/cost-centers/{id}` | 更新成本中心 |
 
-### 10.2 工艺费率管理
+### 9.2 工艺费率管理
 
 | 方法 | 端点 | 功能 |
 |------|------|------|
@@ -408,14 +346,14 @@ flowchart TD
 | POST | `/api/v1/process-rates` | 创建工序费率 |
 | PUT | `/api/v1/process-rates/{id}` | 更新工序费率 |
 
-### 10.3 工艺成本计算
+### 9.3 工艺成本计算
 
 | 方法 | 端点 | 功能 |
 |------|------|------|
 | POST | `/api/v1/process-cost/calculate` | 计算工艺成本 |
 | GET | `/api/v1/process-cost/{project_product_id}` | 获取产品工艺成本 |
 
-### 10.4 响应示例
+### 9.4 响应示例
 
 ```json
 {
@@ -424,19 +362,12 @@ flowchart TD
     {
       "process_code": "INJECTION_001",
       "sequence_order": 10,
-      "cycle_time_std": 45,
-      "cycle_time_vave": 40,
-      "personnel_std": 1.0,
-      "personnel_vave": 0.5,
-      "std_cost": 3.3750,
-      "vave_cost": 2.8000,
-      "savings": 0.5750,
-      "savings_rate": 17.04
+      "cycle_time": 45,
+      "personnel": 1.0,
+      "std_cost": 3.3750
     }
   ],
   "total_std_cost": 3.3750,
-  "total_vave_cost": 2.8000,
-  "total_savings": 0.5750,
   "validation": {
     "is_valid": true,
     "warnings": [],

@@ -3,7 +3,7 @@
 设计规范: docs/DATABASE_DESIGN.md
 """
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 from decimal import Decimal
 from datetime import datetime
 from app.schemas.common import PricePair, StatusLight
@@ -158,8 +158,12 @@ class QuoteSummaryResponse(BaseModel):
 class BOMMaterialResponse(BaseModel):
     """BOM 上传返回的物料响应（用于前端显示）."""
     id: str  # 格式: M-001
+    level: Optional[str] = None  # BOM 层级（从 BOM 文件解析）
     part_number: str = Field(..., alias="partNumber")
     part_name: str = Field(..., alias="partName")
+    version: Optional[str] = None  # 版本（从 BOM 文件的 "Ver." 列解析）
+    type: Optional[str] = None  # 类型（从 BOM 文件的 "Typ" 列解析）
+    stock_status: Optional[str] = Field(None, alias="stockStatus")  # 库存状态（从 BOM 文件的 "St" 列解析）
     material: Optional[str] = None
     supplier: Optional[str] = None
     quantity: Optional[float] = None
@@ -168,7 +172,7 @@ class BOMMaterialResponse(BaseModel):
     vave_price: Optional[float] = Field(None, alias="vavePrice")
     has_history_data: bool = Field(False, alias="hasHistoryData")
     comments: Optional[str] = None
-    status: StatusLight = StatusLight.RED
+    status: StatusLight = StatusLight.RED  # 数据匹配状态灯（GREEN/YELLOW/RED）
 
     model_config = {"populate_by_name": True, "by_alias": True}
 
@@ -209,3 +213,86 @@ class MaterialDetailResponse(BaseModel):
     updated_at: datetime = Field(..., alias="updatedAt")
 
     model_config = {"populate_by_name": True, "by_alias": True}
+
+
+# ==================== 多产品 BOM 解析 ====================
+
+class ProductInfoSchema(BaseModel):
+    """产品元数据（从 sheet 顶部提取）."""
+    product_code: str
+    product_name: Optional[str] = None
+    product_number: Optional[str] = None
+    product_version: str = "01"
+    customer_version: str = "01"
+    customer_number: Optional[str] = None
+    issue_date: Optional[datetime] = None
+    material_count: int = 0
+    process_count: int = 0
+
+    model_config = {"by_alias": True}
+
+
+class MaterialSchema(BaseModel):
+    """物料 Schema（用于解析结果）."""
+    level: str
+    part_number: str = Field(..., alias="partNumber")
+    part_name: str = Field(..., alias="partName")
+    version: str
+    type: str
+    status: str
+    material: str
+    supplier: str
+    quantity: float
+    unit: str
+    comments: str
+
+    model_config = {"by_alias": True, "populate_by_name": True}
+
+
+class ProcessSchema(BaseModel):
+    """工艺 Schema（用于解析结果）."""
+    op_no: str = Field(..., alias="opNo")
+    name: str
+    work_center: str = Field(..., alias="workCenter")
+    standard_time: float = Field(..., alias="standardTime")
+    spec: Optional[str] = None
+
+    model_config = {"by_alias": True, "populate_by_name": True}
+
+
+class ProductBOMResultSchema(BaseModel):
+    """单个产品的 BOM 解析结果."""
+    product_info: ProductInfoSchema = Field(..., alias="productInfo")
+    materials: List[MaterialSchema]
+    processes: List[ProcessSchema]
+
+    model_config = {"by_alias": True, "populate_by_name": True}
+
+
+class MultiProductBOMParseResultSchema(BaseModel):
+    """多产品 BOM 解析结果."""
+    products: List[ProductBOMResultSchema]
+    total_products: int
+    total_materials: int
+    parse_warnings: List[str] = []
+
+    model_config = {"by_alias": True, "populate_by_name": True}
+
+
+class BOMConfirmCreateRequest(BaseModel):
+    """确认创建产品请求."""
+    project_id: str = Field(..., alias="projectId")
+    products: List[ProductBOMResultSchema]
+
+    model_config = {"by_alias": True, "populate_by_name": True}
+
+
+class BOMPreviewResponse(BaseModel):
+    """BOM 预览响应."""
+    project_id: str = Field(..., alias="projectId")
+    products: List[ProductBOMResultSchema]
+    total_products: int
+    total_materials: int
+    parse_warnings: List[str] = []
+
+    model_config = {"by_alias": True, "populate_by_name": True}

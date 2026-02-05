@@ -2,7 +2,16 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.1   | 2026-02-03 | 2026-02-03 | Dr.aiVOSS 项目术语表 | Randy Luo |
+| v1.3   | 2026-02-03 | 2026-02-05 | Dr.aiVOSS 项目术语表 | Randy Luo |
+
+---
+
+**版本变更记录：**
+| 版本 | 日期 | 变更内容 |
+|------|------|----------|
+| v1.3 | 2026-02-05 | 🔴 移除 VAVE 相关术语（双轨计价、VAVE价、节省空间、节省率） |
+| v1.2 | 2026-02-05 | 更新 MHR 定义：拆分为变动费率(var)和固定费率(fix)；新增摊销模式术语 |
+| v1.1 | 2026-02-03 | 初始版本 |
 
 ---
 
@@ -10,14 +19,12 @@
 
 | 中文术语 | 英文术语 | 定义 | 示例/备注 |
 |----------|----------|------|-----------|
-| **双轨计价** | Dual-Track Pricing | 同时计算标准价与 VAVE 优化价的计价机制 | 核心业务逻辑 |
-| **VAVE** | Value Analysis/Value Engineering | 价值工程/价值分析，通过优化设计降低成本的方法 | 也称"价值优化" |
 | **标准价** | Standard Price/Std | 当前正常的采购成本或生产成本 | 对应数据库 `std_price` |
-| **VAVE价** | VAVE Price | 通过价值优化后的理想成本 | 对应数据库 `vave_price` |
-| **节省空间** | Savings Gap | 标准价与 VAVE 价的差额 | `savings = std - vave` |
-| **节省率** | Savings Rate | 节省空间占标准价的比例 | `savings_rate = savings / std × 100%` |
 | **BOM** | Bill of Materials | 物料清单，产品所需材料的明细列表 | 通常以 Excel 格式上传 |
-| **MHR** | Machine Hour Rate | 机时费率，每小时机器运行的综合成本 | 含折旧、能源、人工等 |
+| **MHR** | Machine Hour Rate | 机时费率，每小时机器运行的综合成本 | v1.3 拆分为变动费率(var)和固定费率(fix)；MHR = var + fix + personnel × labor_rate |
+| **MHR_var** | Machine Hour Rate Variable | 机时变动费率（与产量相关） | 含能源、耗材、维护等 |
+| **MHR_fix** | Machine Hour Rate Fixed | 机时固定费率（与产量无关） | 含折旧、利息、租金、保险等 |
+| **摊销模式** | Amortization Mode | 投资/研发成本的摊销策略 | total_volume_based（全生命周期）/ fixed_3_years（前3年） |
 | **QS** | Quote Summary | 报价摘要，客户视角的报价总览 | 含总金额、利润率、交期等 |
 | **BC** | Breakdown | 成本分解，内部视角的成本结构透明化 | 分为物料成本、工艺成本 |
 | **HK III** | Herstellkosten III | 制造成本（工厂大门成本） | 不含研发和模具分摊 |

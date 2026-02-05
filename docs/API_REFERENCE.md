@@ -2,7 +2,7 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.1   | 2026-02-03 | 2026-02-03 | Dr.aiVOSS API 完整参考 | Randy Luo |
+| v1.2   | 2026-02-03 | 2026-02-05 | Dr.aiVOSS API 完整参考 | Randy Luo |
 
 ---
 
@@ -159,10 +159,7 @@
         "part_name": "铝合金",
         "quantity": 3.5,
         "unit": "kg",
-        "std_price": 28.50,
-        "vave_price": 26.80,
-        "savings": 1.70,
-        "savings_rate": 0.0596,
+        "unit_price": 28.50,
         "has_history_data": true,
         "status": "verified",
         "confidence": 100.0,
@@ -180,9 +177,6 @@
         "name": "重力铸造",
         "work_center": "铸造车间",
         "cycle_time_std": 45,
-        "cycle_time_vave": 40,
-        "std_mhr": 65.00,
-        "vave_mhr": 58.00,
         "has_history_data": true,
         "status": "verified"
       }
@@ -214,7 +208,6 @@
 ```json
 {
   "project_id": "PRJ-2024-001",
-  "use_vave": true,
   "recalculate": false
 }
 ```
@@ -227,33 +220,15 @@
     "calculation_id": "calc-456",
     "project_id": "PRJ-2024-001",
     "summary": {
-      "total_std_cost": 474950.00,
-      "total_vave_cost": 441050.00,
-      "total_savings": 33900.00,
-      "savings_rate": 0.0714
+      "total_cost": 474950.00
     },
     "by_product": [
       {
         "product_id": "PROD-001",
         "product_name": "制动管路总成",
-        "material_cost": {
-          "std": 210950.00,
-          "vave": 198250.00,
-          "savings": 12700.00,
-          "savings_rate": 0.0602
-        },
-        "process_cost": {
-          "std": 264000.00,
-          "vave": 242800.00,
-          "savings": 21200.00,
-          "savings_rate": 0.0803
-        },
-        "total_cost": {
-          "std": 474950.00,
-          "vave": 441050.00,
-          "savings": 33900.00,
-          "savings_rate": 0.0714
-        }
+        "material_cost": 210950.00,
+        "process_cost": 264000.00,
+        "total_cost": 474950.00
       }
     ]
   }
@@ -279,22 +254,18 @@
   "data": {
     "project_id": "PRJ-2024-001",
     "quote_summary": {
-      "total_std_cost": 474950.00,
-      "total_vave_cost": 441050.00,
+      "total_cost": 474950.00,
       "quoted_price": 550000.00,
       "target_margin": 15.0,
-      "actual_margin": 13.65,
-      "payback_months": null
+      "actual_margin": 13.65
     },
     "breakdown": {
       "material_cost": {
-        "std": 210950.00,
-        "vave": 198250.00,
+        "amount": 210950.00,
         "percentage": 44.4
       },
       "process_cost": {
-        "std": 264000.00,
-        "vave": 242800.00,
+        "amount": 264000.00,
         "percentage": 55.6
       }
     },
@@ -365,18 +336,7 @@
 
 ## 4. 数据模型定义
 
-### 4.1 PricePair（双轨价格）
-
-```typescript
-interface PricePair {
-  std: number;        // 标准价格
-  vave: number;       // VAVE 价格
-  savings: number;    // 节省空间 (std - vave)
-  savings_rate: number; // 节省率 (savings / std)
-}
-```
-
-### 4.2 MaterialStatus（物料状态）
+### 4.1 MaterialStatus（物料状态）
 
 ```typescript
 type MaterialStatus = 'verified' | 'warning' | 'missing';
@@ -387,10 +347,7 @@ interface Material {
   part_name: string;
   quantity: number;
   unit: string;
-  std_price?: number;
-  vave_price?: number;
-  savings?: number;
-  savings_rate?: number;
+  unit_price?: number;
   has_history_data: boolean;
   status: MaterialStatus;
   confidence: number; // 0-100

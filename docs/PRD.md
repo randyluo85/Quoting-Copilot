@@ -2,7 +2,7 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.6   | 2026-02-03 | 2026-02-03 | Dr.aiVOSS 智能快速报价助手 PRD | Randy Luo |
+| v1.9   | 2026-02-03 | 2026-02-05 | Dr.aiVOSS 智能快速报价助手 PRD | Randy Luo |
 
 ---
 
@@ -17,6 +17,9 @@
 | v1.4 | 2026-02-03 | Randy Luo | 删除开发计划章节；统一金额单位为人民币(¥) |
 | v1.5 | 2026-02-03 | Randy Luo | 精简业务概念章节：移除计算公式（改为引用逻辑文档），明确文档职责分离 |
 | v1.6 | 2026-02-03 | Randy Luo | 应用 SPEC 原则完善功能规范：添加具体的性能指标、验收标准和完整定义 |
+| v1.7 | 2026-02-05 | Randy Luo | 🔴 v2.0 流程变更：VM/Sales/Controlling 职责重新划分；移除 Controlling 审核；新增多版本报价支持；v2.1 采购询价邮件化：采购无需登录系统，VM 导入报价单识别价格 |
+| v1.8 | 2026-02-05 | Randy Luo | 架构调整：移除双轨计价功能，简化为单一标准成本计算 |
+| **v1.9** | **2026-02-05** | **Randy Luo** | **✅ 重写 Payback 功能：从 VAVE 增量回收期改为项目静态回收期** |
 
 ---
 
@@ -37,7 +40,7 @@
 
 ### 1.3 核心价值主张
 
-**"双轨计价"** - 同时提供标准报价与 VAVE 优化报价，让企业在竞标中拥有更多策略选择。
+**"智能自动化"** - 通过 AI 辅助的 BOM 解析和自动化成本计算，消除人工计算的误差和低效，实现快速、准确的报价响应。
 
 ---
 
@@ -50,9 +53,11 @@
 **主要职责：**
 - 创建报价项目并上传 BOM（Bill of Materials）
 - 维护物料库和工艺费率库
-- 自动计算标准成本和 VAVE 成本
+- 自动计算标准成本
+- **完成投资成本计算**（模具、检具、夹具、工装）
+- **完成研发成本计算**
+- **成本计算完成后通知 Sales 介入**
 - 协调跨部门评审
-- 生成最终报价单
 
 **痛点：**
 - 需要向 5 个部门收集数据，沟通成本高
@@ -63,31 +68,35 @@
 **核心需求：**
 - 一键上传 BOM，自动解析
 - 实时查看各部门评审状态
-- 自动计算双轨成本，对比差异
+- 自动计算标准成本
+- **完整的成本计算（物料+工艺+投资+研发）**
 
 ---
 
 ### 2.2 Sales - 项目发起者
 
-**角色定位：** 项目发起与利润率把控者
+**角色定位：** 项目发起与商业参数把控者
 
 **主要职责：**
 - 发起报价项目，输入客户需求
 - 设定目标利润率
-- 审核 QS（Quote Summary，报价摘要）
-- 审核 BC（Breakdown，成本分解）
-- 审核 Payback（投资回报期）
-- 发送最终报价给客户
+- **输入商业参数：单价、汇率、年降比例**
+- **计算 QS（Quote Summary，报价摘要）**
+- **计算 BC（Breakdown，成本分解）**
+- **计算 Payback（投资回报期）**
+- **直接导出报价单**（无需 Controlling 审核）
 
 **痛点：**
 - 不知道合理的利润率应该是多少
 - 缺乏历史报价数据参考
 - 客户催单时无法快速响应
+- **商业参数分散在不同系统中**
 
 **核心需求：**
 - 快速创建项目
-- 查看 QS/BC/Payback 汇总
-- 导出专业报价单（PDF）
+- **统一输入商业参数**
+- **自助计算 QS/BC/Payback**
+- **快速导出报价单（PDF）**
 
 ---
 
@@ -128,42 +137,47 @@
 
 ---
 
-### 2.5 Controlling - 成本控制者
+### 2.5 Controlling - 成本标准维护者
 
-**角色定位：** 成本审核与费率管理
+**角色定位：** MHR 标准创建者与费率维护者
 
 **主要职责：**
+- **创建/维护 MHR（Machine Hour Rate，机时费率）标准**
+- **当 IE 定义新工艺路线涉及新设备时，创建新的 MHR 标准**
 - 维护价格系数（汇率、通胀系数等）
+- **维护 SK/HK 转换系数（S&A、物流包装、其他制造费用）**
 - 维护工艺有效工时范围
-- 审核利润率是否合理
-- 审核 BC（成本分解）是否合理
-- 审核 MHR（Machine Hour Rate，机时费率）
 
 **痛点：**
 - 无法验证各部门给出的报价是否合理
 - 缺乏历史数据对比
+- **新设备 MHR 标准缺乏参考**
 
 **核心需求：**
+- **MHR 标准库管理**
 - 设置费率阈值，超值自动预警
 - 查看同类项目的历史报价对比
 
 ---
 
-### 2.6 采购 (Procurement) - 供应商价格维护者
+### 2.6 采购询价流程（邮件化）🔴 v2.0 变更
 
-**角色定位：** 物料价格维护者
+**流程说明：**
+- 采购**不需要登录系统**
+- VM 通过系统自动发送询价邮件给采购
+- 采购联系供应商获取报价后，通过邮件回复报价单
+- VM 导入报价单，系统自动识别物料价格并入库
 
-**主要职责：**
-- 维护供应商物料价格
-- 标注供应商等级（Tier 1/Tier 2）
+**询价邮件内容：**
+- 物料编码、物料名称
+- 汇总数量（项目级）
+- 推荐供应商列表
+- 预计回复日期
 
-**痛点：**
-- 重复回答相同物料的价格
-- 缺乏供应商绩效数据
-
-**核心需求：**
-- 物料价格库 CRUD 操作
-- 批量导入价格表
+**报价单导入：**
+- 支持格式：Excel/CSV/PDF
+- 自动识别：物料编码、单价、供应商
+- 价格验证：超出历史范围 ±20% 自动预警
 
 ---
 
@@ -182,15 +196,14 @@
 | 优先级 | 功能模块 | RICE 评分 | 说明 |
 |--------|----------|----------|------|
 | **P0** | BOM 上传与解析 | 🔥 128 | MVP 核心，必须支持 Excel/CSV 解析 |
-| **P0** | 自动计算工艺成本 | 🔥 125 | 核心算法，标准价 + VAVE 价 |
+| **P0** | 自动计算工艺成本 | 🔥 125 | 核心算法，标准成本计算 |
 | **P0** | 物料库管理 | 🔥 120 | 基础数据 CRUD |
 | **P0** | 工艺费率库管理 | 🔥 118 | 基础数据 CRUD |
 | **P0** | 项目创建与流转 | 🔥 115 | 主流程引擎 |
-| **P1** | 双轨计价展示 | ⭐ 95 | 差异高亮，节省率计算 |
 | **P1** | 审批流程引擎 | ⭐ 90 | 节点配置，状态机 |
 | **P1** | 报价单导出 (PDF) | ⭐ 88 | 模板化导出 |
 | **P1** | MHR 审核 | ⭐ 85 | Controlling 专用功能 |
-| **P2** | QS/BC/Payback 计算 | 💡 72 | 高级分析功能 |
+| **P2** | QS/BC 计算 | 💡 72 | 高级分析功能（Payback 功能暂时下架） |
 | **P2** | AI 语义匹配物料 | 💡 65 | 模糊匹配，提升体验 |
 | **P3** | 历史数据 BI 分析 | 💡 50 | 后续优化 |
 
@@ -213,10 +226,10 @@
 
 | SPEC 维度 | 内容 |
 |-----------|------|
-| **Specific（具体功能）** | 根据 BOM 数据和知识库，自动计算每个工序的 Standard Cost 和 VAVE Cost |
-| **Performance（性能指标）** | • 计算时间：< 2 秒/100 行 BOM<br/>• 计算精度：小数点后 2 位<br/>• 双轨成本一致性：100%（所有项目必须同时计算两套成本） |
+| **Specific（具体功能）** | 根据 BOM 数据和知识库，自动计算每个工序的 Standard Cost |
+| **Performance（性能指标）** | • 计算时间：< 2 秒/100 行 BOM<br/>• 计算精度：小数点后 2 位 |
 | **Executable（验收标准）** | • 物料有历史价格时自动填充<br/>• 工艺有对应 MHR 时自动计算成本<br/>• 新物料/新工艺标记为"待确认"<br/>• 计算结果实时展示，支持参数调整后重新计算 |
-| **Complete（完整定义）** | **输入**：BOM 数据 + 物料库 + 工艺费率库<br/>**公式**：`Cost = (Material × Qty) + (MHR × CycleTime / 3600)`<br/>**输出**：双轨成本（Standard / VAVE）+ 节省金额 + 节省率 |
+| **Complete（完整定义）** | **输入**：BOM 数据 + 物料库 + 工艺费率库<br/>**公式**：`Cost = (Material × Qty) + (CycleTime / 3600) × (mhr_var + mhr_fix + personnel × labor_rate)`<br/>**输出**：Standard Cost |
 
 ---
 
@@ -224,10 +237,10 @@
 
 | SPEC 维度 | 内容 |
 |-----------|------|
-| **Specific（具体功能）** | 维护物料主数据，支持双价格录入（Standard Price / VAVE Price） |
+| **Specific（具体功能）** | 维护物料主数据，支持标准价格录入 |
 | **Performance（性能指标）** | • 查询响应：< 500 ms<br/>• 支持数据量：> 10,000 条<br/>• 批量导入：> 1000 条/次 |
 | **Executable（验收标准）** | • 支持物料号唯一性校验<br/>• 支持物料分类（原材料/外购件/半成品）<br/>• 价格变更时记录历史版本<br/>• 支持物料号模糊搜索 |
-| **Complete（完整定义）** | **数据字段**：物料号、物料名、规格、材质、单位、Standard Price、VAVE Price、供应商、更新时间<br/>**操作**：Create / Read / Update / Delete / Batch Import |
+| **Complete（完整定义）** | **数据字段**：物料号、物料名、规格、材质、单位、Standard Price、供应商、更新时间<br/>**操作**：Create / Read / Update / Delete / Batch Import |
 
 ---
 
@@ -235,10 +248,10 @@
 
 | SPEC 维度 | 内容 |
 |-----------|------|
-| **Specific（具体功能）** | 维护工序费率（MHR），支持双费率录入（Standard / VAVE） |
+| **Specific（具体功能）** | 维护工序费率（MHR），支持标准费率录入 |
 | **Performance（性能指标）** | • 费率查询：< 300 ms<br/>• 支持工序数：> 500 种<br/>• 费率精度：0.01 元 |
 | **Executable（验收标准）** | • 工序编码唯一性校验<br/>• 支持按成本中心分类管理<br/>• 费率变更需 Controlling 审批<br/>• 支持费率生效日期管理 |
-| **Complete（完整定义）** | **数据字段**：工序编码、工序名称、成本中心、Standard MHR、VAVE MHR、生效日期、状态<br/>**操作**：Create / Read / Update / Delete / Approve |
+| **Complete（完整定义）** | **数据字段**：工序编码、工序名称、成本中心、Standard MHR、生效日期、状态<br/>**操作**：Create / Read / Update / Delete / Approve |
 
 ---
 
@@ -249,24 +262,13 @@
 | **Specific（具体功能）** | 创建报价项目，支持跨部门审批流转，状态机管理 |
 | **Performance（性能指标）** | • 项目创建：< 3 秒<br/>• 状态流转实时通知：< 1 分钟内<br/>• 支持并发项目数：> 100 |
 | **Executable（验收标准）** | • 必填字段校验（项目名、客户、年量）<br/>• 状态流转不可逆（除"返回修改"）<br/>• 每次状态变更记录操作日志<br/>• 支持项目暂存草稿 |
-| **Complete（完整定义）** | **状态流转**：draft → parsed → calculating → sales_review → controlling_review → completed<br/>**角色权限**：Sales（发起/编辑）、Controlling（审核/批准）<br/>**通知机制**：邮件 + 站内消息 |
+| **Complete（完整定义）** | **状态流转 v2.0**：draft → parsing → (waiting_price | waiting_ie) → waiting_mhr → calculated → sales_input → completed<br/>**角色权限**：Sales（发起/输入商业参数）、VM（成本计算）、Controlling（创建/维护 MHR 标准）<br/>**通知机制**：邮件 + 站内消息 |
 
 ---
 
 ### 3.3 P1 功能详细规范
 
-#### 3.3.1 双轨计价展示
-
-| SPEC 维度 | 内容 |
-|-----------|------|
-| **Specific（具体功能）** | 并排展示 Standard Cost 和 VAVE Cost，高亮差异 |
-| **Performance（性能指标）** | • 渲染时间：< 1 秒<br/>• 差异高亮阈值：节省率 > 15% 标红 |
-| **Executable（验收标准）** | • 支持按物料/工艺/汇总三个层级展示<br/>• 节省金额/节省率自动计算<br/>• 支持点击展开详细构成 |
-| **Complete（完整定义）** | **展示格式**：`Standard: ¥100 \| VAVE: ¥85 \| 节省: ¥15 (15%)`<br/>**视觉样式**：节省率 > 20% 为绿色高亮，< 5% 为灰色 |
-
----
-
-#### 3.3.2 审批流程引擎
+#### 3.3.1 审批流程引擎
 
 | SPEC 维度 | 内容 |
 |-----------|------|
@@ -277,7 +279,7 @@
 
 ---
 
-#### 3.3.3 报价单导出（PDF）
+#### 3.3.2 报价单导出（PDF）
 
 | SPEC 维度 | 内容 |
 |-----------|------|
@@ -288,7 +290,7 @@
 
 ---
 
-#### 3.3.4 MHR 审核（Controlling）
+#### 3.3.3 MHR 审核（Controlling）
 
 | SPEC 维度 | 内容 |
 |-----------|------|
@@ -301,14 +303,14 @@
 
 ### 3.4 P2 功能详细规范
 
-#### 3.4.1 QS/BC/Payback 计算
+#### 3.4.1 QS/BC 计算
 
 | SPEC 维度 | 内容 |
 |-----------|------|
-| **Specific（具体功能）** | 计算报价摘要（QS）、成本分解（BC）、投资回报期（Payback） |
+| **Specific（具体功能）** | 计算报价摘要（QS）、成本分解（BC） |
 | **Performance（性能指标）** | • 计算时间：< 2 秒<br/>• 数据准确性：100% |
-| **Executable（验收标准）** | • QS 包含含税报价、利润率、交货周期<br/>• BC 包含物料/工艺成本占比<br/>• Payback 支持客户投资金额输入 |
-| **Complete（完整定义）** | **输入**：双轨成本 + 利润率参数<br/>**输出**：QS 报价 / BC 分解图 / Payback 月数<br/>**参考**：详细计算逻辑见逻辑文档 |
+| **Executable（验收标准）** | • QS 包含含税报价、利润率、交货周期<br/>• BC 包含物料/工艺成本占比 |
+| **Complete（完整定义）** | **输入**：Standard Cost + 利润率参数<br/>**输出**：QS 报价 / BC 分解图<br/>**注意**：Payback 功能暂时下架<br/>**参考**：详细计算逻辑见逻辑文档 |
 
 ---
 
@@ -358,7 +360,7 @@
 | Objective | Key Results | 目标值 |
 |-----------|-------------|--------|
 | **O1: 提升报价准确性** | KR1: 标准偏差率 | < 5% |
-| | KR2: VAVE 节省率识别准确率 | > 85% |
+| | KR2: 成本计算准确率 | > 95% |
 | **O2: 扩展使用场景** | KR1: 月活报价项目数 | > 50 |
 | | KR2: 跨部门采用率 | 100% (5 个部门) |
 
@@ -366,7 +368,7 @@
 
 ## 5. 报价流程
 
-### 5.1 标准流程（主流程）
+### 5.1 标准流程（主流程）v2.1
 
 ```mermaid
 flowchart TB
@@ -380,54 +382,46 @@ flowchart TB
 
     %% 物料分支（左侧）
     MBranch -->|已存在| MAuto[自动获取价格]
-    MBranch -->|新物料| MMail[邮件通知采购]
-    MMail --> MPrice[采购维护价格]
-    MPrice --> MAuto
+    MBranch -->|新物料| MMail[🔴 VM 发邮件给采购]
+    MMail --> MWait[等待采购邮件回复]
+    MWait --> MImport[VM 导入报价单]
+    MImport --> MAuto
 
     %% 工艺分支（右侧）
     PBranch -->|已存在| PAuto[自动获取费率]
     PBranch -->|新工艺| PIE[IE 维护路线]
-    PIE --> PPE[PE 评估可行性]
-    PPE --> PControl[Controlling 审核 MHR]
+    PIE --> PControl[Controlling 创建 MHR 标准]
     PControl --> PAuto
 
     %% 汇合计算
-    MAuto --> Calc[系统计算双轨成本]
+    MAuto --> Calc[VM 完成成本计算]
     PAuto --> Calc
 
-    %% 审核流程（从上到下，无交叉）
-    Calc --> Sales[Sales 审核 QS/BC<br/>输入利润率]
-    Sales --> SDec{确认?}
+    Calc --> CalcFull[物料 + 工艺<br/>+ 投资 + 研发]
+    CalcFull --> Notify[通知 Sales 介入]
 
+    %% Sales 输入商业参数
+    Notify --> Sales[Sales 输入商业参数<br/>单价/汇率/年降/利润率]
+    Sales --> CalcQSBC[计算 QS/BC/Payback]
+
+    CalcQSBC --> SDec{确认?}
     SDec -->|否| SEdit[返回修改]
-    SEdit --> Calc
+    SEdit --> Sales
 
-    SDec -->|是| Control[Controlling 审核<br/>成本与利润率]
-    Control --> CDec{通过?}
-
-    CDec -->|否| CEdit[返回 Sales]
-    CEdit --> Sales
-
-    CDec -->|是| Export[生成报价单]
+    SDec -->|是| Export[生成报价单]
     Export --> End([结束: 发送客户])
 
-    %% 样式：深色文字 + 浅色背景
+    %% 样式：不超过3种颜色
     classDef startEnd fill:#1e293b,stroke:#0f172a,stroke-width:2px,color:#fff
-    classDef decision fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#1e293b
-    classDef auto fill:#ecfdf5,stroke:#10b981,stroke-width:1px,color:#1e293b
-    classDef manual fill:#fef3c7,stroke:#f59e0b,stroke-width:1px,color:#1e293b
-    classDef system fill:#dbeafe,stroke:#3b82f6,stroke-width:1px,color:#1e293b
-    classDef review fill:#f3e8ff,stroke:#a855f7,stroke-width:1px,color:#1e293b
+    classDef process fill:#dbeafe,stroke:#3b82f6,stroke-width:1px,color:#1e293b
+    classDef highlight fill:#fef3c7,stroke:#f59e0b,stroke-width:1px,color:#1e293b
 
     class Start,End startEnd
-    class MBranch,PBranch,SDec,CDec decision
-    class MAuto,PAuto,Calc auto
-    class MMail,MPrice,PIE,PPE,PControl,SEdit,CEdit manual
-    class Project,Upload,Parse,Export system
-    class Sales,Control review
+    class MBranch,PBranch,SDec,MAuto,PAuto,Calc,CalcQSBC,PIE,PControl,Project,Upload,Parse,Notify,Export process
+    class SEdit,MImport,Sales,MMail,MWait highlight
 ```
 
-### 5.2 状态流转
+### 5.2 状态流转 v2.1
 
 ```mermaid
 stateDiagram-v2
@@ -437,101 +431,114 @@ stateDiagram-v2
     Parsed --> M_Auto: 物料匹配
     Parsed --> P_Auto: 工艺匹配
 
-    M_Auto --> M_Wait: 等待采购
-    M_Wait --> M_Ready: 完成
+    M_Auto --> M_Wait: 等待采购邮件
+    M_Wait --> M_Import: VM 导入报价单
+    M_Import --> M_Ready: 完成
     M_Auto --> M_Ready: 自动完成
 
     P_Auto --> P_Wait: 等待 IE
-    P_Wait --> P_PE: PE 评估
-    P_PE --> P_Ctrl: Controlling 审核
+    P_Wait --> P_Ctrl: Controlling 创建 MHR
     P_Ctrl --> P_Ready: 完成
     P_Auto --> P_Ready: 自动完成
 
-    M_Ready --> Calc: 计算双轨成本
+    M_Ready --> Calc: VM 计算成本
     P_Ready --> Calc
 
-    Calc --> Sales: Sales 审核
-    Sales --> Ctrl: Controlling 审核
+    Calc --> FullCalc: 完整计算<br/>(物料+工艺+投资+研发)
+    FullCalc --> Sales: Sales 输入商业参数
 
-    Ctrl --> Done: 完成
-    Sales --> Calc: 返回修改
-    Ctrl --> Sales: 返回修改
+    Sales --> QSBC: 计算 QS/BC/Payback
+    QSBC --> Done: 直接导出
+    Sales --> FullCalc: 返回修改
 
     Done --> [*]
 ```
 
-### 5.3 角色参与矩阵
+### 5.3 角色参与矩阵 v2.1
 
-| 流程节点 | Sales | VM | Controlling | IE | PE | 采购 |
-|----------|-------|----|-------------|----|----|----|
-| 创建项目 | ✅ 主导 | ❌ | ❌ | ❌ | ❌ | ❌ |
-| 上传 BOM | ❌ | ✅ 主导 | ❌ | ❌ | ❌ | ❌ |
-| 物料价格匹配 | ❌ | 🔶 自动 | ❌ | ❌ | ❌ | ❌ |
-| 新物料询价通知 | ❌ | 🔶 自动发邮件 | ❌ | ❌ | ❌ | ✅ 维护 |
-| 工艺费率匹配 | ❌ | 🔶 自动 | ❌ | ❌ | ❌ | ❌ |
-| 新工艺路线维护 | ❌ | ❌ | ❌ | ✅ 主导 | ❌ | ❌ |
-| 可行性评估 | ❌ | ❌ | ❌ | ❌ | ✅ 主导 | ❌ |
-| 审核 MHR（新工艺） | ❌ | ❌ | ✅ 主导 | ❌ | ❌ | ❌ |
-| 双轨成本计算 | ❌ | 🔶 自动 | ❌ | ❌ | ❌ | ❌ |
-| **审核 QS/BC/Payback** | ✅ **主导**<br/>输入利润率 | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **最终审核并释放** | ❌ | ❌ | ✅ **主导** | ❌ | ❌ | ❌ |
+| 流程节点 | Sales | VM | Controlling | IE | 采购 |
+|----------|-------|----|-------------|----|----|
+| 创建项目 | ✅ 主导 | ❌ | ❌ | ❌ | ❌ |
+| 上传 BOM | ❌ | ✅ 主导 | ❌ | ❌ | ❌ |
+| 物料价格匹配 | ❌ | 🔶 自动 | ❌ | ❌ | ❌ |
+| **新物料询价** | ❌ | ✅ **主导**<br/>触发邮件/导入报价单 | ❌ | ❌ | 📧 邮件回复 |
+| 工艺费率匹配 | ❌ | 🔶 自动 | ❌ | ❌ | ❌ |
+| 新工艺路线维护 | ❌ | ❌ | ❌ | ✅ 主导 | ❌ |
+| **创建 MHR 标准（新工艺）** | ❌ | ❌ | ✅ **主导** | ❌ | ❌ |
+| **完成成本计算** | ❌ | ✅ **主导**<br/>物料+工艺+投资+研发 | ❌ | ❌ | ❌ |
+| **输入商业参数** | ✅ **主导**<br/>单价/汇率/年降/利润率 | ❌ | ❌ | ❌ | ❌ |
+| **计算 QS/BC/Payback** | ✅ **主导** | ❌ | ❌ | ❌ | ❌ |
+| **导出报价单** | ✅ **主导** | ❌ | ❌ | ❌ | ❌ |
 
-*注：🔶 表示系统自动执行*
+*注：🔶 表示系统自动执行；📧 表示邮件交互（无需登录系统）*
 
-### 5.4 核心流程变更说明（v1.1 更新）
+### 5.4 核心流程变更说明（v2.0 更新）
 
-#### 并行处理架构
-**变更前**：物料和工艺按顺序处理，存在等待依赖。
-**变更后**：物料和工艺解析后**并行处理**，大幅缩短整体处理时间。
+#### VM 职责增强
+**变更前**：VM 完成物料和工艺成本计算后，即可通知 Sales 介入。
+**变更后**：VM 必须**完成所有成本计算**（物料 + 工艺 + 投资 + 研发）后，才能通知 Sales 介入。
 
-#### 审核顺序调整
+> **理由**：Sales 需要完整的成本数据作为输入，才能准确计算 QS/BC/Payback。
+
+#### Controlling 职责变更
 | 变更前 | 变更后 |
 |--------|--------|
-| Controlling 先审核成本 | ❌ 错误顺序 |
-| Sales 后审核 QS/BC | ❌ 错误顺序 |
-| **正确流程** | **Sales 先审核（输入利润率）** → **Controlling 最终审核并释放** |
+| 审核 MHR（新工艺） | ❌ 移除 |
+| 审核利润率是否合理 | ❌ 移除 |
+| 审核 BC 是否合理 | ❌ 移除 |
+| **正确职责** | **创建/维护 MHR 标准**<br/>**维护 SK/HK 转换系数** |
 
-> **理由**：Sales 需要先确认客户需求、输入目标利润率，Controlling 基于此进行最终成本与利润率合理性审核后才能释放报价。
+> **理由**：Controlling 的核心价值在于建立和维护成本标准，而非审批每个报价。新流程让 Sales 能够更快速响应客户需求。
 
-#### 物料处理自动化
+#### Sales 职责增强
+| 变更前 | 变更后 |
+|--------|--------|
+| 设定目标利润率 | 保持 |
+| 审核 QS/BC | ✅ 改为**自行计算** |
+| 等待 Controlling 审核通过 | ❌ **移除** |
+| **新增职责** | **输入商业参数：单价、汇率、年降**<br/>**计算 QS/BC/Payback**<br/>**直接导出报价单** |
+
+#### 并行处理架构（保持）
+**物料和工艺解析后并行处理**，大幅缩短整体处理时间。
+
+#### 物料处理自动化（保持）
+| 场景 | 处理方式 |
+|------|----------|
+| 无新物料 | ✅ **系统自动**获取物料价格并计算 |
+| 有新物料 | ✅ **VM 发邮件**通知采购询价 |
+| 物料成本审核 | ❌ **不需要审核**，直接计入成本 |
+
+#### 工艺处理流程（调整）
 | 场景 | 变更前 | 变更后 |
 |------|--------|--------|
-| 无新物料 | VM 手动确认 | ✅ **系统自动**获取物料价格并计算 |
-| 有新物料 | VM 通知采购 | ✅ **系统自动发邮件**通知采购询价 |
-| 物料成本审核 | 需要 Controlling 审核 | ❌ **不需要审核**，直接计入成本 |
+| 无新工艺 | 系统自动获取工艺费率 | 保持 |
+| 有新工艺 | IE → PE → Controlling 审核 MHR | ✅ IE → **Controlling 创建 MHR 标准** |
 
-#### 工艺处理流程
-| 场景 | 变更前 | 变更后 |
-|------|--------|--------|
-| 无新工艺 | VM 手动确认 | ✅ **系统自动**获取工艺费率 |
-| 有新工艺 | 顺序处理 | ✅ IE → PE → Controlling **依次处理** |
+#### 项目级汇总询价（邮件化）
+**变更前**：按 BOM 行逐个发送询价邮件，同一物料重复询价。
+**变更后**：
+- **项目级汇总询价**，系统自动抓取整个项目中相同的物料进行汇总
+- **采购无需登录系统**，通过邮件完成询价交互
+- VM **导入报价单**，系统自动识别物料价格并入库
+
+**邮件化询价流程：**
+```
+VM 点击"一键询价" → VM 发邮件给采购 → 采购联系供应商 → 采购邮件回复报价单 → VM 导入报价单 → 系统自动识别价格入库
+```
 
 #### 关键价值
-1. **效率提升**：物料/工艺并行处理，理论上节省 40-50% 处理时间
+1. **效率提升**：物料/工艺并行处理，节省 40-50% 处理时间
 2. **自动化增强**：系统自动邮件通知，减少人工沟通成本
-3. **简化流程**：物料成本无需审批，聚焦于工艺成本和最终利润率审核
-4. **审核顺序优化**：Sales 先确认业务需求，Controlling 后做风控把关
+3. **流程简化**：移除 Controlling 审核环节，Sales 可直接导出报价单
+4. **职责清晰**：Controlling 专注于标准维护，Sales 专注于商业决策
+5. **询价优化**：项目级汇总询价，避免重复询价
+6. **采购零门槛**：采购无需登录系统，通过邮件即可完成询价
 
 ---
 
 ## 6. 业务概念详解
 
-### 7.1 双轨计价 (Dual-Track Pricing)
-
-**定义：** 同一物料/工艺同时计算两个价格：
-- **Standard Price（标准价）**：当前正常的采购成本/生产成本
-- **VAVE Price（优化价）**：通过 VAVE（Value Analysis/Value Engineering）优化后的理想成本
-
-**业务价值：**
-- 帮助企业在竞标中了解"底线价格"
-- 识别高水分的供应商/工艺
-- 持续优化成本结构
-
-> **详细计算逻辑：** [docs/PROCESS_COST_LOGIC.md](PROCESS_COST_LOGIC.md) §3 双轨计价逻辑
-
----
-
-### 7.2 QS (Quote Summary) - 报价摘要
+### 6.1 QS (Quote Summary) - 报价摘要
 
 **定义：** 客户视角的报价总览
 
@@ -551,7 +558,7 @@ stateDiagram-v2
 
 ---
 
-### 7.3 BC (Breakdown) - 成本分解
+### 6.2 BC (Breakdown) - 成本分解
 
 **定义：** 内部视角的成本结构透明化
 
@@ -576,22 +583,36 @@ Total Cost（总成本）
 
 ---
 
-### 7.4 Payback - 投资回报期
+### 6.3 Payback - 项目静态投资回收期 🔴 v1.5
 
-**定义：** 客户购买此产品后，需要多长时间收回投资成本
+**定义：** 客户购买此产品后，需要多长时间收回全部投资成本
+
+**核心公式：**
+$$ Payback\ (月数) = \frac{项目总投资}{项目月度净利} $$
 
 **业务场景：**
 - 客户需要购买新设备/产线
+- 客户需要承担模具开发费用
 - 报价中需要体现"设备能帮客户多快回本"
 
-**输入数据：** 客户投资金额、预计月节省金额
-**输出数据：** 回本周期（月）
+**计算理念：**
+- 采用静态回收期方法，不考虑货币时间价值
+- 简单直观，易于向客户解释
+- 结果偏保守，有利于风险控制
+
+**推荐等级：**
+| 等级 | 回收期 | 建议 |
+|------|--------|------|
+| 极力推荐 | ≤ 12 个月 | 回收期极短，投资回报快 |
+| 推荐 | 12 - 24 个月 | 回收期适中，风险可控 |
+| 谨慎 | 24 - 36 个月 | 回收期较长，需评估风险 |
+| 不推荐 | > 36 个月 | 回收期过长，建议调整策略 |
 
 > **详细计算逻辑：** [docs/PAYBACK_LOGIC.md](PAYBACK_LOGIC.md)
 
 ---
 
-### 7.5 MHR (Machine Hour Rate) - 机时费率
+### 6.4 MHR (Machine Hour Rate) - 机时费率
 
 **定义：** 每小时机器运行的综合成本
 
@@ -601,20 +622,16 @@ Total Cost（总成本）
 - 维护成本
 - 厂房分摊
 
-**双轨费率：**
-- **Standard MHR**：当前实际费率
-- **VAVE MHR**：优化后的理想费率
-
 **示例：**
 > **MHR 费率表**
-> | 工艺 | Standard MHR | VAVE MHR | 节省率 |
-> |------|-------------|----------|--------|
-> | CNC 加工 | ¥ 85/h | ¥ 65/h | 23.5% |
-> | 焊接 | ¥ 65/h | ¥ 50/h | 23.1% |
+> | 工艺 | Standard MHR |
+> |------|-------------|
+> | CNC 加工 | ¥ 85/h |
+> | 焊接 | ¥ 65/h |
 
 ---
 
-### 7.6 HK III (Herstellkosten III) - 制造成本
+### 6.5 HK III (Herstellkosten III) - 制造成本
 
 **定义：** 工厂大门的制造成本，不含研发和模具分摊
 
@@ -628,7 +645,7 @@ Total Cost（总成本）
 
 ---
 
-### 7.7 SK (Selbstkosten) - 完全成本
+### 6.6 SK (Selbstkosten) - 完全成本
 
 **定义：** 包含一切分摊后的真实总成本
 
@@ -643,7 +660,7 @@ Total Cost（总成本）
 
 ---
 
-### 7.8 DB I & DB IV (Deckungsbeitrag) - 边际贡献
+### 6.7 DB I & DB IV (Deckungsbeitrag) - 边际贡献
 
 **DB I - 边际贡献 I（生产毛利）：**
 - **意义：** 衡量工厂生产这个产品赚不赚钱，不考虑研发和模具分摊
@@ -659,7 +676,7 @@ Total Cost（总成本）
 
 ---
 
-### 7.9 NRE (Non-Recurring Engineering) - 一次性工程费用
+### 6.8 NRE (Non-Recurring Engineering) - 一次性工程费用
 
 **定义：** 项目启动时的一次性投资费用
 
@@ -677,7 +694,7 @@ Total Cost（总成本）
 
 ---
 
-### 7.10 S&A (Sales & Administration) - 管销费用
+### 6.9 S&A (Sales & Administration) - 管销费用
 
 **定义：** 销售与管理费用的分摊
 
@@ -734,13 +751,13 @@ Total Cost（总成本）
 
 ### 9.2 核心算法概述
 
-**双轨计价机制：** 系统对所有物料和工艺同时计算 Standard 和 VAVE 两套成本，自动输出节省空间（Savings）和节省率（Savings Rate）。
+**标准成本计算机制：** 系统对所有物料和工艺计算 Standard Cost，提供准确的成本核算基础。
 
 **计算模块：**
-- 物料成本双轨计算
-- 工艺成本双轨计算（MHR 费率 × Cycle Time）
+- 物料成本计算
+- 工艺成本计算（MHR 费率 × Cycle Time）
 - HK III / SK / DB 汇总计算
-- Payback 投资回收期计算
+- Payback 投资回收期计算（暂时下架）
 
 > **详细算法实现：** 参考各业务逻辑文档（见附录 11.2）
 
@@ -775,7 +792,6 @@ Total Cost（总成本）
 | 术语 | 英文全称 | 简要说明 |
 |------|----------|----------|
 | BOM | Bill of Materials | 物料清单 |
-| VAVE | Value Analysis/Value Engineering | 价值工程/价值分析 |
 | QS | Quote Summary | 报价摘要 |
 | BC | Breakdown | 成本分解 |
 | MHR | Machine Hour Rate | 机时费率 |
@@ -795,7 +811,7 @@ Total Cost（总成本）
 - [docs/DATABASE_DESIGN.md](DATABASE_DESIGN.md) - 数据库结构唯一真理源
 - [docs/GLOSSARY.md](GLOSSARY.md) - 项目术语表（完整版）
 - [docs/BUSINESS_CASE_LOGIC.md](BUSINESS_CASE_LOGIC.md) - Business Case 计算逻辑 (HK/SK/DB)
-- [docs/PROCESS_COST_LOGIC.md](PROCESS_COST_LOGIC.md) - 工艺成本计算逻辑 (MHR/双轨计价)
+- [docs/PROCESS_COST_LOGIC.md](PROCESS_COST_LOGIC.md) - 工艺成本计算逻辑 (MHR/标准成本)
 - [docs/NRE_INVESTMENT_LOGIC.md](NRE_INVESTMENT_LOGIC.md) - NRE 投资成本计算逻辑
 - [docs/PAYBACK_LOGIC.md](PAYBACK_LOGIC.md) - 投资回收期计算逻辑
 - [docs/QUOTATION_SUMMARY_LOGIC.md](QUOTATION_SUMMARY_LOGIC.md) - 报价汇总计算逻辑
