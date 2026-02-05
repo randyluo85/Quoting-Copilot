@@ -650,6 +650,15 @@ CREATE INDEX idx_bcp_project ON business_case_params(project_id);
 -- business_case_years (新增)
 CREATE INDEX idx_bcy_project ON business_case_years(project_id);
 CREATE INDEX idx_bcy_year ON business_case_years(year);
+
+-- 🆕 v1.7 向量索引 (pgvector HNSW)
+CREATE INDEX idx_mv_embedding_hnsw
+ON material_vectors USING hnsw (embedding vector_cosine_ops)
+WITH (m = 16, ef_construction = 64);
+
+CREATE INDEX idx_pv_embedding_hnsw
+ON product_vectors USING hnsw (embedding vector_cosine_ops)
+WITH (m = 16, ef_construction = 64);
 ```
 
 ---
