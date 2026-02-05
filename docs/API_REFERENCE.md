@@ -319,6 +319,197 @@
 
 ---
 
+### 2.7 向量搜索 (Vector Search) 🆕 v1.3
+
+> **详细设计**：[VECTOR_DESIGN.md](VECTOR_DESIGN.md)
+
+| 方法 | 端点 | 功能 | 认证 |
+|------|------|------|------|
+| POST | `/vector/materials/search` | 语义搜索物料 | 🟡 需要 |
+| POST | `/vector/products/search` | 搜索相似产品 | 🟡 需要 |
+| POST | `/vector/materials/sync` | 同步物料向量 | 🔒 Admin |
+| POST | `/vector/products/sync` | 同步产品向量 | 🔒 Admin |
+
+#### POST /vector/materials/search
+
+搜索与给定文本语义相似的物料。
+
+**请求体:**
+```json
+{
+  "query": "PA66-GF30 Housing",
+  "limit": 5,
+  "min_similarity": 0.85,
+  "material_type_filter": "made"
+}
+```
+
+**请求参数:**
+| 参数 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| query | string | 是 | 搜索查询文本 |
+| limit | int | 否 | 返回结果数量，默认 5 |
+| min_similarity | decimal | 否 | 最小相似度，默认 0.85 |
+| material_type_filter | string | 否 | 物料类型过滤：made/bought |
+
+**响应示例:**
+```json
+{
+  "success": true,
+  "data": {
+    "query_embedding": [0.0123, -0.0456, ...],
+    "results": [
+      {
+        "material_id": "MAT-001",
+        "name": "Housing, Polyamide 66 30% GF",
+        "material": "PA66-GF30",
+        "material_type": "made",
+        "std_price": 28.50,
+        "similarity": 0.92,
+        "match_type": "semantic"
+      },
+      {
+        "material_id": "MAT-002",
+        "name": "Housing PA66 GF30 reinforced",
+        "material": "PA66-GF30",
+        "material_type": "made",
+        "std_price": 30.00,
+        "similarity": 0.88,
+        "match_type": "semantic"
+      }
+    ],
+    "total_results": 2
+  }
+}
+```
+
+#### POST /vector/products/search
+
+搜索与给定 BOM 结构相似的历史产品。
+
+**请求体:**
+```json
+{
+  "product_name": "Front Brake Line Assy",
+  "bom_materials": [
+    {"name": "Steel Tube 6mm", "level": 1},
+    {"name": "M12 Connector", "level": 1},
+    {"name": "Rubber Hose", "level": 1}
+  ],
+  "processes": ["Cutting", "CNC Bending", "Assembly", "Leak Testing"],
+  "limit": 3,
+  "min_similarity": 0.80
+}
+```
+
+**请求参数:**
+| 参数 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| product_name | string | 否 | 产品名称 |
+| bom_materials | array | 否 | BOM 物料列表 |
+| processes | array | 否 | 工艺列表 |
+| limit | int | 否 | 返回结果数量，默认 3 |
+| min_similarity | decimal | 否 | 最小相似度，默认 0.80 |
+
+**响应示例:**
+```json
+{
+  "success": true,
+  "data": {
+    "results": [
+      {
+        "product_id": "PROD-001",
+        "project_id": "PRJ-2024-Q1",
+        "project_name": "Brake Line Project 2024-Q1",
+        "product_name": "Brake Line Assembly",
+        "similarity": 0.89,
+        "processes": ["Cutting", "CNC Bending", "End Forming", "Assembly", "Leak Testing"],
+        "avg_mhr": 75.50,
+        "created_at": "2024-01-15T10:00:00Z"
+      },
+      {
+        "product_id": "PROD-045",
+        "project_id": "PRJ-2023-Q4",
+        "project_name": "Suspension Line Project",
+        "product_name": "Front Brake Line Assy",
+        "similarity": 0.82,
+        "processes": ["Cutting", "CNC Bending", "Assembly"],
+        "avg_mhr": 68.00,
+        "created_at": "2023-10-20T14:30:00Z"
+      }
+    ],
+    "total_results": 2
+  }
+}
+```
+
+#### POST /vector/materials/sync
+
+为指定物料生成/更新向量嵌入。
+
+**请求体:**
+```json
+{
+  "material_ids": ["MAT-001", "MAT-002"],
+  "force_rebuild": false
+}
+```
+
+**请求参数:**
+| 参数 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| material_ids | array | 是 | 物料 ID 列表 |
+| force_rebuild | boolean | 否 | 是否强制重建，默认 false |
+
+**响应示例:**
+```json
+{
+  "success": true,
+  "data": {
+    "synced": 2,
+    "failed": 0,
+    "details": [
+      {"material_id": "MAT-001", "status": "created"},
+      {"material_id": "MAT-002", "status": "updated"}
+    ]
+  }
+}
+```
+
+#### POST /vector/products/sync
+
+为指定产品生成/更新指纹向量。
+
+**请求体:**
+```json
+{
+  "product_ids": ["PROD-001"],
+  "force_rebuild": false
+}
+```
+
+**请求参数:**
+| 参数 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| product_ids | array | 是 | 产品 ID 列表 |
+| force_rebuild | boolean | 否 | 是否强制重建，默认 false |
+
+**响应示例:**
+```json
+{
+  "success": true,
+  "data": {
+    "synced": 1,
+    "failed": 0,
+    "details": [
+      {"product_id": "PROD-001", "status": "updated"}
+    ]
+  }
+}
+```
+
+---
+
 ## 3. 错误码定义
 
 | 错误码 | HTTP 状态 | 说明 |
