@@ -358,10 +358,15 @@ interface Process {
 
 2. **状态标记逻辑:**
    - 如果 `item_code` 在库中完全匹配且有效期内 → **Green**
-   - 如果使用 AI 语义匹配或 AI 估算参数 → **Yellow**
-   - 如果库中无数据 → **Red**
+   - 如果使用 AI 语义匹配（向量相似度 > 85%）或 AI 估算参数 → **Yellow**
+   - 如果库中无数据且向量匹配失败 → **Red**
 
-3. **不确定的逻辑:** 如果遇到 PRD 未定义的逻辑，优先询问用户，不要自行假设。
+3. **向量汇集规则 🆕 v1.7:**
+   - **物料层**：汇集 `name` + `material` + `remarks` + `material_type`，排除 `std_price` 等数值噪音
+   - **产品层**：汇集 `product_name` + Level 1 关键组件 + 工艺名称序列，排除 `quantity` 等数值噪音
+   - 详细规则参考：[docs/VECTOR_DESIGN.md §4](docs/VECTOR_DESIGN.md#field-aggregation)
+
+4. **不确定的逻辑:** 如果遇到 PRD 未定义的逻辑，优先询问用户，不要自行假设。
 
 ## 🧪 Testing Focus
 
