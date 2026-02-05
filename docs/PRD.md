@@ -247,10 +247,10 @@
 
 | SPEC 维度 | 内容 |
 |-----------|------|
-| **Specific（具体功能）** | 维护工序费率（MHR），支持双费率录入（Standard / VAVE） |
+| **Specific（具体功能）** | 维护工序费率（MHR），支持标准费率录入 |
 | **Performance（性能指标）** | • 费率查询：< 300 ms<br/>• 支持工序数：> 500 种<br/>• 费率精度：0.01 元 |
 | **Executable（验收标准）** | • 工序编码唯一性校验<br/>• 支持按成本中心分类管理<br/>• 费率变更需 Controlling 审批<br/>• 支持费率生效日期管理 |
-| **Complete（完整定义）** | **数据字段**：工序编码、工序名称、成本中心、Standard MHR、VAVE MHR、生效日期、状态<br/>**操作**：Create / Read / Update / Delete / Approve |
+| **Complete（完整定义）** | **数据字段**：工序编码、工序名称、成本中心、Standard MHR、生效日期、状态<br/>**操作**：Create / Read / Update / Delete / Approve |
 
 ---
 
