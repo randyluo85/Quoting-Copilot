@@ -660,7 +660,7 @@ Total Cost（总成本）
 
 ---
 
-### 7.9 NRE (Non-Recurring Engineering) - 一次性工程费用
+### 6.8 NRE (Non-Recurring Engineering) - 一次性工程费用
 
 **定义：** 项目启动时的一次性投资费用
 
