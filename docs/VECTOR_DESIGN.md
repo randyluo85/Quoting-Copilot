@@ -103,7 +103,7 @@ Dr.aiVOSS 向量化架构服务于两个核心业务场景：
 ## 3. 向量表设计 {#vector-tables}
 
 > **技术栈**：PostgreSQL 16 + pgvector 扩展
-> **向量维度**：1536（OpenAI text-embedding-ada-002）或根据模型调整
+> **向量维度**：1536（OpenAI text-embedding-v4）或根据模型调整
 > **相似度计算**：余弦距离（Cosine Distance）
 
 ### 3.1 material_vectors（物料向量表）{#material-vectors}
@@ -118,7 +118,7 @@ Dr.aiVOSS 向量化架构服务于两个核心业务场景：
 | material_id | VARCHAR(50) | FK, NOT NULL, UNIQUE | 关联 materials.id |
 | embedding | vector(1536) | NOT NULL | 物料语义向量 |
 | embedding_text | TEXT | NOT NULL | 用于生成向量的汇集文本（快照） |
-| embedding_model | VARCHAR(50) | DEFAULT 'text-embedding-ada-002' | 使用的嵌入模型 |
+| embedding_model | VARCHAR(50) | DEFAULT 'text-embedding-v4' | 使用的嵌入模型 |
 | similarity_threshold | DECIMAL(3,2) | DEFAULT 0.85 | 相似度阈值 |
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
@@ -161,7 +161,7 @@ CREATE INDEX idx_mv_material_id ON material_vectors(material_id);
 | product_id | CHAR(36) | FK, NOT NULL, UNIQUE | 关联 project_products.id |
 | embedding | vector(1536) | NOT NULL | 产品指纹向量 |
 | fingerprint_text | TEXT | NOT NULL | 用于生成向量的汇集文本（快照） |
-| embedding_model | VARCHAR(50) | DEFAULT 'text-embedding-ada-002' | 使用的嵌入模型 |
+| embedding_model | VARCHAR(50) | DEFAULT 'text-embedding-v4' | 使用的嵌入模型 |
 | similarity_threshold | DECIMAL(3,2) | DEFAULT 0.80 | 相似度阈值 |
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
@@ -552,7 +552,7 @@ LIMIT 5;
 
 | 模型 | 维度 | 语言 | 推荐 |
 |------|------|------|------|
-| **text-embedding-ada-002** | 1536 | 多语言 | ⭐⭐⭐ 推荐 |
+| **text-embedding-v4** | 1536 | 多语言 | ⭐⭐⭐ 推荐 |
 | **通义千问 Embedding** | 1024 | 中英 | ⭐⭐ 备选 |
 | **bge-large-zh** | 1024 | 中文 | ⭐ 备选 |
 
