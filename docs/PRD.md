@@ -447,8 +447,7 @@ stateDiagram-v2
     M_Auto --> M_Ready: 自动完成
 
     P_Auto --> P_Wait: 等待 IE
-    P_Wait --> P_PE: PE 评估
-    P_PE --> P_Ctrl: Controlling 创建 MHR
+    P_Wait --> P_Ctrl: Controlling 创建 MHR
     P_Ctrl --> P_Ready: 完成
     P_Auto --> P_Ready: 自动完成
 
