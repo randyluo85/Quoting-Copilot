@@ -211,7 +211,6 @@
 ```json
 {
   "project_id": "PRJ-2024-001",
-  "use_vave": true,
   "recalculate": false
 }
 ```
@@ -224,33 +223,15 @@
     "calculation_id": "calc-456",
     "project_id": "PRJ-2024-001",
     "summary": {
-      "total_std_cost": 474950.00,
-      "total_vave_cost": 441050.00,
-      "total_savings": 33900.00,
-      "savings_rate": 0.0714
+      "total_cost": 474950.00
     },
     "by_product": [
       {
         "product_id": "PROD-001",
         "product_name": "制动管路总成",
-        "material_cost": {
-          "std": 210950.00,
-          "vave": 198250.00,
-          "savings": 12700.00,
-          "savings_rate": 0.0602
-        },
-        "process_cost": {
-          "std": 264000.00,
-          "vave": 242800.00,
-          "savings": 21200.00,
-          "savings_rate": 0.0803
-        },
-        "total_cost": {
-          "std": 474950.00,
-          "vave": 441050.00,
-          "savings": 33900.00,
-          "savings_rate": 0.0714
-        }
+        "material_cost": 210950.00,
+        "process_cost": 264000.00,
+        "total_cost": 474950.00
       }
     ]
   }
