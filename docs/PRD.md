@@ -776,7 +776,6 @@ Total Cost（总成本）
 | 术语 | 英文全称 | 简要说明 |
 |------|----------|----------|
 | BOM | Bill of Materials | 物料清单 |
-| VAVE | Value Analysis/Value Engineering | 价值工程/价值分析 |
 | QS | Quote Summary | 报价摘要 |
 | BC | Breakdown | 成本分解 |
 | MHR | Machine Hour Rate | 机时费率 |
