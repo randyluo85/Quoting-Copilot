@@ -14,6 +14,7 @@
 | 2026-02-03 | v1.2 | 修复前端技术栈描述；更新产品名称 | 全部 |
 | 2026-02-03 | v1.3 | 🔴 **破坏性变更**：新增5张表；process_rates 表 MHR 拆分为 var/fix | 全部 |
 | 2026-02-04 | v1.4 | 🔴 **破坏性变更**：process_rates 表新增折旧率字段，支持 Payback 现金流计算 | Payback 模块 |
+| 2026-02-05 | v1.5 | 🔴 **破坏性变更**：projects 表新增 factory_id；quote_summaries 表新增 version_number；新增 factories 表；新增 std_investment_costs 表 | 多版本报价、工厂管理 |
 
 **变更规范：**
 - 任何字段新增/修改/删除必须记录在此
