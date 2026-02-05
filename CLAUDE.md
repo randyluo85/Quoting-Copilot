@@ -251,7 +251,7 @@ interface Process {
   "projectId": "PRJ-2024-001",
   "versionNumber": 1.0,
   "status": "draft",
-  "totalStdCost": {"std": 474.95, "vave": 441.05, "savings": 33.90},
+  "totalCost": 474.95,
   "hk3Cost": 474.95,
   "skCost": 490.50,
   "db1": 50.00,
