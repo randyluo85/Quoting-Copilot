@@ -328,13 +328,9 @@ calculated → sales_input → completed
 | process_code | VARCHAR(50) | FK, NOT NULL | 工序编码 |
 | sequence_order | INT | NOT NULL | 工序顺序 |
 | **cycle_time_std** | INT | | **🔴 新增：标准工时（秒）** |
-| **cycle_time_vave** | INT | | **🔴 新增：VAVE 工时（秒）** |
 | **personnel_std** | DECIMAL(4,2) | DEFAULT 1.0 | **🔴 新增：标准人工配置（人/机）** |
-| **personnel_vave** | DECIMAL(4,2) | | **🔴 新增：VAVE 人工配置** |
 | std_mhr | DECIMAL(10,2) | | MHR 快照（保留兼容） |
-| vave_mhr | DECIMAL(10,2) | | MHR 快照（保留兼容） |
 | std_cost | DECIMAL(12,4) | | 标准成本 |
-| vave_cost | DECIMAL(12,4) | | VAVE 成本 |
 | remarks | TEXT | | 备注 |
 | created_at | DATETIME | DEFAULT NOW() | |
 
