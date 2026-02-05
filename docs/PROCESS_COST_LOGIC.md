@@ -108,7 +108,7 @@ $$Cost_{std} = (std\_mhr\_var + std\_mhr\_fix + Rate_{labor}) \times \frac{Cycle
 | $MHR_{total}$ 偏离同类成本中心均值 $\pm 15\%$ | 自动标记为"需重点审核" |
 | 产能利用率超过 110% | 提示"需增加投资成本（如新扩产线）" |
 
-### 4.3 同步性检查 (Data Consistency)
+### 3.3 同步性检查 (Data Consistency)
 
 | 条件 | 触发动作 |
 |------|---------|
