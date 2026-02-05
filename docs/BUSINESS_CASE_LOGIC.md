@@ -326,9 +326,9 @@ flowchart TD
 |------|------|---------|
 | `projects` | 项目基础数据 | `annual_volume`, `target_margin` |
 | `project_products` | 产品数据 | `product_version`, `route_code` |
-| `product_materials` | BOM 物料成本 | `std_cost`, `vave_cost` |
-| `product_processes` | 工艺成本 | `std_cost`, `vave_cost` |
-| `quote_summaries` | 报价汇总 | `total_std_cost`, `total_vave_cost`, `quoted_price` |
+| `product_materials` | BOM 物料成本 | `unit_cost` |
+| `product_processes` | 工艺成本 | `unit_cost` |
+| `quote_summaries` | 报价汇总 | `total_cost`, `quoted_price` |
 
 **新增建议表（用于存储 Business Case 参数）：**
 
