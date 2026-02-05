@@ -555,7 +555,7 @@ std_cost = (cycle_time_std / 3600) × (std_mhr_var + std_mhr_fix + personnel_std
 | material_id | VARCHAR(50) | FK, NOT NULL, UNIQUE | 关联 materials.id |
 | embedding | vector(1536) | NOT NULL | 物料语义向量（pgvector） |
 | embedding_text | TEXT | NOT NULL | 用于生成向量的汇集文本（快照） |
-| embedding_model | VARCHAR(50) | DEFAULT 'text-embedding-ada-002' | 使用的嵌入模型 |
+| embedding_model | VARCHAR(50) | DEFAULT 'text-embedding-v4' | 使用的嵌入模型 |
 | similarity_threshold | DECIMAL(3,2) | DEFAULT 0.85 | 相似度阈值 |
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
@@ -579,7 +579,7 @@ FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
 | product_id | CHAR(36) | FK, NOT NULL, UNIQUE | 关联 project_products.id |
 | embedding | vector(1536) | NOT NULL | 产品指纹向量（pgvector） |
 | fingerprint_text | TEXT | NOT NULL | 用于生成向量的汇集文本（快照） |
-| embedding_model | VARCHAR(50) | DEFAULT 'text-embedding-ada-002' | 使用的嵌入模型 |
+| embedding_model | VARCHAR(50) | DEFAULT 'text-embedding-v4' | 使用的嵌入模型 |
 | similarity_threshold | DECIMAL(3,2) | DEFAULT 0.80 | 相似度阈值 |
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
