@@ -94,7 +94,7 @@ $$Cost_{std} = (std\_mhr\_var + std\_mhr\_fix + Rate_{labor}) \times \frac{Cycle
 
 为防止录入错误导致报价亏损，系统需设置以下"软硬闸口"：
 
-### 4.1 除零保护 (Zero Division Protection)
+### 3.1 除零保护 (Zero Division Protection)
 
 | 条件 | 触发动作 |
 |------|---------|
