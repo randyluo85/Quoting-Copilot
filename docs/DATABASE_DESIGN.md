@@ -314,7 +314,6 @@ calculated → sales_input → completed
 | quantity | DECIMAL(10,3) | | 数量 |
 | unit | VARCHAR(10) | | 单位 |
 | std_cost | DECIMAL(12,4) | | 标准成本 |
-| vave_cost | DECIMAL(12,4) | | VAVE 成本 |
 | confidence | DECIMAL(5,2) | | 匹配置信度 0-100 |
 | ai_suggestion | TEXT | | AI 建议 |
 | remarks | TEXT | | 备注（BOM Comments） |
