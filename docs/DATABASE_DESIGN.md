@@ -348,9 +348,6 @@ vave_cost = (cycle_time_vave / 3600) × (vave_mhr_var + vave_mhr_fix + personnel
 | project_id | CHAR(36) | FK, NOT NULL | 关联项目 |
 | **version_number** | **DECIMAL(3,1)** | **DEFAULT 1.0** | **🔴 v1.5 新增：版本号** |
 | total_std_cost | DECIMAL(14,4) | | 总标准成本 |
-| total_vave_cost | DECIMAL(14,4) | | 总 VAVE 成本 |
-| total_savings | DECIMAL(14,4) | | 节省金额 |
-| savings_rate | DECIMAL(5,2) | | 节省率(%) |
 | quoted_price | DECIMAL(14,4) | | 报价 |
 | actual_margin | DECIMAL(5,2) | | 实际利润率(%) |
 | **hk_3_cost** | DECIMAL(14,4) | | **🔴 新增：HK III 制造成本** |
