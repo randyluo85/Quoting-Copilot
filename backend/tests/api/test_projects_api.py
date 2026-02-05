@@ -69,7 +69,6 @@ class TestProjectsAPI:
                 "sales": "张三",
                 "vm": "李四",
                 "ie": "王五",
-                "pe": "赵六",
                 "controlling": "钱七"
             },
             "targetMargin": 15.5  # 目标利润率 15.5%
