@@ -51,12 +51,9 @@
 所有涉及金额的计算，必须使用此结构：
 
 ```json
-// PricePair: 双轨价格封装
+// PricePair: 价格封装
 {
-  "std": "Decimal (标准成本)",
-  "vave": "Decimal (目标成本)",
-  "savings": "Decimal (std - vave)",
-  "savings_rate": "Float (savings / std)"
+  "std": "Decimal (标准成本)"
 }
 ```
 
