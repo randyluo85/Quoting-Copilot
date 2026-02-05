@@ -198,7 +198,6 @@ class AmortizationMode(str):
     """摊销模式"""
     TOTAL_VOLUME = "total_volume_based"  # 全生命周期平摊
     FIXED_3_YEARS = "fixed_3_years"      # 前3年摊销
-    FIXED_5_YEARS = "fixed_5_years"      # 前5年摊销
 
 
 class GlobalParameters(BaseModel):
