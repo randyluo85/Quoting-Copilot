@@ -241,6 +241,65 @@ interface Process {
 }
 ```
 
+**QuoteSummaryResponse（报价摘要响应）v1.5**
+```json
+{
+  "id": "QS-001",
+  "projectId": "PRJ-2024-001",
+  "versionNumber": 1.0,
+  "status": "draft",
+  "totalStdCost": {"std": 474.95, "vave": 441.05, "savings": 33.90},
+  "hk3Cost": 474.95,
+  "skCost": 490.50,
+  "db1": 50.00,
+  "db4": 35.50,
+  "quotedPrice": 580.00,
+  "actualMargin": 15.5,
+  "businessParams": {
+    "exchangeRate": 6.8,
+    "annualReductionRate": 3.0,
+    "logisticsRate": 0.015,
+    "otherMfgRate": 0.02
+  },
+  "createdAt": "2026-02-05T10:00:00Z"
+}
+```
+
+**ProcurementSummaryResponse（采购询价汇总响应）🔴 v1.5**
+```json
+{
+  "projectId": "PRJ-2024-001",
+  "materialsToQuote": [
+    {
+      "materialCode": "A356-T6",
+      "materialName": "铝合金",
+      "totalQuantity": 350.5,
+      "unit": "kg",
+      "products": ["产品A", "产品B"],
+      "suppliers": ["供应商1", "供应商2"]
+    }
+  ],
+  "totalUniqueMaterials": 5,
+  "emailRecipients": ["procurement@company.com"],
+  "estimatedQuoteDate": "2026-02-10"
+}
+```
+
+**StdInvestmentCostResponse（投资项标准响应）🔴 v1.5**
+```json
+{
+  "id": "STD-001",
+  "itemType": "MOLD",
+  "materialType": "P20",
+  "tonnage": 500,
+  "complexity": "MEDIUM",
+  "stdCostMin": 150000,
+  "stdCostMax": 200000,
+  "currency": "CNY",
+  "status": "ACTIVE"
+}
+```
+
 ### BOM 上传解析 API
 
 **POST** `/api/v1/bom/upload`
