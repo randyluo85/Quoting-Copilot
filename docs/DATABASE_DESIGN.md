@@ -130,11 +130,8 @@ erDiagram
         varchar50 process_code FK
         int sequence_order
         int cycle_time_std "标准工时(秒)"
-        int cycle_time_vave "VAVE工时(秒)"
         decimal personnel_std
-        decimal personnel_vave
         decimal std_cost
-        decimal vave_cost
     }
 
     investment_items {
