@@ -120,7 +120,6 @@ interface ProjectOwner {
   sales: string;       // 销售
   vm: string;          // 项目经理
   ie: string;          // 工艺工程师
-  pe: string;          // 产品工程师
   controlling: string; // 财务控制
 }
 
