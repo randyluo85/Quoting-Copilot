@@ -185,6 +185,7 @@ interface Process {
 | GET | `/bom/{projectId}/processes` | 获取工艺清单 | BOMManagement |
 | **POST** | **`/procurement/summary/{projectId}`** | **🔴 v1.5：生成项目级采购询价汇总** | BOMManagement |
 | **POST** | **`/procurement/send-request`** | **🔴 v1.5：发送询价邮件** | BOMManagement |
+| **POST** | **`/procurement/import-quote`** | **🔴 v2.1：导入采购报价单并识别价格** | BOMManagement |
 | POST | `/cost/calculate` | 执行成本核算 | CostCalculation |
 | GET | `/cost/{projectId}` | 获取成本结果 | CostCalculation |
 | **GET** | **`/quotations/{projectId}`** | **🔴 v1.5：获取项目所有版本报价** | QuoteSummary |
