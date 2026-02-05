@@ -59,13 +59,10 @@ uv run uvicorn app.main:app --reload --port 8000
 
 ## 5. 核心业务逻辑公式
 
-系统后端必须始终运行两套公式：
+系统后端标准成本计算公式：
 
-**Standard Cost (当前成本):**
-$$ \sum (Qty \times P_{std}) + \sum (CycleTime_{std} \times (MHR_{std} + Labor_{std})) $$
-
-**VAVE Cost (目标成本):**
-$$ \sum (Qty \times P_{vave}) + \sum (CycleTime_{opt} \times (MHR_{vave} + Labor_{vave})) $$
+**Standard Cost (标准成本):**
+$$ Cost_{std} = \sum (Qty \times P_{std}) + \sum (CycleTime \times (MHR_{std} + Labor_{std})) $$
 
 ## 6. 🚀 快速找到你要的文档
 
