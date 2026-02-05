@@ -224,21 +224,14 @@ class ProductProcess(BaseModel):
     project_product_id: str
     process_code: str
     sequence_order: int
-    cycle_time_std: int = Field(gt=0, description="标准工时（秒）")
-    cycle_time_vave: int | None = Field(None, description="VAVE 工时（秒）")
-    personnel_std: Decimal = Field(default=Decimal("1.0"), ge=0)
-    personnel_vave: Decimal | None = Field(None, ge=0)
+    cycle_time: int = Field(gt=0, description="标准工时（秒）")
+    personnel: Decimal = Field(default=Decimal("1.0"), ge=0)
 
-    def calculate_cost(self, rate: ProcessRate, labor_rate: Decimal, use_vave: bool = False) -> Decimal:
+    def calculate_cost(self, rate: ProcessRate, labor_rate: Decimal) -> Decimal:
         """计算工艺成本"""
-        if use_vave:
-            mhr = rate.vave_mhr_total
-            cycle_time = self.cycle_time_vave or self.cycle_time_std
-            personnel = self.personnel_vave or self.personnel_std
-        else:
-            mhr = rate.std_mhr_total
-            cycle_time = self.cycle_time_std
-            personnel = self.personnel_std
+        mhr = rate.std_mhr_total
+        cycle_time = self.cycle_time
+        personnel = self.personnel
 
         # 成本 = (MHR + Labor) × (CycleTime / 3600)
         labor_cost = labor_rate * personnel
