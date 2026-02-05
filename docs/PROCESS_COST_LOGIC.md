@@ -144,9 +144,6 @@ $$Cost_{std} = (std\_mhr\_var + std\_mhr\_fix + Rate_{labor}) \times \frac{Cycle
 | `std_mhr_var` | DECIMAL(10,2) | 标准变动费率 | 45.00 |
 | `std_mhr_fix` | DECIMAL(10,2) | 标准固定费率 | 30.00 |
 | `std_depreciation_rate` | DECIMAL(8,4) | **🔴 v1.4 新增：标准折旧率** | 8.50 |
-| `vave_mhr_var` | DECIMAL(10,2) | VAVE 变动费率 | 42.00 |
-| `vave_mhr_fix` | DECIMAL(10,2) | VAVE 固定费率 | 28.00 |
-| `vave_depreciation_rate` | DECIMAL(8,4) | **🔴 v1.4 新增：VAVE 折旧率** | 7.50 |
 | `efficiency_factor` | DECIMAL(4,2) | 效率系数 | 1.00 |
 | `created_at` | DATETIME | 创建时间 | DEFAULT NOW() |
 
