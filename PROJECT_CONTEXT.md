@@ -70,7 +70,7 @@
 |---------|--------|---------|
 | 物料主数据 | `materials` | `id` (物料编码), `std_price`, `vave_price` |
 | 工序费率 | `process_rates` | `process_code`, `std_mhr_var`, `std_mhr_fix`, `vave_mhr_var`, `vave_mhr_fix` |
-| 项目 | `projects` | `id`, `project_code`, `status`, `annual_volume` |
+| 项目 | `projects` | `id`, `project_code`, `status`, `annual_volume`, `factory_id` |
 | BOM 行 | `product_materials` | `std_cost`, `vave_cost`, `confidence` |
 
 **状态流转（projects.status）v2.0：**
