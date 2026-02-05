@@ -2,7 +2,7 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.5   | 2026-02-03 | 2026-02-05 | Dr.aiVOSS 文档变更日志 | Randy Luo |
+| v1.6   | 2026-02-03 | 2026-02-05 | Dr.aiVOSS 文档变更日志 | Randy Luo |
 
 ---
 
@@ -10,12 +10,14 @@
 
 | 日期 | 文档 | 版本 | 变更内容 | 影响范围 | 责任人 |
 |------|------|------|----------|----------|------|
+| 2026-02-05 | docs/PAYBACK_LOGIC.md | v1.4 → **v1.5** | ✅ **重写逻辑**：从 VAVE 增量回收期改为项目静态回收期；新公式：Payback = 项目总投资 / 项目月度净利 | 业务逻辑 | Randy Luo |
+| 2026-02-05 | docs/PRD.md | v1.8 → **v1.9** | ✅ **同步更新**：Payback 功能重写为静态回收期；更新推荐等级定义 | 产品需求 | Randy Luo |
 | 2026-02-05 | PROJECT_CONTEXT.md | v2.3 → **v2.4** | 🔴 **架构调整**：移除双轨计价功能，简化为单一标准成本计算 | 业务流程 | Randy Luo |
-| 2026-02-05 | docs/PRD.md | v1.7 → **v1.8** | 🔴 **架构调整**：移除双轨计价功能，简化为单一标准成本计算；Payback 功能暂时下架 | 产品需求 | Randy Luo |
+| 2026-02-05 | docs/PRD.md | v1.7 → **v1.8** | 🔴 **架构调整**：移除双轨计价功能，简化为单一标准成本计算 | 产品需求 | Randy Luo |
 | 2026-02-05 | docs/DATABASE_DESIGN.md | v1.5 → **v1.6** | 🔴 **破坏性变更**：移除所有 VAVE 相关字段，简化双轨价格为单轨标准成本 | 数据库设计 | Randy Luo |
-| 2026-02-05 | CLAUDE.md | v1.4 → **v1.5** | 🔴 **架构调整**：移除双轨计价功能；PricePair 模型简化；Payback 功能暂时下架 | API 契约 | Randy Luo |
+| 2026-02-05 | CLAUDE.md | v1.4 → **v1.5** | 🔴 **架构调整**：移除双轨计价功能；PricePair 模型简化 | API 契约 | Randy Luo |
 | 2026-02-05 | docs/PROCESS_COST_LOGIC.md | v1.3 → **v1.4** | 🔴 **架构调整**：移除双轨计价逻辑，仅保留 Standard Cost 计算 | 业务逻辑 | Randy Luo |
-| 2026-02-05 | docs/PAYBACK_LOGIC.md | v1.3 → **v1.4** | 🔴 **功能暂时下架**：原逻辑基于 VAVE 价格节省额，现已移除 VAVE 功能 | 业务逻辑 | Randy Luo |
+| 2026-02-05 | docs/API_REFERENCE.md | v1.1 → **v1.2** | 🔴 **架构调整**：移除 VAVE 相关字段；PricePair 模型简化；响应模型更新 | API 契约 | Randy Luo |
 | 2026-02-05 | docs/API_REFERENCE.md | v1.1 → **v1.2** | 🔴 **架构调整**：移除 VAVE 相关字段；PricePair 模型简化；响应模型更新 | API 契约 | Randy Luo |
 | 2026-02-05 | docs/GLOSSARY.md | v1.2 → **v1.3** | 🔴 **架构调整**：移除 VAVE 相关术语（双轨计价、VAVE价、节省空间、节省率） | 术语表 | Randy Luo |
 | 2026-02-05 | docs/BUSINESS_CASE_LOGIC.md | v1.2 → **v1.3** | 同步 v2.0 流程变更；移除 VAVE 相关引用 | 业务逻辑 | Randy Luo |
