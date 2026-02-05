@@ -84,6 +84,19 @@ calculated → sales_input → completed
 
 完整表结构、索引、约束请参考 [`docs/DATABASE_DESIGN.md`](docs/DATABASE_DESIGN.md)。
 
+### 2.2.3 向量数据结构 🆕 v2.5
+
+> **详细设计**：[docs/VECTOR_DESIGN.md](docs/VECTOR_DESIGN.md)
+
+| 业务概念 | 对应表 | 关键字段 | 用途 |
+|---------|--------|---------|------|
+| 物料语义向量 | `material_vectors` | `embedding` (pgvector), `embedding_text` | BOM 物料清洗匹配 |
+| 产品指纹向量 | `product_vectors` | `embedding` (pgvector), `fingerprint_text` | 历史相似产品检索 |
+
+**向量搜索触发时机：**
+- 物料精确匹配失败时 → 触发向量语义搜索（相似度阈值：85%）
+- 新产品创建后 → 触发产品指纹匹配（相似度阈值：80%）
+
 ### 2.3 业务实体 (Transaction Entities)
 
 **Object: `BOMLineItem` (BOM 行)**
