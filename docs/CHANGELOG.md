@@ -10,6 +10,13 @@
 
 | 日期 | 文档 | 版本 | 变更内容 | 影响范围 | 责任人 |
 |------|------|------|----------|----------|------|
+| 2026-02-05 | PROJECT_CONTEXT.md | v2.2 → **v2.3** | 🔴 **v2.0 流程变更**：VM/Sales/Controlling 职责重新划分；移除 Controlling 审核；新增多版本报价支持；新增 sales_input 状态；MHR 字段更新为 var/fix 拆分 | 业务流程 | Randy Luo |
+| 2026-02-05 | docs/PRD.md | v1.6 → **v1.7** | 同步 v2.0 流程变更：更新角色职责；移除 Controlling 审核节点；更新流程图；新增 v2.1 采购询价邮件化；统一工艺成本计算公式 | 产品需求 | Randy Luo |
+| 2026-02-05 | docs/DATABASE_DESIGN.md | v1.4 → **v1.5** | 新增 factories 表；新增 std_investment_costs 表（投资项标准库）；projects 表新增 factory_id 字段；quote_summaries 表新增 version_number 字段；business_case_params 新增 logistics_rate 和 other_mfg_rate | 数据库设计 | Randy Luo |
+| 2026-02-05 | CLAUDE.md | v1.3 → **v1.4** | 新增多版本报价 API 端点；新增投资标准库 API 端点；新增工厂管理 API 端点；PricePair 模型新增 savings_rate 字段；新增采购询价邮件化 API `/procurement/import-quote` | API 契约 | Randy Luo |
+| 2026-02-05 | docs/PROCESS_COST_LOGIC.md | v1.2 → **v1.3** | 同步 v2.0 流程变更；MHR 费率拆分为 var/fix | 业务逻辑 | Randy Luo |
+| 2026-02-05 | docs/BUSINESS_CASE_LOGIC.md | - | 统一 SK 计算公式，添加物流包装费和其他制造费用；统一摊销模式枚举值（移除 FIXED_5_YEARS） | 业务逻辑 | Randy Luo |
+| 2026-02-05 | docs/GLOSSARY.md | v1.1 → **v1.2** | 更新 MHR 定义：拆分为变动费率(var)和固定费率(fix)；新增摊销模式术语 | 术语表 | Randy Luo |
 | 2026-02-03 | docs/DATABASE_DESIGN.md | v1.2 → **v1.3** | 🔴 **破坏性变更**：新增5张表（cost_centers, investment_items, amortization_strategies, business_case_params, business_case_years）；process_rates 表 MHR 拆分为 var/fix；扩展 quote_summaries、product_processes 表字段 | 数据库设计 | Randy Luo |
 | 2026-02-03 | 全部文档 | - | 统一产品名称为 Dr.aiVOSS 智能快速报价助手 (Quoting-Copilot) | 全部 | Randy Luo |
 | 2026-02-03 | PROJECT_CONTEXT.md | v2.0 → v2.2 | 修复前端技术栈描述：Next.js → Vite + React；更新产品名称 | 前端开发 | Randy Luo |
