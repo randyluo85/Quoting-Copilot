@@ -347,21 +347,20 @@ interface Process {
 
 ## 🚨 Coding Rules (重要原则)
 
-1. **双轨计算原则:** 任何涉及金额计算的逻辑，必须同时返回 Standard 和 VAVE 两个数值。严禁只返回单一价格。
+1. **AI 特征提取:** 解析 Excel 时，重点关注 Comments (Col 13)。提取格式统一为 JSON 字典。
 
-2. **AI 特征提取:** 解析 Excel 时，重点关注 Comments (Col 13)。提取格式统一为 JSON 字典。
-
-3. **状态标记逻辑:**
+2. **状态标记逻辑:**
    - 如果 `item_code` 在库中完全匹配且有效期内 → **Green**
    - 如果使用 AI 语义匹配或 AI 估算参数 → **Yellow**
    - 如果库中无数据 → **Red**
 
-4. **Value Highlight:** 前端展示时，如果 `savings` (Gap) 超过 Std Cost 的 20%，必须高亮显示。
-
-5. **不确定的逻辑:** 如果遇到 PRD 未定义的逻辑，优先询问用户，不要自行假设。
+3. **不确定的逻辑:** 如果遇到 PRD 未定义的逻辑，优先询问用户，不要自行假设。
 
 ## 🧪 Testing Focus
 
-测试重点在于 **BOM 解析的准确性** 和 **双轨公式计算的一致性**。
+测试重点在于 **BOM 解析的准确性** 和 **标准成本计算的一致性**。
 
-必须编写 Unit Test 来验证 Standard Cost 和 VAVE Cost 的计算结果差异。
+必须编写 Unit Test 来验证以下计算结果：
+- 物料成本计算：`SUM(std_price × quantity)`
+- 工艺成本计算：`SUM((cycle_time / 3600) × (mhr_var + mhr_fix + personnel × labor_rate))`
+- Payback 回收期计算：`项目总投资 / 项目月度净利`
