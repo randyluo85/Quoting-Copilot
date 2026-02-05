@@ -417,7 +417,35 @@ vave_cost = (cycle_time_vave / 3600) × (vave_mhr_var + vave_mhr_fix + personnel
 
 ---
 
-### 3.4 NRE 投资相关表 {#nre-tables}
+### 3.4 投资标准库表 {#investment-standards}
+
+#### std_investment_costs（投资项标准库）🔴 v1.5 新增
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | CHAR(36) | PK | UUID |
+| item_type | VARCHAR(20) | NOT NULL | MOLD/GAUGE/JIG/FIXTURE |
+| material_type | VARCHAR(100) | | 模具材质 |
+| tonnage | DECIMAL(8,2) | | 吨位 |
+| complexity | VARCHAR(20) | | 复杂度：LOW/MEDIUM/HIGH |
+| std_cost_min | DECIMAL(12,2) | | 标准成本下限 |
+| std_cost_max | DECIMAL(12,2) | | 标准成本上限 |
+| currency | VARCHAR(10) | DEFAULT 'CNY' | 币种 |
+| status | VARCHAR(20) | DEFAULT 'ACTIVE' | ACTIVE/INACTIVE |
+| effective_date | DATETIME | | 生效日期 |
+| expiry_date | DATETIME | | 失效日期 |
+| remarks | TEXT | | 备注 |
+| created_at | DATETIME | DEFAULT NOW() | |
+| updated_at | DATETIME | ON UPDATE NOW() | |
+
+**用途说明：**
+- 用于校验投资成本的合理性
+- 根据类型、材质、吨位、复杂度查询标准成本范围
+- 当投资项超出标准范围 ±20% 时发出预警
+
+---
+
+### 3.5 NRE 投资相关表 {#nre-tables}
 
 #### investment_items（投资项明细）🔴 新增
 
