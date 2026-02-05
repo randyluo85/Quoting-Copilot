@@ -56,7 +56,7 @@ $$H_{effective} = Net\ production\ hours \times Efficiency\%$$
 
 ### 2.2 MHR (机时费率) 拆解逻辑
 
-MHR 被拆分为变动与固定两个维度，以支持 VAVE 的敏感度分析。
+MHR 被拆分为变动与固定两个维度。
 
 #### 机器变动费率 (MHR Variable)
 
@@ -84,7 +84,7 @@ $$Rate_{labor} = Average\ Wages\ per\ Hour \times Personnel\ per\ machine$$
 
 对于报价单中的每一行工艺，成本计算如下：
 
-$$Cost_{process} = (MHR_{var} + MHR_{fix} + Rate_{labor}) \times \frac{Cycle\ Time}{3600}$$
+$$Cost_{std} = (std\_mhr\_var + std\_mhr\_fix + Rate_{labor}) \times \frac{Cycle\ Time}{3600}$$
 
 > **注意：** Cycle Time 以秒为单位，需除以 3600 转换为小时
 
