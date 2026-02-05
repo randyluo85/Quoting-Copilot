@@ -400,8 +400,7 @@ flowchart TB
     %% 工艺分支（右侧）
     PBranch -->|已存在| PAuto[自动获取费率]
     PBranch -->|新工艺| PIE[IE 维护路线]
-    PIE --> PPE[PE 评估可行性]
-    PPE --> PControl[Controlling 创建 MHR 标准]
+    PIE --> PControl[Controlling 创建 MHR 标准]
     PControl --> PAuto
 
     %% 汇合计算
