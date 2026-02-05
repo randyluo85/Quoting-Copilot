@@ -39,11 +39,13 @@
 |------|------|---------|
 | `materials` | 物料主数据 | [DATABASE_DESIGN.md §3.1](docs/DATABASE_DESIGN.md#master-data) |
 | `process_rates` | 工序费率 | [DATABASE_DESIGN.md §3.1](docs/DATABASE_DESIGN.md#master-data) |
+| `factories` | 工厂主数据 | [DATABASE_DESIGN.md §3.3](docs/DATABASE_DESIGN.md#master-data-extension) 🔴 v1.5 |
+| `std_investment_costs` | 投资项标准库 | [DATABASE_DESIGN.md §3.4](docs/DATABASE_DESIGN.md#investment-standards) 🔴 v1.5 |
 | `projects` | 项目表 | [DATABASE_DESIGN.md §3.2](docs/DATABASE_DESIGN.md#transaction-data) |
 | `project_products` | 项目-产品 | [DATABASE_DESIGN.md §3.2](docs/DATABASE_DESIGN.md#transaction-data) |
 | `product_materials` | BOM 行 | [DATABASE_DESIGN.md §3.2](docs/DATABASE_DESIGN.md#transaction-data) |
 | `product_processes` | 工艺路线 | [DATABASE_DESIGN.md §3.2](docs/DATABASE_DESIGN.md#transaction-data) |
-| `quote_summaries` | 报价汇总 | [DATABASE_DESIGN.md §3.2](docs/DATABASE_DESIGN.md#transaction-data) |
+| `quote_summaries` | 报价汇总（多版本） | [DATABASE_DESIGN.md §3.2](docs/DATABASE_DESIGN.md#transaction-data) |
 
 > 完整设计文档：[docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md)
 
