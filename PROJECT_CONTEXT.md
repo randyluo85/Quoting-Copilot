@@ -100,17 +100,12 @@ calculated → sales_input → completed
 
 ## 3. 🧠 核心业务逻辑 (Business Logic)
 
-### 3.1 双轨计算公式 (The Golden Formula)
+### 3.1 成本计算公式 (The Cost Calculation Formula)
 
-后端计算服务必须严格执行以下两套公式并行计算：
+后端计算服务必须严格执行以下公式：
 
-**Standard Cost (当前):**
+**Standard Cost (标准成本):**
 $$ Cost_{std} = (Qty \times MaterialPrice_{std}) + \sum (CycleTime \times (MHR_{std} + Labor_{std})) $$
-
-**VAVE Cost (目标):**
-$$ Cost_{vave} = (Qty \times MaterialPrice_{vave}) + \sum (CycleTime_{opt} \times (MHR_{vave} + Labor_{vave})) $$
-
-> **注:** `CycleTime_opt` 由 AI 基于最佳实践推荐，或默认为 `CycleTime * 0.9`。
 
 ### 3.2 红绿灯置信度逻辑 (Traffic Light Logic)
 
