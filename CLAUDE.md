@@ -151,9 +151,8 @@ interface Material {
   material: string;           // 材质类型
   supplier: string;
   quantity: number;
-  unitPrice?: number;         // 标准单价
-  vavePrice?: number;         // VAVE 单价
-  hasHistoryData: boolean;    // 是否有历史数据
+  unitPrice?: number;         // 单价
+  hasHistoryData: boolean;
   comments: string;
 }
 
@@ -164,7 +163,6 @@ interface Process {
   workCenter: string;         // 工作中心
   standardTime: number;       // 标准工时
   unitPrice?: number;
-  vavePrice?: number;
   hasHistoryData: boolean;
 }
 ```
