@@ -540,6 +540,7 @@ CREATE INDEX idx_projects_status ON projects(status);
 CREATE INDEX idx_projects_customer ON projects(customer_code);
 CREATE INDEX idx_projects_code ON projects(project_code);
 CREATE INDEX idx_projects_created ON projects(created_at DESC);
+CREATE INDEX idx_projects_factory ON projects(factory_id); -- 🔴 v1.5 新增
 
 -- project_products
 CREATE INDEX idx_pp_project ON project_products(project_id);
@@ -558,9 +559,18 @@ CREATE INDEX idx_pproc_sequence ON product_processes(project_product_id, sequenc
 
 -- quote_summaries
 CREATE INDEX idx_qs_project ON quote_summaries(project_id);
+CREATE UNIQUE INDEX idx_qs_project_version ON quote_summaries(project_id, version_number); -- 🔴 v1.5 更新
+
+-- factories (v1.5 新增)
+CREATE INDEX idx_factories_status ON factories(status);
 
 -- cost_centers (新增)
 CREATE INDEX idx_cc_status ON cost_centers(status);
+CREATE INDEX idx_cc_factory ON cost_centers(factory_id); -- 🔴 v1.5 新增
+
+-- std_investment_costs (v1.5 新增)
+CREATE INDEX idx_std_inv_type ON std_investment_costs(item_type);
+CREATE INDEX idx_std_inv_status ON std_investment_costs(status);
 
 -- investment_items (新增)
 CREATE INDEX idx_inv_project ON investment_items(project_id);
