@@ -337,7 +337,6 @@ calculated → sales_input → completed
 **扩展成本计算公式:**
 ```
 std_cost = (cycle_time_std / 3600) × (std_mhr_var + std_mhr_fix + personnel_std × labor_rate)
-vave_cost = (cycle_time_vave / 3600) × (vave_mhr_var + vave_mhr_fix + personnel_vave × labor_rate)
 ```
 
 #### quote_summaries（报价汇总）
