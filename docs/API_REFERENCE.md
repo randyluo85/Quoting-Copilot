@@ -180,9 +180,6 @@
         "name": "重力铸造",
         "work_center": "铸造车间",
         "cycle_time_std": 45,
-        "cycle_time_vave": 40,
-        "std_mhr": 65.00,
-        "vave_mhr": 58.00,
         "has_history_data": true,
         "status": "verified"
       }
