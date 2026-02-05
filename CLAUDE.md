@@ -64,11 +64,8 @@ Backend 必须使用以下模型作为 API 契约:
 
 ```python
 class PricePair(BaseModel):
-    """双轨价格封装"""
+    """价格封装"""
     std: Decimal
-    vave: Decimal
-    savings: Decimal  # calculated as: std - vave
-    savings_rate: float  # calculated as: savings / std
 
 class BOMLineItem(BaseModel):
     line_index: int
@@ -76,7 +73,7 @@ class BOMLineItem(BaseModel):
     part_name: str
     comments_extracted: dict  # e.g., {"process": "bending", "count": 32}
 
-    # 核心：双轨总成本
+    # 核心：总成本
     total_cost: PricePair
 
     # 状态红绿灯
