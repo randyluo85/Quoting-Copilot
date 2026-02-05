@@ -260,7 +260,7 @@ class ProcessCostValidation(BaseModel):
 
 ---
 
-## 7. 计算流程图
+## 6. 计算流程图
 
 ```mermaid
 flowchart TD
