@@ -112,7 +112,6 @@ erDiagram
         int material_level
         decimal quantity
         decimal std_cost
-        decimal vave_cost
     }
 
     process_rates {
