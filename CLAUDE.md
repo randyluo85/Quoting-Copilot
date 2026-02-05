@@ -67,6 +67,7 @@ class PricePair(BaseModel):
     std: Decimal
     vave: Decimal
     savings: Decimal  # calculated as: std - vave
+    savings_rate: float  # calculated as: savings / std
 
 class BOMLineItem(BaseModel):
     line_index: int
