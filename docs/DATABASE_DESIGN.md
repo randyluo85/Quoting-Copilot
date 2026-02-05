@@ -281,6 +281,7 @@ erDiagram
 | project_code | VARCHAR(50) | | AS/AC 编号 |
 | customer_name | VARCHAR(200) | NOT NULL | 客户名称 |
 | customer_code | VARCHAR(50) | | 客户编号 |
+| **factory_id** | **VARCHAR(20)** | **FK** | **🔴 v1.5 新增：所属工厂** |
 | annual_volume | INT | | 年量 |
 | status | VARCHAR(20) | NOT NULL | 状态值 |
 | owner | VARCHAR(50) | | 负责人 |
@@ -289,11 +290,16 @@ erDiagram
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
 
-**状态值流转:**
+**状态值流转 v2.0:**
 ```
 draft → parsing → (waiting_price | waiting_ie) → (waiting_mhr) →
-calculated → sales_review → controlling_review → approved
+calculated → sales_input → completed
 ```
+
+**v1.5 变更说明：**
+- 移除 `controlling_review` 状态
+- 新增 `sales_input` 状态（Sales 输入商业参数）
+- 新增 `factory_id` 字段关联工厂
 
 #### project_products（项目-产品关联）
 
