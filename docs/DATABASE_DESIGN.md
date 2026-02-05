@@ -364,6 +364,7 @@ vave_cost = (cycle_time_vave / 3600) × (vave_mhr_var + vave_mhr_fix + personnel
 |------|------|------|------|
 | id | CHAR(36) | PK | UUID |
 | project_id | CHAR(36) | FK, NOT NULL | 关联项目 |
+| **version_number** | **DECIMAL(3,1)** | **DEFAULT 1.0** | **🔴 v1.5 新增：版本号** |
 | total_std_cost | DECIMAL(14,4) | | 总标准成本 |
 | total_vave_cost | DECIMAL(14,4) | | 总 VAVE 成本 |
 | total_savings | DECIMAL(14,4) | | 节省金额 |
@@ -376,6 +377,11 @@ vave_cost = (cycle_time_vave / 3600) × (vave_mhr_var + vave_mhr_fix + personnel
 | **db_4** | DECIMAL(14,4) | | **🔴 新增：DB IV 净利润** |
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
+
+**v1.5 变更说明：**
+- 新增 `version_number` 字段支持多版本报价
+- 更新 UNIQUE 约束为 `(project_id, version_number)`
+- 一个项目可以有多条报价记录（v1.0, v1.1, v1.2...）
 
 ---
 
