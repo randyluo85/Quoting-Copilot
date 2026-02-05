@@ -261,7 +261,7 @@
 | **Specific（具体功能）** | 创建报价项目，支持跨部门审批流转，状态机管理 |
 | **Performance（性能指标）** | • 项目创建：< 3 秒<br/>• 状态流转实时通知：< 1 分钟内<br/>• 支持并发项目数：> 100 |
 | **Executable（验收标准）** | • 必填字段校验（项目名、客户、年量）<br/>• 状态流转不可逆（除"返回修改"）<br/>• 每次状态变更记录操作日志<br/>• 支持项目暂存草稿 |
-| **Complete（完整定义）** | **状态流转**：draft → parsed → calculating → sales_review → controlling_review → completed<br/>**角色权限**：Sales（发起/编辑）、Controlling（审核/批准）<br/>**通知机制**：邮件 + 站内消息 |
+| **Complete（完整定义）** | **状态流转 v2.0**：draft → parsing → (waiting_price | waiting_ie) → waiting_mhr → calculated → sales_input → completed<br/>**角色权限**：Sales（发起/输入商业参数）、VM（成本计算）、Controlling（创建/维护 MHR 标准）<br/>**通知机制**：邮件 + 站内消息 |
 
 ---
 
