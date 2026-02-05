@@ -70,7 +70,6 @@ export function generateTestProject() {
       sales: 'E2E销售',
       vm: 'E2E项目经理',
       ie: 'E2E工艺',
-      pe: 'E2E产品',
       controlling: 'E2E财务',
     },
   };
