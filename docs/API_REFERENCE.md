@@ -254,22 +254,18 @@
   "data": {
     "project_id": "PRJ-2024-001",
     "quote_summary": {
-      "total_std_cost": 474950.00,
-      "total_vave_cost": 441050.00,
+      "total_cost": 474950.00,
       "quoted_price": 550000.00,
       "target_margin": 15.0,
-      "actual_margin": 13.65,
-      "payback_months": null
+      "actual_margin": 13.65
     },
     "breakdown": {
       "material_cost": {
-        "std": 210950.00,
-        "vave": 198250.00,
+        "amount": 210950.00,
         "percentage": 44.4
       },
       "process_cost": {
-        "std": 264000.00,
-        "vave": 242800.00,
+        "amount": 264000.00,
         "percentage": 55.6
       }
     },
