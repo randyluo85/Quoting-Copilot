@@ -455,9 +455,49 @@ std_cost = (cycle_time_std / 3600) × (mhr_snapshot + personnel_std × labor_rat
 | **rent_unit_price** | **DECIMAL(10,4)** | | **🔴 v1.8 新增：租金单价（元/㎡/年）** |
 | **energy_unit_price** | **DECIMAL(8,4)** | | **🔴 v1.8 新增：能源单价（元/kWh）** |
 | **interest_rate** | **DECIMAL(5,4)** | | **🔴 v1.8 新增：年利率** |
+| status | VARCHAR(20) | DEFAULT 'TEMPORARY' | **🆕 v1.9 更新：TEMPORARY/ACTIVE/INACTIVE |
+| created_at | DATETIME | DEFAULT NOW() | |
+| updated_at | DATETIME | ON UPDATE NOW() | |
+
+> **status 字段说明（v1.9 更新）：**
+> - `TEMPORARY`：临时工作中心，MHR 已计算但设备未投产
+> - `ACTIVE`：正式工作中心，已实际投产
+> - `INACTIVE`：停用，设备已退役
+
+#### work_center_time_rules（工作中心工时规则）🆕 v1.9
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | INT | PK, AUTO_INCREMENT | |
+| cost_center_id | VARCHAR(20) | FK, NOT NULL | 关联成本中心 |
+| calc_method | VARCHAR(20) | NOT NULL | 计算方法：LENGTH/COUNT/TIME |
+| input_variable | VARCHAR(50) | NOT NULL | 输入变量名（如"管子长度"、"压桩点数"） |
+| range_min | DECIMAL(10,2) | | 范围下限 |
+| range_max | DECIMAL(10,2) | | 范围上限（NULL 表示无上限） |
+| std_time_seconds | DECIMAL(10,2) | NOT NULL | 标准工时（秒） |
+| unit | VARCHAR(20) | | 单位（如"秒/根"、"秒/点"） |
 | status | VARCHAR(20) | DEFAULT 'ACTIVE' | ACTIVE/INACTIVE |
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
+
+**外键关系：**
+```sql
+FOREIGN KEY (cost_center_id) REFERENCES cost_centers(id) ON DELETE CASCADE
+```
+
+**用途说明：**
+- 存储每个工作中心的工时计算规则
+- 支持 3 种计算方法：长度法(LENGTH)、点数法(COUNT)、时间法(TIME)
+- 根据输入变量值匹配范围，返回标准工时
+
+**示例数据：**
+| cost_center_id | calc_method | input_variable | range_min | range_max | std_time_seconds | unit |
+|----------------|-------------|----------------|-----------|-----------|------------------|------|
+| M01 | COUNT | 管子类型 | - | - | 8 | 秒/根 |
+| A01 | COUNT | 管径 | 0 | 25 | 12 | 秒/点 |
+| A01 | COUNT | 管径 | 25 | NULL | 15 | 秒/点 |
+| M02 | TIME | 管子长度 | 0 | 1000 | 2.7 | 秒 |
+| M02 | TIME | 管子长度 | 1000 | 2000 | 5.0 | 秒 |
 
 ---
 
