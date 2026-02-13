@@ -108,6 +108,9 @@ erDiagram
         decimal plan_fx_rate
         decimal avg_wages_per_hour
         int useful_life_years
+        decimal rent_unit_price "租金单价 v1.8"
+        decimal energy_unit_price "能源单价 v1.8"
+        decimal interest_rate "年利率 v1.8"
         string status
     }
 
