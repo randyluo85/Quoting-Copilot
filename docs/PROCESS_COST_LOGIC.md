@@ -273,9 +273,9 @@ $$Cost_{std} = (MHR_{total} + Rate_{labor}) \times \frac{Cycle\ Time}{3600}$$
 
 ---
 
-## 4. 数据库设计规范 (Schema)
+## 7. 数据库设计规范 (Schema)
 
-### 表 1: `cost_centers` (成本中心主数据)
+### 7.1 cost_centers (成本中心主数据)
 
 | 字段名 | 类型 | 说明 | 示例值 |
 |--------|------|------|--------|
@@ -290,10 +290,15 @@ $$Cost_{std} = (MHR_{total} + Rate_{labor}) \times \frac{Cycle\ Time}{3600}$$
 | `rent_unit_price` | DECIMAL(10,4) | **🆕 租金单价（元/㎡/年）** | 1200.00 |
 | `energy_unit_price` | DECIMAL(8,4) | **🆕 能源单价（元/kWh）** | 0.85 |
 | `interest_rate` | DECIMAL(5,4) | **🆕 利率（年）** | 0.0600 |
-| `status` | VARCHAR(20) | ACTIVE / INACTIVE | ACTIVE |
+| `status` | VARCHAR(20) | **🆕 TEMPORARY / ACTIVE / INACTIVE** | ACTIVE |
 | `created_at` | DATETIME | 创建时间 | DEFAULT NOW() |
 
-### 表 2: `process_rates` (工序费率主数据) - 扩展
+> **status 字段说明**：
+> - `TEMPORARY`：临时工作中心，MHR 已计算但设备未投产
+> - `ACTIVE`：正式工作中心，已实际投产
+> - `INACTIVE`：停用，设备已退役
+
+### 7.2 process_rates (工序费率主数据) - 扩展
 
 | 字段名 | 类型 | 说明 | 示例值 |
 |--------|------|------|--------|
@@ -314,7 +319,7 @@ $$Cost_{std} = (MHR_{total} + Rate_{labor}) \times \frac{Cycle\ Time}{3600}$$
 | `status` | VARCHAR(20) | ACTIVE / INACTIVE | ACTIVE |
 | `created_at` | DATETIME | 创建时间 | DEFAULT NOW() |
 
-### 表 3: `product_processes` (产品工艺路线) - 扩展
+### 7.3 product_processes (产品工艺路线) - 扩展
 
 | 字段名 | 类型 | 说明 | 示例值 |
 |--------|------|------|--------|
@@ -323,12 +328,35 @@ $$Cost_{std} = (MHR_{total} + Rate_{labor}) \times \frac{Cycle\ Time}{3600}$$
 | `process_code` | VARCHAR(50) | FK, 工序编号 | I01 |
 | `sequence_order` | INT | 工序顺序 | 10 |
 | `cycle_time_std` | INT | 标准工时（秒） | 45 |
+| **`cycle_time_source`** | **VARCHAR(10)** | **🆕 工时来源：auto / manual** | auto |
+| **`cycle_time_adjustment_reason`** | **TEXT** | **🆕 手动调整原因（manual 时必填）** | - |
 | `personnel_std` | DECIMAL(4,2) | 标准人工配置 | 1.0 |
 | `labor_rate` | DECIMAL(10,2) | **🆕 人工费率快照** | 85.50 |
 | `mhr_snapshot` | DECIMAL(10,2) | **🆕 MHR 快照** | 156.40 |
 | `std_cost` | DECIMAL(12,4) | 标准成本 | 3.0125 |
 | `remarks` | TEXT | 备注 | - |
 | `created_at` | DATETIME | 创建时间 | DEFAULT NOW() |
+
+### 7.4 work_center_time_rules (工作中心工时规则) 🆕
+
+| 字段名 | 类型 | 说明 | 示例值 |
+|--------|------|------|--------|
+| `id` | INT | PK, AUTO_INCREMENT | - |
+| `cost_center_id` | VARCHAR(20) | FK, 关联成本中心 | M01 |
+| `calc_method` | VARCHAR(20) | 计算方法：LENGTH / COUNT / TIME | COUNT |
+| `input_variable` | VARCHAR(50) | 输入变量名 | 管径 |
+| `range_min` | DECIMAL(10,2) | 范围下限 | 0 |
+| `range_max` | DECIMAL(10,2) | 范围上限（NULL 表示无上限） | 25 |
+| `std_time_seconds` | DECIMAL(10,2) | 标准工时（秒） | 12 |
+| `unit` | VARCHAR(20) | 单位 | 秒/点 |
+| `status` | VARCHAR(20) | ACTIVE / INACTIVE | ACTIVE |
+| `created_at` | DATETIME | 创建时间 | DEFAULT NOW() |
+
+> **规则匹配逻辑**：
+> 1. 根据成本中心 ID 查询所有 ACTIVE 规则
+> 2. 根据 `calc_method` 确定输入变量类型
+> 3. 匹配 `range_min` 和 `range_max` 范围
+> 4. 返回对应的 `std_time_seconds`
 
 ---
 
