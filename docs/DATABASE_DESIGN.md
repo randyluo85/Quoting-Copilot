@@ -135,8 +135,15 @@ erDiagram
         varchar50 process_code UK "工序编码"
         varchar20 cost_center_id FK "成本中心"
         string process_name
+        varchar1 work_center "工作中心 v1.8"
+        decimal equipment_origin_value "设备原值 v1.8"
+        decimal floor_area "占用面积 v1.8"
+        decimal rated_power "额定功率 v1.8"
+        decimal planned_hours "计划小时数 v1.8"
+        decimal load_factor "负载系数 v1.8"
         decimal std_mhr_var "标准变动费率"
         decimal std_mhr_fix "标准固定费率"
+        decimal std_mhr_total "标准总费率 v1.8"
         decimal efficiency_factor
     }
 
