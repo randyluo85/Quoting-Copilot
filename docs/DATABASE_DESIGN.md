@@ -420,6 +420,9 @@ std_cost = (cycle_time_std / 3600) × (std_mhr_var + std_mhr_fix + personnel_std
 | plan_fx_rate | DECIMAL(10,6) | | 计划汇率 |
 | avg_wages_per_hour | DECIMAL(10,2) | | 平均时薪 |
 | useful_life_years | INT | DEFAULT 8 | 折旧年限 |
+| **rent_unit_price** | **DECIMAL(10,4)** | | **🔴 v1.8 新增：租金单价（元/㎡/年）** |
+| **energy_unit_price** | **DECIMAL(8,4)** | | **🔴 v1.8 新增：能源单价（元/kWh）** |
+| **interest_rate** | **DECIMAL(5,4)** | | **🔴 v1.8 新增：年利率** |
 | status | VARCHAR(20) | DEFAULT 'ACTIVE' | ACTIVE/INACTIVE |
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
