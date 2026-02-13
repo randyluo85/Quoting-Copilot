@@ -17,6 +17,7 @@
 | 2026-02-05 | v1.5 | 🔴 **破坏性变更**：projects 表新增 factory_id；quote_summaries 表新增 version_number；新增 factories 表；新增 std_investment_costs 表；business_case_params 新增 logistics_rate 和 other_mfg_rate | 多版本报价、工厂管理、系数维护 |
 | 2026-02-05 | v1.6 | 🔴 **破坏性变更**：移除所有 VAVE 相关字段，简化双轨价格为单轨标准成本 | 全部表 |
 | 2026-02-05 | v1.7 | 🔴 **新增功能**：新增向量数据表 material_vectors 和 product_vectors，支持语义匹配和产品复用 | 向量搜索 |
+| 2026-02-13 | v1.8 | 🔴 **破坏性变更**：cost_centers 新增租金单价/能源单价/利率字段；process_rates 新增工作中心/设备原值/占用面积/额定功率/计划小时数/负载系数/std_mhr_total 字段；product_processes 新增人工费率/MHR快照字段 | MHR 计算逻辑 |
 
 **变更规范：**
 - 任何字段新增/修改/删除必须记录在此
