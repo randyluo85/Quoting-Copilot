@@ -2,13 +2,14 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.4   | 2026-02-03 | 2026-02-05 | 工艺成本计算逻辑 | Randy Luo |
+| v2.0   | 2026-02-03 | 2026-02-13 | 工艺成本计算逻辑 | Randy Luo |
 
 ---
 
 **版本变更记录：**
 | 版本 | 日期 | 变更内容 |
 |------|------|----------|
+| v2.0 | 2026-02-13 | 🔴 **重大重构**：新增工序编码规则；重构参数分类为固定/变动成本；更新 MHR 计算公式；新增负载系数 |
 | v1.4 | 2026-02-05 | 移除双轨计价逻辑，仅保留 Standard Cost 计算；简化 MHR 费率模型 |
 | v1.3 | 2026-02-05 | 同步 v2.0 流程变更：移除 Controlling 审核；新增 sales_input 状态；MHR 费率拆分为 var/fix |
 | v1.2 | 2026-02-04 | 初始版本 |
@@ -17,74 +18,127 @@
 
 ## 1. 工艺评估核心录入参数
 
-根据业务场景，参数录入分为基础环境参数（由财务/Controlling 维护）和项目特定参数（由 IE/VM 维护）。
+根据业务场景，参数录入分为**固定成本参数**（由 Controlling 维护）和**变动成本参数**（由 IE/工艺输入）。
 
-### 1.1 基础环境与成本中心参数 (Master Data)
+### 1.1 固定成本参数（Controlling 维护）
 
 这些参数通常每年更新一次，作为全公司报价的底座。
 
-| 参数 | 说明 | 数据类型 |
-|------|------|----------|
-| **成本中心 (Cost Center)** | 标识工艺所属的生产单元 | VARCHAR |
-| **有效工作时间** | 年度额定生产小时数 | DECIMAL |
-| **稼动率 (Efficiency %)** | 考虑设备故障、换模等因素后的实际产出率 | DECIMAL |
-| **计划汇率 (Plan fx rate)** | 如 CNY 兑 EUR，用于跨国报价 | DECIMAL |
-| **平均时薪 (Avg Wages/Hour)** | 该成本中心操作员的综合时薪 | DECIMAL |
-| **折旧年限 (Useful life)** | 通常为 8 年 | INT |
+| 参数 | 说明 | 单位 | 变化频率 |
+|------|------|------|---------|
+| **租金单价** | 厂房租金成本 | 元/㎡/年 | 年度更新 |
+| **能源单价** | 电力单价 | 元/kWh | 年度更新 |
+| **折旧年限** | 设备折旧年限 | 年 | 因成本中心不同有差异 |
+| **利率** | 年利率 | % | 年度更新 |
+| **小时工资** | 操作员时薪 | 元/小时 | 每个成本中心每年变化 |
 
-### 1.2 项目特定参数 (Project Specific)
+### 1.2 变动成本参数（IE/工艺输入）
 
-由 IE 或 VM 针对具体零件的工艺路径进行录入。
+由 IE 或 VM 针对具体设备/工艺进行录入，**在新增工艺时触发 MHR 计算**。
 
-| 参数 | 说明 | 数据类型 |
-|------|------|----------|
-| **设备/工装投资 (Investment)** | 针对该零件新增的设备、模具或检具投入 | DECIMAL |
-| **工位数 (Workstation nr.)** | 该工艺涉及的工位编号 | VARCHAR |
-| **每机台人数 (Personnel/machine)** | 操作该设备所需的人力配置 | DECIMAL |
-| **节拍工时 (Cycle Time)** | 完成单件产品所需的生产时长（秒） | DECIMAL |
-| **能源需求 (Energy/hour)** | 机器每小时运行的电/气等能耗量（kWh） | DECIMAL |
+| 参数 | 说明 | 单位 |
+|------|------|------|
+| **设备购置原值** | 设备采购价格 | 元 |
+| **占用面积** | 设备占地面积 | ㎡ |
+| **额定功率** | 设备额定功率 | kW |
+| **计划小时数** | 年度计划运行时间 | 小时 |
+| **负载系数** | 实际功率与额定功率比率 | 0-1（默认 0.7） |
+
+**计划小时数计算：**
+```
+计划小时数 = 天数 × 班次小时 × 稼动率
+```
+
+**负载系数使用规则：**
+| 场景 | 负载系数 | 说明 |
+|------|---------|------|
+| 默认值 | 0.7 | 针对成熟工序如注塑机 |
+| 低负载 | 0.5-0.6 | 保压、冷却占比较长的工序 |
+| 高负载 | 0.8-1.0 | 全速冲压、持续加热的高能耗工序 |
+
+> **注意：** 在"新增工艺"或"高精度报价"时，IE 可以调整负载系数。
+
+### 1.3 工序编码规则 🆕
+
+#### 工序编号格式
+
+- **格式**：`字母 + 两位数字`
+- **字母**：代表工作中心
+- **数字**：该工作中心下的工序序号（01-99）
+
+**示例**：`I01` = 注塑工作中心的第1个工序
+
+#### 工作中心字母映射表
+
+| 字母 | 英文全称 | 中文 | 说明 |
+|------|---------|------|------|
+| **I** | Injection | 注塑 | VOSS 核心工序，通常关联注塑机 |
+| **A** | Assembly | 装配 | 包含手动、半自动、全自动装配线 |
+| **M** | Machining | 机加 | 涉及切管、倒角、打孔等 |
+| **T** | Testing | 检测 | 气密性检查、水检、视觉检测 |
+| **P** | Packing | 包装 | 称重、贴标、入库前处理 |
+| **S** | Surface | 表处 | 涂层、清洗、丝印 |
+
+#### 工艺路线编码规则
+
+- **格式**：`产线名称 + 工序1编号 + 工序2编号 + ...`
+- **示例**：`LINE-I01A02M03` = 产线 LINE，经过注塑 I01 → 装配 A02 → 机加 M03
 
 ---
 
 ## 2. 工艺评估计算逻辑 (Calculation Logic)
 
-系统采用级联计算模式，自动处理从单机费率到总工艺成本的转化。
+### 2.1 工艺成本快速计算流程
 
-### 2.1 年度有效产能计算
+```
+AI 解析 BOM/工艺路径
+       ↓
+识别工序编号（如"I01"、"M02"）
+       ↓
+自动关联该设备的 MHR
+       ↓
+乘以工艺定额（人工 + 节拍）
+       ↓
+得出设备部分工艺成本
+```
 
-$$H_{effective} = Net\ production\ hours \times Efficiency\%$$
+### 2.2 MHR (机时费率) 计算公式 🆕
 
-### 2.2 MHR (机时费率) 拆解逻辑
+**触发时机**：新增工艺/设备时
 
-MHR 被拆分为变动与固定两个维度。
+#### 固定成本/小时
 
-#### 机器变动费率 (MHR Variable)
+```
+租金成本 = 租金单价 × 占用面积 / 计划小时数
+折旧成本 = 设备购置原值 / 折旧年限 / 计划小时数
+利息成本 = [（购置原值 / 2）× 利率] / 计划小时数
+```
 
-包含：能源、维修、刀具、操作辅料
+#### 变动成本/小时
 
-$$MHR_{var} = \frac{\sum (能源成本 + 维保成本 + 刀具成本)}{H_{effective}}$$
+```
+能源成本 = 能源单价 × 额定功率 × 负载系数
+```
 
-#### 机器固定费率 (MHR Fixed)
+#### MHR 费率汇总
 
-包含：折旧、利息、厂房租金、保险费
+```
+MHR_fix = 租金成本 + 折旧成本 + 利息成本
+MHR_var = 能源成本
+MHR_total = MHR_fix + MHR_var
+```
 
-$$MHR_{fix} = \frac{\sum (折旧 + 租金 + 管理分摊)}{H_{effective}}$$
+### 2.3 人工成本（单独计算）
 
-> **⚠️ v1.4 重要更新：折旧数据单独存储**
-> - 从 v1.4 开始，折旧率字段 `depreciation_rate` 从 MHR_fix 中单独剥离
-> - MHR_fix 仍包含折旧作为其组成部分之一
-> - `depreciation_rate` 字段独立存储，用于 Payback 现金流计算（现金流 = 净利 + 折旧）
-> - 可通过 `fix_excluding_depreciation` 属性获取不含折旧的固定费率
+```
+人工成本/小时 = 小时工资 × 人数
+```
 
-#### 人工费率 (Labor Rate)
-
-$$Rate_{labor} = Average\ Wages\ per\ Hour \times Personnel\ per\ machine$$
-
-### 2.3 单工序工艺成本汇总
+### 2.4 单工序工艺成本汇总
 
 对于报价单中的每一行工艺，成本计算如下：
 
-$$Cost_{std} = (std\_mhr\_var + std\_mhr\_fix + Rate_{labor}) \times \frac{Cycle\ Time}{3600}$$
+$$Cost_{std} = (MHR_{total} + Rate_{labor}) \times \frac{Cycle\ Time}{3600}$$
 
 > **注意：** Cycle Time 以秒为单位，需除以 3600 转换为小时
 
@@ -98,22 +152,22 @@ $$Cost_{std} = (std\_mhr\_var + std\_mhr\_fix + Rate_{labor}) \times \frac{Cycle
 
 | 条件 | 触发动作 |
 |------|---------|
-| Net production hours = 0 | 禁止计算，弹出 `#DIV/0!` 预警 |
-| Efficiency % = 0 | 禁止计算，提示"稼动率不能为0" |
+| 计划小时数 = 0 | 禁止计算，提示"计划小时数不能为0" |
+| 折旧年限 = 0 | 禁止计算，提示"折旧年限不能为0" |
 
 ### 3.2 阈值拦截 (Threshold Validation)
 
 | 条件 | 触发动作 |
 |------|---------|
 | $MHR_{total}$ 偏离同类成本中心均值 $\pm 15\%$ | 自动标记为"需重点审核" |
-| 产能利用率超过 110% | 提示"需增加投资成本（如新扩产线）" |
+| 负载系数 < 0.5 或 > 1.0 | 弹出警告确认 |
 
 ### 3.3 同步性检查 (Data Consistency)
 
 | 条件 | 触发动作 |
 |------|---------|
-| 检测到新设备投资（Investment）但无对应 MHR 输入 | 不允许进入 Sales 审核环节 |
-| Investment > 0 但未填写折旧年限 | 弹出警告并阻止保存 |
+| 设备购置原值 > 0 但未填写占用面积 | 弹出警告 |
+| 新增工艺但未触发 MHR 计算 | 不允许进入 Sales 审核环节 |
 
 ---
 
@@ -124,12 +178,16 @@ $$Cost_{std} = (std\_mhr\_var + std\_mhr\_fix + Rate_{labor}) \times \frac{Cycle
 | 字段名 | 类型 | 说明 | 示例值 |
 |--------|------|------|--------|
 | `id` | VARCHAR(20) | PK, 成本中心代码 | CC001 |
+| `factory_id` | VARCHAR(20) | FK, 所属工厂 | F001 |
 | `name` | VARCHAR(100) | 成本中心名称 | 注塑车间A线 |
 | `net_production_hours` | DECIMAL(8,2) | 年度额定生产小时数 | 4800.00 |
 | `efficiency_rate` | DECIMAL(5,4) | 稼动率 (0-1) | 0.8000 |
 | `plan_fx_rate` | DECIMAL(10,6) | 计划汇率 | 7.830000 |
-| `avg_wages_per_hour` | DECIMAL(10,2) | 平均时薪 | 85.50 |
-| `useful_life_years` | INT | 折旧年限 | 8 |
+| `avg_wages_per_hour` | DECIMAL(10,2) | **小时工资** | 85.50 |
+| `useful_life_years` | INT | **折旧年限** | 8 |
+| `rent_unit_price` | DECIMAL(10,4) | **🆕 租金单价（元/㎡/年）** | 1200.00 |
+| `energy_unit_price` | DECIMAL(8,4) | **🆕 能源单价（元/kWh）** | 0.85 |
+| `interest_rate` | DECIMAL(5,4) | **🆕 利率（年）** | 0.0600 |
 | `status` | VARCHAR(20) | ACTIVE / INACTIVE | ACTIVE |
 | `created_at` | DATETIME | 创建时间 | DEFAULT NOW() |
 
@@ -138,19 +196,21 @@ $$Cost_{std} = (std\_mhr\_var + std\_mhr\_fix + Rate_{labor}) \times \frac{Cycle
 | 字段名 | 类型 | 说明 | 示例值 |
 |--------|------|------|--------|
 | `id` | INT | PK, AUTO_INCREMENT | - |
-| `process_code` | VARCHAR(50) | UNIQUE, 工序编码 | INJECTION_001 |
+| `process_code` | VARCHAR(50) | UNIQUE, **工序编号**（字母+数字） | I01 |
 | `cost_center_id` | VARCHAR(20) | FK, 关联成本中心 | CC001 |
 | `process_name` | VARCHAR(100) | 工序名称 | 注塑成型 |
-| `std_mhr_var` | DECIMAL(10,2) | 标准变动费率 | 45.00 |
-| `std_mhr_fix` | DECIMAL(10,2) | 标准固定费率 | 30.00 |
-| `std_depreciation_rate` | DECIMAL(8,4) | **🔴 v1.4 新增：标准折旧率** | 8.50 |
+| `work_center` | VARCHAR(1) | **🆕 工作中心字母** | I |
+| `equipment_origin_value` | DECIMAL(14,2) | **🆕 设备购置原值** | 1500000.00 |
+| `floor_area` | DECIMAL(8,2) | **🆕 占用面积（㎡）** | 50.00 |
+| `rated_power` | DECIMAL(8,2) | **🆕 额定功率（kW）** | 120.00 |
+| `planned_hours` | DECIMAL(10,2) | **🆕 计划小时数** | 3840.00 |
+| `load_factor` | DECIMAL(3,2) | **🆕 负载系数** | 0.70 |
+| `std_mhr_var` | DECIMAL(10,2) | 标准变动费率（计算值） | 71.40 |
+| `std_mhr_fix` | DECIMAL(10,2) | 标准固定费率（计算值） | 85.00 |
+| `std_mhr_total` | DECIMAL(10,2) | **🆕 标准总费率** | 156.40 |
 | `efficiency_factor` | DECIMAL(4,2) | 效率系数 | 1.00 |
+| `status` | VARCHAR(20) | ACTIVE / INACTIVE | ACTIVE |
 | `created_at` | DATETIME | 创建时间 | DEFAULT NOW() |
-
-> **v1.4 折旧率说明：**
-> - `depreciation_rate` 单独存储，用于 Payback 现金流计算
-> - 折旧额 = `depreciation_rate × (cycle_time / 3600)`
-> - 不含折旧的固定费率 = `MHR_fix - depreciation_rate`
 
 ### 表 3: `product_processes` (产品工艺路线) - 扩展
 
@@ -158,11 +218,13 @@ $$Cost_{std} = (std\_mhr\_var + std\_mhr\_fix + Rate_{labor}) \times \frac{Cycle
 |--------|------|------|--------|
 | `id` | CHAR(36) | PK, UUID | - |
 | `project_product_id` | CHAR(36) | FK, 关联产品 | - |
-| `process_code` | VARCHAR(50) | FK, 工序编码 | INJECTION_001 |
+| `process_code` | VARCHAR(50) | FK, 工序编号 | I01 |
 | `sequence_order` | INT | 工序顺序 | 10 |
-| `cycle_time` | INT | 标准工时（秒） | 45 |
-| `personnel` | DECIMAL(4,2) | 标准人工配置 | 1.0 |
-| `std_cost` | DECIMAL(12,4) | 标准成本 | 3.3750 |
+| `cycle_time_std` | INT | 标准工时（秒） | 45 |
+| `personnel_std` | DECIMAL(4,2) | 标准人工配置 | 1.0 |
+| `labor_rate` | DECIMAL(10,2) | **🆕 人工费率快照** | 85.50 |
+| `mhr_snapshot` | DECIMAL(10,2) | **🆕 MHR 快照** | 156.40 |
+| `std_cost` | DECIMAL(12,4) | 标准成本 | 3.0125 |
 | `remarks` | TEXT | 备注 | - |
 | `created_at` | DATETIME | 创建时间 | DEFAULT NOW() |
 
@@ -175,6 +237,18 @@ $$Cost_{std} = (std\_mhr\_var + std\_mhr\_fix + Rate_{labor}) \times \frac{Cycle
 ```python
 from decimal import Decimal
 from pydantic import BaseModel, Field, validator
+from enum import Enum
+
+
+class WorkCenter(str, Enum):
+    """工作中心枚举"""
+    INJECTION = "I"   # 注塑
+    ASSEMBLY = "A"    # 装配
+    MACHINING = "M"   # 机加
+    TESTING = "T"     # 检测
+    PACKING = "P"     # 包装
+    SURFACE = "S"     # 表处
+
 
 class CostCenter(BaseModel):
     """成本中心"""
@@ -183,8 +257,11 @@ class CostCenter(BaseModel):
     net_production_hours: Decimal = Field(gt=0)
     efficiency_rate: Decimal = Field(gt=0, le=1)
     plan_fx_rate: Decimal = Field(gt=0)
-    avg_wages_per_hour: Decimal = Field(gt=0)
-    useful_life_years: int = Field(default=8, ge=1)
+    avg_wages_per_hour: Decimal = Field(gt=0, description="小时工资")
+    useful_life_years: int = Field(default=8, ge=1, description="折旧年限")
+    rent_unit_price: Decimal = Field(gt=0, description="租金单价（元/㎡/年）")
+    energy_unit_price: Decimal = Field(gt=0, description="能源单价（元/kWh）")
+    interest_rate: Decimal = Field(ge=0, le=1, description="年利率")
 
     @property
     def effective_hours(self) -> Decimal:
@@ -194,28 +271,40 @@ class CostCenter(BaseModel):
 
 class ProcessRate(BaseModel):
     """工序费率"""
-    process_code: str
+    process_code: str = Field(..., pattern=r"^[IAMTPS]\d{2}$", description="工序编号")
     cost_center_id: str
     process_name: str
-    std_mhr_var: Decimal
-    std_mhr_fix: Decimal
-    std_depreciation_rate: Decimal = Field(default=Decimal("0"))  # v1.4 新增
-    efficiency_factor: Decimal = Field(default=Decimal("1.0"))
+    work_center: WorkCenter
+    equipment_origin_value: Decimal = Field(gt=0, description="设备购置原值")
+    floor_area: Decimal = Field(gt=0, description="占用面积（㎡）")
+    rated_power: Decimal = Field(gt=0, description="额定功率（kW）")
+    planned_hours: Decimal = Field(gt=0, description="计划小时数")
+    load_factor: Decimal = Field(default=Decimal("0.7"), ge=0.5, le=1.0, description="负载系数")
+
+    # 计算字段
+    std_mhr_var: Decimal | None = None
+    std_mhr_fix: Decimal | None = None
+    std_mhr_total: Decimal | None = None
+
+    def calculate_mhr(self, cost_center: CostCenter) -> None:
+        """计算 MHR 费率"""
+        # 固定成本/小时
+        rent_cost = cost_center.rent_unit_price * self.floor_area / self.planned_hours
+        depreciation_cost = self.equipment_origin_value / cost_center.useful_life_years / self.planned_hours
+        interest_cost = (self.equipment_origin_value / 2 * cost_center.interest_rate) / self.planned_hours
+
+        # 变动成本/小时
+        energy_cost = cost_center.energy_unit_price * self.rated_power * self.load_factor
+
+        # 汇总
+        self.std_mhr_fix = (rent_cost + depreciation_cost + interest_cost).quantize(Decimal("0.01"))
+        self.std_mhr_var = energy_cost.quantize(Decimal("0.01"))
+        self.std_mhr_total = (self.std_mhr_fix + self.std_mhr_var).quantize(Decimal("0.01"))
 
     @property
-    def std_mhr_total(self) -> Decimal:
-        """标准总费率"""
-        return self.std_mhr_var + self.std_mhr_fix
-
-    @property
-    def std_depreciation_per_hour(self) -> Decimal:
-        """标准折旧额/小时（用于 Payback 现金流计算）"""
-        return self.std_depreciation_rate
-
-    @property
-    def std_fix_excluding_depreciation(self) -> Decimal:
-        """标准固定费率（不含折旧）"""
-        return self.std_mhr_fix - self.std_depreciation_rate
+    def mhr_total(self) -> Decimal:
+        """获取总费率"""
+        return self.std_mhr_total or Decimal("0")
 
 
 class ProductProcess(BaseModel):
@@ -224,21 +313,21 @@ class ProductProcess(BaseModel):
     project_product_id: str
     process_code: str
     sequence_order: int
-    cycle_time: int = Field(gt=0, description="标准工时（秒）")
-    personnel: Decimal = Field(default=Decimal("1.0"), ge=0)
+    cycle_time_std: int = Field(gt=0, description="标准工时（秒）")
+    personnel_std: Decimal = Field(default=Decimal("1.0"), ge=0)
+    labor_rate: Decimal = Field(gt=0, description="人工费率快照")
+    mhr_snapshot: Decimal = Field(gt=0, description="MHR 快照")
 
-    def calculate_cost(self, rate: ProcessRate, labor_rate: Decimal) -> Decimal:
-        """计算工艺成本"""
-        mhr = rate.std_mhr_total
-        cycle_time = self.cycle_time
-        personnel = self.personnel
+    def calculate_cost(self) -> Decimal:
+        """计算工艺成本
 
-        # 成本 = (MHR + Labor) × (CycleTime / 3600)
-        labor_cost = labor_rate * personnel
-        total_rate = mhr + labor_cost
-        hours = Decimal(cycle_time) / Decimal("3600")
+        公式: Cost = (MHR + 人工成本) × (节拍 / 3600)
+        """
+        labor_cost_per_hour = self.labor_rate * self.personnel_std
+        total_rate = self.mhr_snapshot + labor_cost_per_hour
+        hours = Decimal(self.cycle_time_std) / Decimal("3600")
 
-        return total_rate * hours
+        return (total_rate * hours).quantize(Decimal("0.0001"))
 
 
 class ProcessCostValidation(BaseModel):
@@ -248,7 +337,12 @@ class ProcessCostValidation(BaseModel):
     errors: list[str] = []
 
     @classmethod
-    def validate_mhr_deviation(cls, calculated: Decimal, benchmark: Decimal, threshold: Decimal = Decimal("0.15")) -> "ProcessCostValidation":
+    def validate_mhr_deviation(
+        cls,
+        calculated: Decimal,
+        benchmark: Decimal,
+        threshold: Decimal = Decimal("0.15")
+    ) -> "ProcessCostValidation":
         """校验 MHR 偏离度"""
         deviation = abs((calculated - benchmark) / benchmark)
         warnings = []
@@ -264,16 +358,23 @@ class ProcessCostValidation(BaseModel):
 
 ```mermaid
 flowchart TD
-    A[开始] --> B[读取成本中心参数]
-    B --> C[计算有效产能 H = Hours × Efficiency]
-    C --> D[计算 MHR 变动与固定费率]
-    D --> E[计算人工费率 = Wages × Personnel]
-    E --> F[读取工艺路线]
-    F --> G[计算标准成本]
-    G --> H{校验阈值}
-    H -->|超限| I[标记预警]
-    H -->|正常| J[结束]
-    I --> J
+    A[新增工艺] --> B[IE 输入变动参数]
+    B --> C{参数完整性检查}
+    C -->|不完整| D[提示补充]
+    D --> B
+    C -->|完整| E[读取成本中心固定参数]
+    E --> F[计算 MHR]
+    F --> G[保存工艺费率]
+
+    G --> H[产品报价流程]
+    H --> I[AI 识别工序编号]
+    I --> J[关联设备 MHR]
+    J --> K[读取节拍和人数]
+    K --> L[计算工艺成本]
+    L --> M{校验阈值}
+    M -->|超限| N[标记预警]
+    M -->|正常| O[结束]
+    N --> O
 ```
 
 ---
@@ -284,7 +385,7 @@ flowchart TD
 |------|--------|
 | `DATABASE_DESIGN.md` | 依赖 `cost_centers`, `process_rates`, `product_processes` 表 |
 | `NRE_INVESTMENT_LOGIC.md` | 设备投资影响 MHR 固定费率计算 |
-| `PAYBACK_LOGIC.md` | `depreciation_rate` 用于现金流计算（现金流 = 净利 + 折旧） |
+| `PAYBACK_LOGIC.md` | 折旧成本用于现金流计算 |
 | `BUSINESS_CASE_LOGIC.md` | 工艺成本汇总为 HK III |
 | `QUOTATION_SUMMARY_LOGIC.md` | 工艺成本影响 SK1/SK2 |
 
@@ -293,17 +394,25 @@ flowchart TD
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                 Controlling (财务)                           │
-│  维护: Cost Center, MHR 费率, 汇率, 折旧年限                  │
+│  维护: 租金单价, 能源单价, 折旧年限, 利率, 小时工资           │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
-│                 IE/VM (工艺工程师)                           │
-│  录入: Cycle Time, Personnel, Investment                     │
+│                 IE/工艺工程师                                │
+│  录入: 设备原值, 占用面积, 额定功率, 计划小时数, 负载系数     │
+│  触发: 新增工艺时自动计算 MHR                                │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
 │                 工艺成本计算引擎                              │
-│  计算: Effective Hours, MHR, Labor Rate, Process Cost       │
+│  计算: MHR_fix + MHR_var + 人工成本 = 总费率                 │
+│        工艺成本 = 总费率 × (节拍 / 3600)                      │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                 AI 识别层                                    │
+│  识别: 工序编号 (I01, A02, M03...)                          │
+│  关联: 自动匹配设备 MHR                                      │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -318,13 +427,14 @@ flowchart TD
 
 | 任务 | 责任方 | 状态 |
 |------|--------|------|
-| 后端：实现 `CostCenter` CRUD 接口 | 后端开发 | ⬜ |
-| 后端：实现 MHR 费率拆解计算逻辑 | 后端开发 | ⬜ |
-| 后端：实现工艺成本计算引擎 | 后端开发 | ⬜ |
+| 后端：更新 `CostCenter` 模型新增字段 | 后端开发 | ⬜ |
+| 后端：更新 `ProcessRate` 模型新增字段 | 后端开发 | ⬜ |
+| 后端：实现 MHR 自动计算逻辑 | 后端开发 | ⬜ |
+| 后端：实现工序编号格式校验 | 后端开发 | ⬜ |
 | 后端：实现阈值校验与预警机制 | 后端开发 | ⬜ |
-| 前端：开发成本中心参数维护页面 | 前端开发 | ⬜ |
-| 前端：开发工艺录入卡片 | 前端开发 | ⬜ |
-| 前端：实现实时成本计算预览 | 前端开发 | ⬜ |
+| 前端：开发新增工艺 MHR 计算界面 | 前端开发 | ⬜ |
+| 前端：实现工序编号自动生成 | 前端开发 | ⬜ |
+| AI：实现工序编号识别与 MHR 关联 | AI 开发 | ⬜ |
 
 ---
 
@@ -343,8 +453,9 @@ flowchart TD
 | 方法 | 端点 | 功能 |
 |------|------|------|
 | GET | `/api/v1/process-rates` | 获取工序费率列表 |
-| POST | `/api/v1/process-rates` | 创建工序费率 |
+| POST | `/api/v1/process-rates` | **创建工序费率（触发 MHR 计算）** |
 | PUT | `/api/v1/process-rates/{id}` | 更新工序费率 |
+| POST | `/api/v1/process-rates/{id}/recalculate` | **重新计算 MHR** |
 
 ### 9.3 工艺成本计算
 
@@ -360,14 +471,18 @@ flowchart TD
   "project_product_id": "PROD-001",
   "processes": [
     {
-      "process_code": "INJECTION_001",
+      "process_code": "I01",
+      "process_name": "注塑成型",
+      "work_center": "I",
       "sequence_order": 10,
-      "cycle_time": 45,
-      "personnel": 1.0,
-      "std_cost": 3.3750
+      "cycle_time_std": 45,
+      "personnel_std": 1.0,
+      "mhr_snapshot": 156.40,
+      "labor_rate": 85.50,
+      "std_cost": 3.0125
     }
   ],
-  "total_std_cost": 3.3750,
+  "total_std_cost": 3.0125,
   "validation": {
     "is_valid": true,
     "warnings": [],
