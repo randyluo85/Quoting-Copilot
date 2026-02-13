@@ -637,15 +637,16 @@ flowchart TD
 
 ## 12. API 端点定义
 
-### 9.1 成本中心管理
+### 12.1 成本中心管理
 
 | 方法 | 端点 | 功能 |
 |------|------|------|
 | GET | `/api/v1/cost-centers` | 获取成本中心列表 |
 | POST | `/api/v1/cost-centers` | 创建成本中心 |
 | PUT | `/api/v1/cost-centers/{id}` | 更新成本中心 |
+| **PUT** | **`/api/v1/cost-centers/{id}/activate`** | **🆕 将临时工作中心改为正式** |
 
-### 9.2 工艺费率管理
+### 12.2 工艺费率管理
 
 | 方法 | 端点 | 功能 |
 |------|------|------|
@@ -654,15 +655,44 @@ flowchart TD
 | PUT | `/api/v1/process-rates/{id}` | 更新工序费率 |
 | POST | `/api/v1/process-rates/{id}/recalculate` | **重新计算 MHR** |
 
-### 9.3 工艺成本计算
+### 12.3 工时规则管理 🆕
+
+| 方法 | 端点 | 功能 |
+|------|------|------|
+| GET | `/api/v1/time-rules/{cost_center_id}` | 获取工作中心的工时规则 |
+| POST | `/api/v1/time-rules` | 创建工时规则 |
+| PUT | `/api/v1/time-rules/{id}` | 更新工时规则 |
+| DELETE | `/api/v1/time-rules/{id}` | 删除工时规则 |
+| POST | `/api/v1/time-rules/calculate` | **根据输入变量计算工时** |
+
+### 12.4 工艺成本计算
 
 | 方法 | 端点 | 功能 |
 |------|------|------|
 | POST | `/api/v1/process-cost/calculate` | 计算工艺成本 |
 | GET | `/api/v1/process-cost/{project_product_id}` | 获取产品工艺成本 |
 
-### 9.4 响应示例
+### 12.5 响应示例
 
+**工时计算请求/响应 🆕：**
+```json
+// POST /api/v1/time-rules/calculate
+{
+  "cost_center_id": "A01",
+  "input_variable": "管径",
+  "value": 20
+}
+
+// Response
+{
+  "matched": true,
+  "std_time_seconds": 12,
+  "rule_id": 5,
+  "calc_method": "COUNT"
+}
+```
+
+**产品工艺成本响应：**
 ```json
 {
   "project_product_id": "PROD-001",
@@ -673,6 +703,8 @@ flowchart TD
       "work_center": "I",
       "sequence_order": 10,
       "cycle_time_std": 45,
+      "cycle_time_source": "auto",
+      "cycle_time_adjustment_reason": null,
       "personnel_std": 1.0,
       "mhr_snapshot": 156.40,
       "labor_rate": 85.50,
