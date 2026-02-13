@@ -119,7 +119,15 @@ calculated → sales_input → completed
 后端计算服务必须严格执行以下公式：
 
 **Standard Cost (标准成本):**
-$$ Cost_{std} = (Qty \times MaterialPrice_{std}) + \sum (CycleTime \times (MHR_{std} + Labor_{std})) $$
+$$ Cost_{std} = \sum (Qty \times MaterialPrice_{std}) + \sum \left( \frac{CycleTime}{3600} \times (MHR_{total} + Personnel \times LaborRate) \right) $$
+
+> **参数说明：**
+> - `CycleTime`: 标准工时（单位：**秒**），需除以 3600 转换为小时
+> - `MHR_total`: 机时费率 = `std_mhr_var` (变动) + `std_mhr_fix` (固定)
+> - `Personnel`: 标准人工配置（人/机）
+> - `LaborRate`: 小时工资（从成本中心获取）
+>
+> **详细计算逻辑**：参见 [`docs/PROCESS_COST_LOGIC.md`](docs/PROCESS_COST_LOGIC.md)
 
 ### 3.2 红绿灯置信度逻辑 (Traffic Light Logic)
 
