@@ -360,14 +360,15 @@ $$Cost_{std} = (MHR_{total} + Rate_{labor}) \times \frac{Cycle\ Time}{3600}$$
 
 ---
 
-## 5. 数据模型定义
+## 8. 数据模型定义
 
-### 5.1 Pydantic 模型
+### 8.1 Pydantic 模型
 
 ```python
 from decimal import Decimal
 from pydantic import BaseModel, Field, validator
 from enum import Enum
+from typing import Literal
 
 
 class WorkCenter(str, Enum):
@@ -378,6 +379,26 @@ class WorkCenter(str, Enum):
     TESTING = "T"     # 检测
     PACKING = "P"     # 包装
     SURFACE = "S"     # 表处
+
+
+class CostCenterStatus(str, Enum):
+    """成本中心状态 🆕"""
+    TEMPORARY = "TEMPORARY"  # 临时
+    ACTIVE = "ACTIVE"        # 正式
+    INACTIVE = "INACTIVE"    # 停用
+
+
+class CycleTimeSource(str, Enum):
+    """工时来源 🆕"""
+    AUTO = "auto"      # 系统自动计算
+    MANUAL = "manual"  # 手动调整
+
+
+class CalcMethod(str, Enum):
+    """工时计算方法 🆕"""
+    LENGTH = "LENGTH"  # 长度法
+    COUNT = "COUNT"    # 点数法
+    TIME = "TIME"      # 时间法
 
 
 class CostCenter(BaseModel):
@@ -392,6 +413,7 @@ class CostCenter(BaseModel):
     rent_unit_price: Decimal = Field(gt=0, description="租金单价（元/㎡/年）")
     energy_unit_price: Decimal = Field(gt=0, description="能源单价（元/kWh）")
     interest_rate: Decimal = Field(ge=0, le=1, description="年利率")
+    status: CostCenterStatus = Field(default=CostCenterStatus.TEMPORARY)  # 🆕
 
     @property
     def effective_hours(self) -> Decimal:
@@ -444,9 +466,18 @@ class ProductProcess(BaseModel):
     process_code: str
     sequence_order: int
     cycle_time_std: int = Field(gt=0, description="标准工时（秒）")
+    cycle_time_source: CycleTimeSource = Field(default=CycleTimeSource.AUTO)  # 🆕
+    cycle_time_adjustment_reason: str | None = None  # 🆕
     personnel_std: Decimal = Field(default=Decimal("1.0"), ge=0)
     labor_rate: Decimal = Field(gt=0, description="人工费率快照")
     mhr_snapshot: Decimal = Field(gt=0, description="MHR 快照")
+
+    @validator('cycle_time_adjustment_reason')
+    def validate_adjustment_reason(cls, v, values):
+        """手动调整时必须填写原因 🆕"""
+        if values.get('cycle_time_source') == CycleTimeSource.MANUAL and not v:
+            raise ValueError('手动调整工时时必须填写调整原因')
+        return v
 
     def calculate_cost(self) -> Decimal:
         """计算工艺成本
@@ -458,6 +489,27 @@ class ProductProcess(BaseModel):
         hours = Decimal(self.cycle_time_std) / Decimal("3600")
 
         return (total_rate * hours).quantize(Decimal("0.0001"))
+
+
+class WorkCenterTimeRule(BaseModel):
+    """工作中心工时规则 🆕"""
+    id: int | None = None
+    cost_center_id: str
+    calc_method: CalcMethod
+    input_variable: str = Field(..., description="输入变量名")
+    range_min: Decimal = Field(description="范围下限")
+    range_max: Decimal | None = Field(default=None, description="范围上限（NULL 表示无上限）")
+    std_time_seconds: Decimal = Field(gt=0, description="标准工时（秒）")
+    unit: str = Field(..., description="单位")
+    status: str = "ACTIVE"
+
+    def matches(self, value: Decimal) -> bool:
+        """检查输入值是否匹配规则范围"""
+        if value < self.range_min:
+            return False
+        if self.range_max is not None and value > self.range_max:
+            return False
+        return True
 
 
 class ProcessCostValidation(BaseModel):
@@ -484,7 +536,7 @@ class ProcessCostValidation(BaseModel):
 
 ---
 
-## 6. 计算流程图
+## 9. 计算流程图
 
 ```mermaid
 flowchart TD
@@ -499,27 +551,35 @@ flowchart TD
     G --> H[产品报价流程]
     H --> I[AI 识别工序编号]
     I --> J[关联设备 MHR]
-    J --> K[读取节拍和人数]
-    K --> L[计算工艺成本]
-    L --> M{校验阈值}
-    M -->|超限| N[标记预警]
-    M -->|正常| O[结束]
-    N --> O
+    J --> K{工时规则匹配}
+    K -->|有规则| L[自动计算工时]
+    K -->|无规则| M[手动输入工时]
+    M --> N{填写调整原因}
+    N -->|是| O[保存]
+    N -->|否| P[提示填写原因]
+    L --> O
+    P --> M
+    O --> Q[读取节拍和人数]
+    Q --> R[计算工艺成本]
+    R --> S{校验阈值}
+    S -->|超限| T[标记预警]
+    S -->|正常| U[结束]
+    T --> U
 ```
 
 ---
 
-## 7. 与其他文档的关联
+## 10. 与其他文档的关联
 
 | 文档 | 关联点 |
 |------|--------|
-| `DATABASE_DESIGN.md` | 依赖 `cost_centers`, `process_rates`, `product_processes` 表 |
+| `DATABASE_DESIGN.md` | 依赖 `cost_centers`, `process_rates`, `product_processes`, `work_center_time_rules` 表 |
 | `NRE_INVESTMENT_LOGIC.md` | 设备投资影响 MHR 固定费率计算 |
 | `PAYBACK_LOGIC.md` | 折旧成本用于现金流计算 |
 | `BUSINESS_CASE_LOGIC.md` | 工艺成本汇总为 HK III |
 | `QUOTATION_SUMMARY_LOGIC.md` | 工艺成本影响 SK1/SK2 |
 
-### 7.1 数据流向
+### 10.1 数据流向
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -530,6 +590,7 @@ flowchart TD
 ┌─────────────────────────────────────────────────────────────┐
 │                 IE/工艺工程师                                │
 │  录入: 设备原值, 占用面积, 额定功率, 计划小时数, 负载系数     │
+│  维护: 工时计算规则（长度法/点数法/时间法）                    │
 │  触发: 新增工艺时自动计算 MHR                                │
 └─────────────────────────────────────────────────────────────┘
                               ↓
@@ -537,6 +598,7 @@ flowchart TD
 │                 工艺成本计算引擎                              │
 │  计算: MHR_fix + MHR_var + 人工成本 = 总费率                 │
 │        工艺成本 = 总费率 × (节拍 / 3600)                      │
+│        工时: 自动计算 或 手动调整（需填原因）                  │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -553,7 +615,7 @@ flowchart TD
 
 ---
 
-## 8. 开发实施 Checklist
+## 11. 开发实施 Checklist
 
 | 任务 | 责任方 | 状态 |
 |------|--------|------|
