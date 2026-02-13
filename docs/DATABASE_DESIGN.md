@@ -369,6 +369,7 @@ calculated → sales_input → completed
 | std_cost | DECIMAL(12,4) | | 标准成本 |
 | confidence | DECIMAL(5,2) | | 匹配置信度 0-100 |
 | ai_suggestion | TEXT | | AI 建议 |
+| **tooling_count** | **JSON** | | **🆕 v1.9 新增：工装数量，格式：`{"mold": 1, "fixture": 2, "gauge": 1}`** |
 | remarks | TEXT | | 备注（BOM Comments） |
 | created_at | DATETIME | DEFAULT NOW() | |
 
@@ -381,6 +382,8 @@ calculated → sales_input → completed
 | process_code | VARCHAR(50) | FK, NOT NULL | 工序编码 |
 | sequence_order | INT | NOT NULL | 工序顺序 |
 | **cycle_time_std** | INT | | **🔴 新增：标准工时（秒）** |
+| **cycle_time_source** | **VARCHAR(10)** | **DEFAULT 'auto'** | **🆕 v1.9 新增：工时来源 auto/manual** |
+| **cycle_time_adjustment_reason** | **TEXT** | | **🆕 v1.9 新增：手动调整原因（manual 时必填）** |
 | **personnel_std** | DECIMAL(4,2) | DEFAULT 1.0 | **🔴 新增：标准人工配置（人/机）** |
 | **labor_rate** | **DECIMAL(10,2)** | | **🔴 v1.8 新增：人工费率快照** |
 | **mhr_snapshot** | **DECIMAL(10,2)** | | **🔴 v1.8 新增：MHR 快照** |
@@ -389,15 +392,15 @@ calculated → sales_input → completed
 | remarks | TEXT | | 备注 |
 | created_at | DATETIME | DEFAULT NOW() | |
 
-**v1.8 扩展成本计算公式:**
+**v1.9 扩展成本计算公式:**
 ```
 std_cost = (cycle_time_std / 3600) × (mhr_snapshot + personnel_std × labor_rate)
 ```
 
-> **v1.8 变更说明：**
-> - 新增 `labor_rate` 人工费率快照，从成本中心获取
-> - 新增 `mhr_snapshot` MHR 快照，从 process_rates.std_mhr_total 获取
-> - 保留 `std_mhr` 字段用于向后兼容
+> **v1.9 变更说明：**
+> - 新增 `cycle_time_source` 工时来源标记（auto/manual）
+> - 新增 `cycle_time_adjustment_reason` 手动调整原因（manual 时必填）
+> - 新增 `tooling_count` 工装数量 JSON 字段（在 product_materials 表）
 
 #### quote_summaries（报价汇总）
 
