@@ -2,7 +2,7 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.8   | 2026-02-03 | 2026-02-13 | Dr.aiVOSS 数据库设计 | Randy Luo |
+| v1.9   | 2026-02-03 | 2026-02-13 | Dr.aiVOSS 数据库设计 | Randy Luo |
 
 ---
 
@@ -18,6 +18,7 @@
 | 2026-02-05 | v1.6 | 🔴 **破坏性变更**：移除所有 VAVE 相关字段，简化双轨价格为单轨标准成本 | 全部表 |
 | 2026-02-05 | v1.7 | 🔴 **新增功能**：新增向量数据表 material_vectors 和 product_vectors，支持语义匹配和产品复用 | 向量搜索 |
 | 2026-02-13 | v1.8 | 🔴 **破坏性变更**：cost_centers 新增租金单价/能源单价/利率字段；process_rates 新增工作中心/设备原值/占用面积/额定功率/计划小时数/负载系数/std_mhr_total 字段；product_processes 新增人工费率/MHR快照字段 | MHR 计算逻辑 |
+| 2026-02-13 | v1.9 | 🆕 **新增功能**：新增 work_center_time_rules 表；product_processes 新增 cycle_time_source/cycle_time_adjustment_reason 字段；product_materials 新增 tooling_count 字段；cost_centers.status 新增 TEMPORARY 状态 | 工时规则、工装管理 |
 
 **变更规范：**
 - 任何字段新增/修改/删除必须记录在此
