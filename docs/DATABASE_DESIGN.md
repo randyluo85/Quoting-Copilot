@@ -272,21 +272,30 @@ erDiagram
 | 字段 | 类型 | 约束 | 说明 |
 |------|------|------|------|
 | id | INT | PK, AUTO_INCREMENT | |
-| process_code | VARCHAR(50) | UNIQUE | 工序编码 |
+| process_code | VARCHAR(50) | UNIQUE | 工序编码（字母+数字，如 I01） |
 | **cost_center_id** | **VARCHAR(20)** | **FK** | **🔴 v1.3 新增：关联成本中心** |
 | process_name | VARCHAR(100) | NOT NULL | 工序名称 |
 | equipment | VARCHAR(100) | | 设备 |
+| **work_center** | **VARCHAR(1)** | | **🔴 v1.8 新增：工作中心字母（I/A/M/T/P/S）** |
+| **equipment_origin_value** | **DECIMAL(14,2)** | | **🔴 v1.8 新增：设备购置原值** |
+| **floor_area** | **DECIMAL(8,2)** | | **🔴 v1.8 新增：占用面积（㎡）** |
+| **rated_power** | **DECIMAL(8,2)** | | **🔴 v1.8 新增：额定功率（kW）** |
+| **planned_hours** | **DECIMAL(10,2)** | | **🔴 v1.8 新增：计划小时数** |
+| **load_factor** | **DECIMAL(3,2)** | **DEFAULT 0.70** | **🔴 v1.8 新增：负载系数** |
 | **std_mhr_var** | DECIMAL(10,2) | | **🔴 v1.3 新增：标准变动费率** |
 | **std_mhr_fix** | DECIMAL(10,2) | | **🔴 v1.3 新增：标准固定费率** |
+| **std_mhr_total** | **DECIMAL(10,2)** | | **🔴 v1.8 新增：标准总费率（计算值）** |
 | **std_depreciation_rate** | DECIMAL(8,4) | | **🔴 v1.4 新增：标准折旧率** |
 | efficiency_factor | DECIMAL(4,2) | DEFAULT 1.0 | 效率系数 |
 | remarks | TEXT | | 备注 |
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
 
-> **兼容性说明：**
-> - `std_mhr_var + std_mhr_fix` 等同于原 `std_mhr`，前端可通过计算显示"总费率"
-> - **v1.4 折旧说明**：MHR_fix 包含折旧、利息、租金、保险；depreciation_rate 单独存储，用于 Payback 现金流计算（现金流 = 净利 + 折旧）
+> **v1.8 MHR 计算说明：**
+> - `std_mhr_var` = 能源单价 × 额定功率 × 负载系数（能源成本）
+> - `std_mhr_fix` = 租金成本 + 折旧成本 + 利息成本
+> - `std_mhr_total` = `std_mhr_var` + `std_mhr_fix`
+> - 新增工艺时自动触发 MHR 计算，详见 `PROCESS_COST_LOGIC.md`
 
 ### 3.2 交易数据表 {#transaction-data}
 
