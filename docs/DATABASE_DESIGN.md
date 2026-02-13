@@ -154,6 +154,8 @@ erDiagram
         int sequence_order
         int cycle_time_std "标准工时(秒)"
         decimal personnel_std
+        decimal labor_rate "人工费率 v1.8"
+        decimal mhr_snapshot "MHR快照 v1.8"
         decimal std_cost
     }
 
