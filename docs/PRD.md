@@ -20,7 +20,8 @@
 | v1.7 | 2026-02-05 | Randy Luo | 🔴 v2.0 流程变更：VM/Sales/Controlling 职责重新划分；移除 Controlling 审核；新增多版本报价支持；v2.1 采购询价邮件化：采购无需登录系统，VM 导入报价单识别价格 |
 | v1.8 | 2026-02-05 | Randy Luo | 架构调整：移除双轨计价功能，简化为单一标准成本计算 |
 | v1.9 | 2026-02-05 | Randy Luo | ✅ 重写 Payback 功能：从 VAVE 增量回收期改为项目静态回收期 |
-| **v2.0** | **2026-02-05** | **Randy Luo** | **🔴 组织架构调整：移除 PE (Product Engineer) 角色，简化工艺处理流程** |
+| v2.0 | 2026-02-05 | Randy Luo | 🔴 组织架构调整：移除 PE (Product Engineer) 角色，简化工艺处理流程 |
+| **v2.1** | **2026-02-13** | **Randy Luo** | **✅ 职责澄清：Sales 负责创建项目（手动/导入）；VM 审核工时；IE 填写工时+维护工艺路线库；Controlling 仅维护 MHR 固定参数** |
 
 ---
 
