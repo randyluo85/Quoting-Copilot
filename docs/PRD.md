@@ -821,6 +821,353 @@ $$ Payback\ (月数) = \frac{项目总投资}{项目月度净利} $$
 
 ---
 
+## 12. AI驱动开发规范（Figma Make 集成）🆕 v2.1
+
+> **适用场景：** 本项目全程使用 AI 辅助开发，原型设计使用 Figma Make（AI prompt-to-code 工具）。本章节提供结构化的 Prompt 规范，确保 AI 能准确理解需求并生成可用的原型代码。
+
+### 12.1 设计原则
+
+| 原则 | 说明 |
+|------|------|
+| **Prompt-First** | 所有 UI 描述必须能直接作为 Figma Make 的输入 prompt |
+| **组件化** | 界面拆分为独立组件，每个组件有清晰的输入/输出定义 |
+| **渐进增强** | 先生成基础结构，再添加交互逻辑 |
+| **设计系统一致** | 统一使用 ShadcnUI 组件库，保持视觉一致性 |
+
+---
+
+### 12.2 核心页面 Prompt 模板
+
+#### 12.2.1 Dashboard（仪表盘）
+
+```markdown
+**页面名称：** Dashboard
+
+**功能描述：** 项目列表展示，支持创建新项目、筛选、搜索
+
+**布局结构：**
+- 顶部导航栏：Logo + 用户头像 + 通知图标
+- 左侧边栏：导航菜单（Dashboard / 项目 / 物料库 / 工艺库 / 设置）
+- 主内容区：
+  - 搜索框 + 筛选下拉
+  - 项目卡片网格（3列）
+  - 每个卡片显示：项目名称、客户、状态徽章、负责人、创建日期
+
+**交互行为：**
+- 点击卡片 → 进入项目详情页
+- 点击"新建项目" → 打开创建项目对话框
+- 状态筛选 → 实时过滤项目列表
+
+**组件依赖：** Card, Badge, Dialog, Input, Select, Button
+
+**ShadcnUI 组件：**
+- `Card` 用于项目卡片
+- `Badge` 用于状态显示（draft=灰色, in-progress=蓝色, completed=绿色）
+- `Dialog` 用于新建项目弹窗
+```
+
+---
+
+#### 12.2.2 BOM Management（BOM 管理）
+
+```markdown
+**页面名称：** BOM Management
+
+**功能描述：** BOM 文件上传、解析、物料/工艺列表展示
+
+**布局结构：**
+- 页面标题 + 项目名称面包屑
+- 上传区域（拖拽上传或点击选择文件）
+- Tab 切换：物料列表 / 工艺列表
+- 数据表格：
+  - 物料列：序号、零件号、零件名、材质、数量、单价、状态（红绿灯）、AI建议
+  - 工艺列：工序号、工序名、工作中心、标准工时、MHR、状态
+
+**状态红绿灯规则：**
+- 🟢 Green（verified）：库中完全匹配
+- 🟡 Yellow（warning）：AI语义匹配或估算参数
+- 🔴 Red（missing）：库中无数据
+
+**交互行为：**
+- 拖拽文件 → 自动上传并解析
+- 点击状态图标 → 显示详细信息
+- 编辑单元格 → 内联编辑
+- 点击"发送询价" → 弹出邮件预览
+
+**组件依赖：** Tabs, Table, FileUpload, Badge, Tooltip
+
+**ShadcnUI 组件：**
+- `Tabs` 用于物料/工艺切换
+- `Table` 用于数据展示
+- `Badge` 用于状态红绿灯
+```
+
+---
+
+#### 12.2.3 Cost Calculation（成本计算）
+
+```markdown
+**页面名称：** Cost Calculation
+
+**功能描述：** 成本汇总展示、参数调整、重新计算
+
+**布局结构：**
+- 左侧面板（40%）：
+  - 成本结构树（可折叠）
+  - 物料成本明细
+  - 工艺成本明细
+- 右侧面板（60%）：
+  - 成本汇总卡片
+  - 调整参数表单
+  - 操作按钮（重新计算 / 确认）
+
+**数据展示：**
+- 物料成本：¥XXX（XX%）
+- 工艺成本：¥XXX（XX%）
+- 投资成本：¥XXX（摊销方式）
+- 研发成本：¥XXX
+- 总成本（HK III）：¥XXX
+
+**交互行为：**
+- 展开/折叠成本节点
+- 修改参数 → 实时预览影响
+- 点击"重新计算" → 更新所有数值
+
+**组件依赖：** Collapsible, Card, Form, Input, Button
+
+**ShadcnUI 组件：**
+- `Collapsible` 用于成本结构树
+- `Card` 用于汇总展示
+- `Form` 用于参数调整
+```
+
+---
+
+#### 12.2.4 Quote Summary（报价摘要）
+
+```markdown
+**页面名称：** Quote Summary
+
+**功能描述：** Sales 输入商业参数、计算 QS/BC/Payback、导出报价单
+
+**布局结构：**
+- 顶部：项目信息摘要（只读）
+- 左侧（商业参数输入）：
+  - 单价输入框
+  - 汇率选择
+  - 年降比例（%）
+  - 目标利润率（%）
+- 右侧（计算结果）：
+  - QS 卡片：含税报价、利润率、交货周期
+  - BC 卡片：成本分解饼图
+  - Payback 卡片：回收期月数 + 推荐等级
+
+**交互行为：**
+- 参数变化 → 实时计算 QS/BC
+- 点击"导出 PDF" → 生成报价单下载
+- 点击"保存草稿" → 暂存当前状态
+
+**组件依赖：** Card, Input, Select, Button, Progress
+
+**ShadcnUI 组件：**
+- `Card` 用于 QS/BC/Payback 展示
+- `Input` 用于参数输入
+- `Progress` 用于回收期等级可视化
+```
+
+---
+
+### 12.3 通用组件 Prompt 规范
+
+#### 12.3.1 状态徽章（Status Badge）
+
+```markdown
+**组件名称：** StatusBadge
+
+**功能描述：** 显示项目/物料/工艺状态的彩色徽章
+
+**Props 定义：**
+```typescript
+interface StatusBadgeProps {
+  status: 'draft' | 'in-progress' | 'completed' | 'verified' | 'warning' | 'missing';
+  size?: 'sm' | 'md' | 'lg';
+}
+```
+
+**样式规则：**
+| status | 背景色 | 文字色 | 文案 |
+|--------|--------|--------|------|
+| draft | gray-100 | gray-700 | 草稿 |
+| in-progress | blue-100 | blue-700 | 进行中 |
+| completed | green-100 | green-700 | 已完成 |
+| verified | green-100 | green-700 | 已验证 |
+| warning | yellow-100 | yellow-700 | 待确认 |
+| missing | red-100 | red-700 | 缺失数据 |
+
+**ShadcnUI 基础组件：** `Badge`
+```
+
+---
+
+#### 12.3.2 项目卡片（Project Card）
+
+```markdown
+**组件名称：** ProjectCard
+
+**功能描述：** 在 Dashboard 中展示单个项目摘要
+
+**Props 定义：**
+```typescript
+interface ProjectCardProps {
+  id: string;
+  projectName: string;
+  clientName: string;
+  status: 'draft' | 'in-progress' | 'completed';
+  owner: {
+    sales: string;
+    vm: string;
+  };
+  createdDate: string;
+  annualVolume: string;
+  onClick?: () => void;
+}
+```
+
+**布局结构：**
+```
+┌─────────────────────────────────┐
+│ 项目名称            [状态徽章] │
+│ 客户名称                         │
+│ ─────────────────────────────────│
+│ Sales: XXX  |  VM: XXX          │
+│ 年量: XXXX                       │
+│ 创建: 2026-02-13                 │
+└─────────────────────────────────┘
+```
+
+**交互行为：**
+- 悬停 → 显示阴影效果
+- 点击 → 触发 onClick 回调
+
+**ShadcnUI 基础组件：** `Card`
+```
+
+---
+
+### 12.4 设计系统规范
+
+#### 12.4.1 颜色系统（TailwindCSS）
+
+| 用途 | 颜色类 | 色值 |
+|------|--------|------|
+| **主色** | `bg-blue-600` | #2563eb |
+| **主色悬停** | `hover:bg-blue-700` | #1d4ed8 |
+| **成功** | `bg-green-600` | #16a34a |
+| **警告** | `bg-yellow-500` | #eab308 |
+| **错误** | `bg-red-600` | #dc2626 |
+| **中性背景** | `bg-slate-50` | #f8fafc |
+| **边框** | `border-slate-200` | #e2e8f0 |
+| **文字主色** | `text-slate-900` | #0f172a |
+| **文字次色** | `text-slate-500` | #64748b |
+
+#### 12.4.2 间距系统
+
+| 级别 | Tailwind 类 | 用途 |
+|------|-------------|------|
+| xs | `p-1` / `gap-1` | 紧凑元素内部间距 |
+| sm | `p-2` / `gap-2` | 按钮内边距 |
+| md | `p-4` / `gap-4` | 卡片内边距 |
+| lg | `p-6` / `gap-6` | 页面区块间距 |
+| xl | `p-8` / `gap-8` | 大区块间距 |
+
+#### 12.4.3 圆角规范
+
+| 组件 | 圆角类 | 值 |
+|------|--------|-----|
+| 按钮 | `rounded-md` | 6px |
+| 卡片 | `rounded-lg` | 8px |
+| 输入框 | `rounded-md` | 6px |
+| 对话框 | `rounded-xl` | 12px |
+| 徽章 | `rounded-full` | 全圆 |
+
+---
+
+### 12.5 交互状态规范
+
+#### 12.5.1 加载状态
+
+```markdown
+**场景：** 数据加载中（BOM解析、成本计算、API请求）
+
+**UI 表现：**
+- 使用 `Skeleton` 组件占位
+- 骨架屏颜色：`bg-slate-200`
+- 动画：`animate-pulse`
+
+**ShadcnUI 组件：** `Skeleton`
+```
+
+#### 12.5.2 空状态
+
+```markdown
+**场景：** 无数据（空项目列表、空BOM）
+
+**UI 表现：**
+- 居中显示插图/图标
+- 提示文案："暂无XX，点击新增"
+- 主操作按钮
+
+**ShadcnUI 组件：** `Card` + 自定义插图
+```
+
+#### 12.5.3 错误状态
+
+```markdown
+**场景：** 操作失败（上传失败、计算错误）
+
+**UI 表现：**
+- 使用 `Alert` 组件
+- 类型：`destructive`
+- 包含错误信息 + 重试按钮
+
+**ShadcnUI 组件：** `Alert`
+```
+
+---
+
+### 12.6 响应式断点
+
+| 断点 | Tailwind 前缀 | 最小宽度 | 布局调整 |
+|------|--------------|----------|----------|
+| Mobile | (default) | 0px | 单列，侧边栏隐藏 |
+| Tablet | `md:` | 768px | 双列，侧边栏折叠 |
+| Desktop | `lg:` | 1024px | 三列，侧边栏展开 |
+
+---
+
+### 12.7 Prompt 编写最佳实践
+
+> **给 Figma Make 的建议：** 以下格式能帮助 AI 更准确地生成代码
+
+**✅ 好的 Prompt 格式：**
+```
+创建一个 [页面名称] 页面，包含：
+1. [组件1]：[具体描述]
+2. [组件2]：[具体描述]
+
+使用 ShadcnUI 的 [组件列表]。
+布局：[具体布局描述]
+交互：[具体交互行为]
+```
+
+**❌ 避免的 Prompt 格式：**
+```
+做一个好看的页面，要有按钮和表格
+（太模糊，AI 无法理解具体需求）
+```
+
+---
+
 **文档结束**
 
 *如有疑问，请联系产品团队：luoxin@jshine.cc*
