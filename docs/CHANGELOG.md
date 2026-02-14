@@ -2,7 +2,7 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.6   | 2026-02-03 | 2026-02-05 | Dr.aiVOSS 文档变更日志 | Randy Luo |
+| v1.8   | 2026-02-03 | 2026-02-13 | Dr.aiVOSS 文档变更日志 | Randy Luo |
 
 ---
 
@@ -10,6 +10,11 @@
 
 | 日期 | 文档 | 版本 | 变更内容 | 影响范围 | 责任人 |
 |------|------|------|----------|----------|------|
+| 2026-02-13 | docs/PROCESS_COST_LOGIC.md | v2.0 → **v2.1** | 🆕 **新增功能**：工时版本管理（auto/manual）；新工作中心建立流程（TEMPORARY→ACTIVE）；工时计算规则维护（长度法/点数法/时间法） | 业务逻辑 | Randy Luo |
+| 2026-02-13 | docs/DATABASE_DESIGN.md | v1.8 → **v1.9** | 🆕 **新增功能**：新增 work_center_time_rules 表；product_processes 新增 cycle_time_source/cycle_time_adjustment_reason；product_materials 新增 tooling_count；cost_centers.status 新增 TEMPORARY | 数据库设计 | Randy Luo |
+| 2026-02-13 | PROJECT_CONTEXT.md | v2.5 → **v2.6** | 🔄 同步 MHR 计算逻辑：更新工艺成本公式（明确时间单位为秒/需÷3600、人工=人数×时薪）；新增 cost_centers/process_rates 字段引用 | 业务逻辑 | Randy Luo |
+| 2026-02-13 | docs/PROCESS_COST_LOGIC.md | v1.4 → **v2.0** | 🔴 **重大重构**：新增工序编码规则（字母+数字）；重构参数分类为固定/变动成本；更新 MHR 计算公式；新增负载系数（默认 0.7）；更新工艺成本公式为 `(MHR + 人工成本) × (节拍/3600)` | 业务逻辑 | Randy Luo |
+| 2026-02-13 | docs/DATABASE_DESIGN.md | v1.7 → **v1.8** | 🔴 **破坏性变更**：cost_centers 新增租金单价/能源单价/利率字段；process_rates 新增工作中心/设备原值/占用面积/额定功率/计划小时数/负载系数/std_mhr_total 字段；product_processes 新增人工费率/MHR快照字段 | 数据库设计 | Randy Luo |
 | 2026-02-05 | docs/PAYBACK_LOGIC.md | v1.4 → **v1.5** | ✅ **重写逻辑**：从 VAVE 增量回收期改为项目静态回收期；新公式：Payback = 项目总投资 / 项目月度净利 | 业务逻辑 | Randy Luo |
 | 2026-02-05 | docs/PRD.md | v1.8 → **v1.9** | ✅ **同步更新**：Payback 功能重写为静态回收期；更新推荐等级定义 | 产品需求 | Randy Luo |
 | 2026-02-05 | PROJECT_CONTEXT.md | v2.3 → **v2.4** | 🔴 **架构调整**：移除双轨计价功能，简化为单一标准成本计算 | 业务流程 | Randy Luo |

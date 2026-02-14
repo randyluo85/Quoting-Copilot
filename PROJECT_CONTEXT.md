@@ -2,13 +2,14 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v2.5   | 2026-02-02 | 2026-02-05 | Dr.aiVOSS 核心契约 (不可变) | Randy Luo |
+| v2.6   | 2026-02-02 | 2026-02-13 | Dr.aiVOSS 核心契约 (不可变) | Randy Luo |
 
 ---
 
 **版本变更记录：**
 | 版本 | 日期 | 变更内容 |
 |------|------|----------|
+| v2.6 | 2026-02-13 | 🔄 同步 MHR 计算逻辑 v2.0：更新工艺成本公式（明确时间单位/人工计算）；新增 process_rates 字段引用 |
 | v2.5 | 2026-02-05 | 🆕 新增向量数据架构：material_vectors 和 product_vectors，支持物料语义匹配和产品复用检索 |
 | v2.4 | 2026-02-05 | 🔴 移除双轨核算理念，简化为单一标准成本计算 |
 | v2.3 | 2026-02-05 | 🔴 v2.0 流程变更：VM/Sales/Controlling 职责重新划分；移除 Controlling 审核；新增多版本报价支持；v2.1 采购询价邮件化 |
@@ -16,8 +17,8 @@
 
 ---
 
-**版本:** v2.5 (MVP)
-**最后更新:** 2026-02-05
+**版本:** v2.6 (MVP)
+**最后更新:** 2026-02-13
 **状态:** 🔴 核心契约 (不可变)
 **适用范围:** Dr.aiVOSS 智能快速报价助手 全团队
 
@@ -67,7 +68,8 @@
 | 业务概念 | 对应表 | 关键字段 |
 |---------|--------|---------|
 | 物料主数据 | `materials` | `id` (物料编码), `std_price` |
-| 工序费率 | `process_rates` | `process_code`, `std_mhr_var`, `std_mhr_fix` |
+| 工序费率 | `process_rates` | `process_code`, `work_center`, `std_mhr_var`, `std_mhr_fix`, `std_mhr_total` |
+| 成本中心 | `cost_centers` | `avg_wages_per_hour`, `rent_unit_price`, `energy_unit_price`, `interest_rate` |
 | 项目 | `projects` | `id`, `project_code`, `status`, `annual_volume`, `factory_id` |
 | BOM 行 | `product_materials` | `std_cost`, `confidence` |
 
@@ -118,7 +120,15 @@ calculated → sales_input → completed
 后端计算服务必须严格执行以下公式：
 
 **Standard Cost (标准成本):**
-$$ Cost_{std} = (Qty \times MaterialPrice_{std}) + \sum (CycleTime \times (MHR_{std} + Labor_{std})) $$
+$$ Cost_{std} = \sum (Qty \times MaterialPrice_{std}) + \sum \left( \frac{CycleTime}{3600} \times (MHR_{total} + Personnel \times LaborRate) \right) $$
+
+> **参数说明：**
+> - `CycleTime`: 标准工时（单位：**秒**），需除以 3600 转换为小时
+> - `MHR_total`: 机时费率 = `std_mhr_var` (变动) + `std_mhr_fix` (固定)
+> - `Personnel`: 标准人工配置（人/机）
+> - `LaborRate`: 小时工资（从成本中心获取）
+>
+> **详细计算逻辑**：参见 [`docs/PROCESS_COST_LOGIC.md`](docs/PROCESS_COST_LOGIC.md)
 
 ### 3.2 红绿灯置信度逻辑 (Traffic Light Logic)
 

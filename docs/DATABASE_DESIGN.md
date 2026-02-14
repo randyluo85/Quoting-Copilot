@@ -2,7 +2,7 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.7   | 2026-02-03 | 2026-02-05 | Dr.aiVOSS 数据库设计 | Randy Luo |
+| v1.9   | 2026-02-03 | 2026-02-13 | Dr.aiVOSS 数据库设计 | Randy Luo |
 
 ---
 
@@ -17,6 +17,8 @@
 | 2026-02-05 | v1.5 | 🔴 **破坏性变更**：projects 表新增 factory_id；quote_summaries 表新增 version_number；新增 factories 表；新增 std_investment_costs 表；business_case_params 新增 logistics_rate 和 other_mfg_rate | 多版本报价、工厂管理、系数维护 |
 | 2026-02-05 | v1.6 | 🔴 **破坏性变更**：移除所有 VAVE 相关字段，简化双轨价格为单轨标准成本 | 全部表 |
 | 2026-02-05 | v1.7 | 🔴 **新增功能**：新增向量数据表 material_vectors 和 product_vectors，支持语义匹配和产品复用 | 向量搜索 |
+| 2026-02-13 | v1.8 | 🔴 **破坏性变更**：cost_centers 新增租金单价/能源单价/利率字段；process_rates 新增工作中心/设备原值/占用面积/额定功率/计划小时数/负载系数/std_mhr_total 字段；product_processes 新增人工费率/MHR快照字段 | MHR 计算逻辑 |
+| 2026-02-13 | v1.9 | 🆕 **新增功能**：新增 work_center_time_rules 表；product_processes 新增 cycle_time_source/cycle_time_adjustment_reason 字段；product_materials 新增 tooling_count 字段；cost_centers.status 新增 TEMPORARY 状态 | 工时规则、工装管理 |
 
 **变更规范：**
 - 任何字段新增/修改/删除必须记录在此
@@ -107,6 +109,9 @@ erDiagram
         decimal plan_fx_rate
         decimal avg_wages_per_hour
         int useful_life_years
+        decimal rent_unit_price "租金单价 v1.8"
+        decimal energy_unit_price "能源单价 v1.8"
+        decimal interest_rate "年利率 v1.8"
         string status
     }
 
@@ -131,8 +136,15 @@ erDiagram
         varchar50 process_code UK "工序编码"
         varchar20 cost_center_id FK "成本中心"
         string process_name
+        varchar1 work_center "工作中心 v1.8"
+        decimal equipment_origin_value "设备原值 v1.8"
+        decimal floor_area "占用面积 v1.8"
+        decimal rated_power "额定功率 v1.8"
+        decimal planned_hours "计划小时数 v1.8"
+        decimal load_factor "负载系数 v1.8"
         decimal std_mhr_var "标准变动费率"
         decimal std_mhr_fix "标准固定费率"
+        decimal std_mhr_total "标准总费率 v1.8"
         decimal efficiency_factor
     }
 
@@ -143,6 +155,8 @@ erDiagram
         int sequence_order
         int cycle_time_std "标准工时(秒)"
         decimal personnel_std
+        decimal labor_rate "人工费率 v1.8"
+        decimal mhr_snapshot "MHR快照 v1.8"
         decimal std_cost
     }
 
@@ -271,21 +285,30 @@ erDiagram
 | 字段 | 类型 | 约束 | 说明 |
 |------|------|------|------|
 | id | INT | PK, AUTO_INCREMENT | |
-| process_code | VARCHAR(50) | UNIQUE | 工序编码 |
+| process_code | VARCHAR(50) | UNIQUE | 工序编码（字母+数字，如 I01） |
 | **cost_center_id** | **VARCHAR(20)** | **FK** | **🔴 v1.3 新增：关联成本中心** |
 | process_name | VARCHAR(100) | NOT NULL | 工序名称 |
 | equipment | VARCHAR(100) | | 设备 |
+| **work_center** | **VARCHAR(1)** | | **🔴 v1.8 新增：工作中心字母（I/A/M/T/P/S）** |
+| **equipment_origin_value** | **DECIMAL(14,2)** | | **🔴 v1.8 新增：设备购置原值** |
+| **floor_area** | **DECIMAL(8,2)** | | **🔴 v1.8 新增：占用面积（㎡）** |
+| **rated_power** | **DECIMAL(8,2)** | | **🔴 v1.8 新增：额定功率（kW）** |
+| **planned_hours** | **DECIMAL(10,2)** | | **🔴 v1.8 新增：计划小时数** |
+| **load_factor** | **DECIMAL(3,2)** | **DEFAULT 0.70** | **🔴 v1.8 新增：负载系数** |
 | **std_mhr_var** | DECIMAL(10,2) | | **🔴 v1.3 新增：标准变动费率** |
 | **std_mhr_fix** | DECIMAL(10,2) | | **🔴 v1.3 新增：标准固定费率** |
+| **std_mhr_total** | **DECIMAL(10,2)** | | **🔴 v1.8 新增：标准总费率（计算值）** |
 | **std_depreciation_rate** | DECIMAL(8,4) | | **🔴 v1.4 新增：标准折旧率** |
 | efficiency_factor | DECIMAL(4,2) | DEFAULT 1.0 | 效率系数 |
 | remarks | TEXT | | 备注 |
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
 
-> **兼容性说明：**
-> - `std_mhr_var + std_mhr_fix` 等同于原 `std_mhr`，前端可通过计算显示"总费率"
-> - **v1.4 折旧说明**：MHR_fix 包含折旧、利息、租金、保险；depreciation_rate 单独存储，用于 Payback 现金流计算（现金流 = 净利 + 折旧）
+> **v1.8 MHR 计算说明：**
+> - `std_mhr_var` = 能源单价 × 额定功率 × 负载系数（能源成本）
+> - `std_mhr_fix` = 租金成本 + 折旧成本 + 利息成本
+> - `std_mhr_total` = `std_mhr_var` + `std_mhr_fix`
+> - 新增工艺时自动触发 MHR 计算，详见 `PROCESS_COST_LOGIC.md`
 
 ### 3.2 交易数据表 {#transaction-data}
 
@@ -346,6 +369,7 @@ calculated → sales_input → completed
 | std_cost | DECIMAL(12,4) | | 标准成本 |
 | confidence | DECIMAL(5,2) | | 匹配置信度 0-100 |
 | ai_suggestion | TEXT | | AI 建议 |
+| **tooling_count** | **JSON** | | **🆕 v1.9 新增：工装数量，格式：`{"mold": 1, "fixture": 2, "gauge": 1}`** |
 | remarks | TEXT | | 备注（BOM Comments） |
 | created_at | DATETIME | DEFAULT NOW() | |
 
@@ -358,16 +382,25 @@ calculated → sales_input → completed
 | process_code | VARCHAR(50) | FK, NOT NULL | 工序编码 |
 | sequence_order | INT | NOT NULL | 工序顺序 |
 | **cycle_time_std** | INT | | **🔴 新增：标准工时（秒）** |
+| **cycle_time_source** | **VARCHAR(10)** | **DEFAULT 'auto'** | **🆕 v1.9 新增：工时来源 auto/manual** |
+| **cycle_time_adjustment_reason** | **TEXT** | | **🆕 v1.9 新增：手动调整原因（manual 时必填）** |
 | **personnel_std** | DECIMAL(4,2) | DEFAULT 1.0 | **🔴 新增：标准人工配置（人/机）** |
-| std_mhr | DECIMAL(10,2) | | MHR 快照（保留兼容） |
+| **labor_rate** | **DECIMAL(10,2)** | | **🔴 v1.8 新增：人工费率快照** |
+| **mhr_snapshot** | **DECIMAL(10,2)** | | **🔴 v1.8 新增：MHR 快照** |
+| std_mhr | DECIMAL(10,2) | | MHR 快照（保留兼容，建议使用 mhr_snapshot） |
 | std_cost | DECIMAL(12,4) | | 标准成本 |
 | remarks | TEXT | | 备注 |
 | created_at | DATETIME | DEFAULT NOW() | |
 
-**扩展成本计算公式:**
+**v1.9 扩展成本计算公式:**
 ```
-std_cost = (cycle_time_std / 3600) × (std_mhr_var + std_mhr_fix + personnel_std × labor_rate)
+std_cost = (cycle_time_std / 3600) × (mhr_snapshot + personnel_std × labor_rate)
 ```
+
+> **v1.9 变更说明：**
+> - 新增 `cycle_time_source` 工时来源标记（auto/manual）
+> - 新增 `cycle_time_adjustment_reason` 手动调整原因（manual 时必填）
+> - 新增 `tooling_count` 工装数量 JSON 字段（在 product_materials 表）
 
 #### quote_summaries（报价汇总）
 
@@ -419,9 +452,52 @@ std_cost = (cycle_time_std / 3600) × (std_mhr_var + std_mhr_fix + personnel_std
 | plan_fx_rate | DECIMAL(10,6) | | 计划汇率 |
 | avg_wages_per_hour | DECIMAL(10,2) | | 平均时薪 |
 | useful_life_years | INT | DEFAULT 8 | 折旧年限 |
+| **rent_unit_price** | **DECIMAL(10,4)** | | **🔴 v1.8 新增：租金单价（元/㎡/年）** |
+| **energy_unit_price** | **DECIMAL(8,4)** | | **🔴 v1.8 新增：能源单价（元/kWh）** |
+| **interest_rate** | **DECIMAL(5,4)** | | **🔴 v1.8 新增：年利率** |
+| status | VARCHAR(20) | DEFAULT 'TEMPORARY' | **🆕 v1.9 更新：TEMPORARY/ACTIVE/INACTIVE |
+| created_at | DATETIME | DEFAULT NOW() | |
+| updated_at | DATETIME | ON UPDATE NOW() | |
+
+> **status 字段说明（v1.9 更新）：**
+> - `TEMPORARY`：临时工作中心，MHR 已计算但设备未投产
+> - `ACTIVE`：正式工作中心，已实际投产
+> - `INACTIVE`：停用，设备已退役
+
+#### work_center_time_rules（工作中心工时规则）🆕 v1.9
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | INT | PK, AUTO_INCREMENT | |
+| cost_center_id | VARCHAR(20) | FK, NOT NULL | 关联成本中心 |
+| calc_method | VARCHAR(20) | NOT NULL | 计算方法：LENGTH/COUNT/TIME |
+| input_variable | VARCHAR(50) | NOT NULL | 输入变量名（如"管子长度"、"压桩点数"） |
+| range_min | DECIMAL(10,2) | | 范围下限 |
+| range_max | DECIMAL(10,2) | | 范围上限（NULL 表示无上限） |
+| std_time_seconds | DECIMAL(10,2) | NOT NULL | 标准工时（秒） |
+| unit | VARCHAR(20) | | 单位（如"秒/根"、"秒/点"） |
 | status | VARCHAR(20) | DEFAULT 'ACTIVE' | ACTIVE/INACTIVE |
 | created_at | DATETIME | DEFAULT NOW() | |
 | updated_at | DATETIME | ON UPDATE NOW() | |
+
+**外键关系：**
+```sql
+FOREIGN KEY (cost_center_id) REFERENCES cost_centers(id) ON DELETE CASCADE
+```
+
+**用途说明：**
+- 存储每个工作中心的工时计算规则
+- 支持 3 种计算方法：长度法(LENGTH)、点数法(COUNT)、时间法(TIME)
+- 根据输入变量值匹配范围，返回标准工时
+
+**示例数据：**
+| cost_center_id | calc_method | input_variable | range_min | range_max | std_time_seconds | unit |
+|----------------|-------------|----------------|-----------|-----------|------------------|------|
+| M01 | COUNT | 管子类型 | - | - | 8 | 秒/根 |
+| A01 | COUNT | 管径 | 0 | 25 | 12 | 秒/点 |
+| A01 | COUNT | 管径 | 25 | NULL | 15 | 秒/点 |
+| M02 | TIME | 管子长度 | 0 | 1000 | 2.7 | 秒 |
+| M02 | TIME | 管子长度 | 1000 | 2000 | 5.0 | 秒 |
 
 ---
 
