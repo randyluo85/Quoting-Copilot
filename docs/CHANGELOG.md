@@ -10,6 +10,7 @@
 
 | 日期 | 文档 | 版本 | 变更内容 | 影响范围 | 责任人 |
 |------|------|------|----------|----------|------|
+| 2026-02-13 | docs/PRD.md | v2.0 → **v2.1** | ✅ **职责澄清**：Sales 负责创建项目（手动/导入）；VM 审核工时合理性；IE 填写标准工时+维护工艺路线库；Controlling 仅维护 MHR 固定参数 | 产品需求 | Randy Luo |
 | 2026-02-13 | docs/PROCESS_COST_LOGIC.md | v2.0 → **v2.1** | 🆕 **新增功能**：工时版本管理（auto/manual）；新工作中心建立流程（TEMPORARY→ACTIVE）；工时计算规则维护（长度法/点数法/时间法） | 业务逻辑 | Randy Luo |
 | 2026-02-13 | docs/DATABASE_DESIGN.md | v1.8 → **v1.9** | 🆕 **新增功能**：新增 work_center_time_rules 表；product_processes 新增 cycle_time_source/cycle_time_adjustment_reason；product_materials 新增 tooling_count；cost_centers.status 新增 TEMPORARY | 数据库设计 | Randy Luo |
 | 2026-02-13 | PROJECT_CONTEXT.md | v2.5 → **v2.6** | 🔄 同步 MHR 计算逻辑：更新工艺成本公式（明确时间单位为秒/需÷3600、人工=人数×时薪）；新增 cost_centers/process_rates 字段引用 | 业务逻辑 | Randy Luo |
