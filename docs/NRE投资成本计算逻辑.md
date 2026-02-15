@@ -225,7 +225,7 @@ $$UnitAmort = \frac{I_{total} \times (1 + R_{interest} \times Y_{amort})}{V_{amo
 
 ## 4. 数据库设计规范 (Schema)
 
-> **文档职责说明**：完整的数据库表结构定义请参考 [DATABASE_DESIGN.md](DATABASE_DESIGN.md)，本文档仅提供计算相关字段的补充说明。
+> **文档职责说明**：完整的数据库表结构定义请参考 [数据库设计.md](数据库设计.md)，本文档仅提供计算相关字段的补充说明。
 
 ### 表 1: `investment_items` (项目投资明细)
 
