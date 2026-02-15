@@ -542,19 +542,62 @@ sequenceDiagram
 
 ### 9.3 响应示例
 
+**v2.0 更新：包含计算参数明细**
+
 ```json
 {
   "project_id": "PRJ-2026-001",
-  "total_investment": 170000.00,
+  "total_investment": 218000.00,
   "items": [
     {
       "id": "INV-001",
       "item_type": "MOLD",
       "name": "Housing Injection Mold",
-      "unit_cost_est": 170000.00,
+      "calc_method": "FEATURE",
+      "calc_param": 500.00,
+      "calc_param_unit": "kg",
+      "unit_price_std": 300.00,
+      "unit_cost_est": 150000.00,
+      "feature_type": "WEIGHT",
       "quantity": 1,
       "asset_lifecycle": 300000,
-      "total": 170000.00
+      "total": 150000.00
+    },
+    {
+      "id": "INV-002",
+      "item_type": "GAUGE",
+      "name": "综合检具",
+      "calc_method": "POINTS",
+      "calc_param": 32.00,
+      "calc_param_unit": "points",
+      "unit_price_std": 500.00,
+      "unit_cost_est": 16000.00,
+      "quantity": 1,
+      "total": 16000.00
+    },
+    {
+      "id": "INV-003",
+      "item_type": "FIXTURE",
+      "name": "去水口工装",
+      "calc_method": "MODULES",
+      "calc_param": 4.00,
+      "calc_param_unit": "modules",
+      "unit_price_std": 8000.00,
+      "unit_cost_est": 32000.00,
+      "quantity": 1,
+      "total": 32000.00
+    },
+    {
+      "id": "INV-004",
+      "item_type": "FORMING_TOOL",
+      "name": "折弯成型工装",
+      "calc_method": "LENGTH",
+      "calc_param": 1200.00,
+      "calc_param_unit": "mm",
+      "unit_price_std": 25.00,
+      "unit_cost_est": 30000.00,
+      "quantity": 1,
+      "total": 30000.00
     }
   ],
   "strategy": {
@@ -562,8 +605,30 @@ sequenceDiagram
     "amortization_volume": 29750,
     "duration_years": 2,
     "capital_interest_rate": 0.06,
-    "unit_amortization": 6.40
+    "unit_amortization": 8.20
   },
+  "calculation_details": [
+    {
+      "item_id": "INV-001",
+      "formula": "calc_param × unit_price_std",
+      "calculation": "500 kg × ¥300/kg = ¥150,000"
+    },
+    {
+      "item_id": "INV-002",
+      "formula": "calc_param × unit_price_std",
+      "calculation": "32 points × ¥500/point = ¥16,000"
+    },
+    {
+      "item_id": "INV-003",
+      "formula": "calc_param × unit_price_std",
+      "calculation": "4 modules × ¥8,000/module = ¥32,000"
+    },
+    {
+      "item_id": "INV-004",
+      "formula": "calc_param × unit_price_std",
+      "calculation": "1200 mm × ¥25/mm = ¥30,000"
+    }
+  ],
   "warnings": [
     "销量 50,000 超出模具寿命 30,000，已自动增加重置模具费"
   ]
