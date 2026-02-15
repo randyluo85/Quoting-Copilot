@@ -1028,6 +1028,337 @@ $$ Payback\ (月数) = \frac{项目总投资}{项目月度净利} $$
 
 ---
 
+#### 12.2.5 Project Overview（项目简介）
+
+```markdown
+**页面名称：** Project Overview（项目简介）
+
+**功能描述：** 汇总项目所有相关信息，作为项目的"信息中心"。用户可在此页面查看项目基本信息、产品列表、询价单、报价版本和附件。
+
+**布局结构：**
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│ 项目简介                                          [状态徽章]        │
+│ PRJ-2024-001 · 博世汽车 · 年量 120,000                               │
+├─────────────────────────────────────────────────────────────────────┤
+│ ┌───────────────────────────────────┐ ┌─────────────────────────────┐│
+│ │ 产品列表 (3)                      │ │ 询价单                      ││
+│ │ ┌───────────────────────────────┐ │ │ • 物料询价单 #1 [待发送]    ││
+│ │ │ ▼ 发动机缸体                  │ │ │ • 物料询价单 #2 [已回复]    ││
+│ │ │   物料: 15项 工艺: 8项         │ │ │                             ││
+│ │ │   成本: ¥325.50               │ │ │ [发起询价]                  ││
+│ │ │   [查看完整 BOM]              │ │ ├─────────────────────────────┤│
+│ │ └───────────────────────────────┘ │ │ 报价单版本                  ││
+│ │ ┌───────────────────────────────┐ │ │ • v1.0 [已提交] 2024-02-05  ││
+│ │ │ ▶ 缸盖组件                    │ │ │ • v1.1 [草稿]  2024-02-06   ││
+│ │ └───────────────────────────────┘ │ │ [创建新版本]                ││
+│ │ ┌───────────────────────────────┐ │ ├─────────────────────────────┤│
+│ │ │ ▶ 密封垫片                    │ │ │ 附件 (5)                    ││
+│ │ └───────────────────────────────┘ │ │ 📄 BOM_v1.xlsx  [下载][删除]││
+│ └───────────────────────────────────┘ │ 📄 报价单.pdf   [下载][删除]││
+│                                       └─────────────────────────────┘│
+├─────────────────────────────────────────────────────────────────────┤
+│ 快速操作: [上传BOM] [成本核算] [QS报价] [导出PDF]                    │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**页面组成区域：**
+
+**1. 顶部项目信息卡片**
+- 项目名称、项目编号、ASAC编号
+- 客户名称、客户编号
+- 年量、目标利润率
+- 负责人信息（Sales、VM、IE、Controlling）
+- 项目状态徽章
+- 创建/更新时间
+
+**2. 左侧产品列表区域（60%宽度）**
+- Accordion 可折叠列表
+- 每个产品展开显示：
+  - BOM 摘要表格（前5条物料）
+  - 工艺摘要表格（前5条工序）
+  - 物料数、工艺数、待询价数统计
+  - 物料成本汇总、工艺成本汇总
+  - "查看完整 BOM" 链接按钮
+
+**3. 右侧信息卡片区域（40%宽度）**
+
+**3.1 询价单卡片**
+- 询价单列表（物料询价单）
+- 状态徽章：待发送 | 已发送 | 已回复 | 已确认
+- 创建时间、发送时间
+- "发起询价"按钮 → 打开邮件预览对话框
+
+**3.2 报价单版本卡片**
+- 多版本报价列表
+- 版本号（v1.0, v1.1, v2.0...）
+- 状态徽章：草稿 | 已提交 | 已批准
+- 总成本、报价、利润率
+- 创建时间
+- "创建新版本"按钮
+
+**3.3 附件管理卡片**
+- 附件文件列表
+- 文件图标（PDF/Excel/图片）
+- 文件名、大小、上传人、上传时间
+- 操作按钮：预览、下载、删除
+- "上传附件"按钮 → 拖拽上传区域
+
+**4. 底部快速操作栏**
+- 按钮组：[上传 BOM] [成本核算] [QS 报价] [导出 PDF]
+- 按钮状态根据项目进度动态启用/禁用
+
+**交互行为：**
+- 展开产品 → 显示 BOM 摘要（前5条物料+工艺）
+- 点击"查看完整 BOM" → 跳转 BOM 管理页面，自动选中该产品
+- 点击"发起询价" → 打开询价邮件预览对话框
+- 上传附件 → 拖拽或点击上传，显示上传进度
+- 下载附件 → 直接触发浏览器下载
+- 预览附件 → PDF/图片在 Dialog 中预览，Excel 下载
+- 创建新报价版本 → 自动递增版本号，跳转到报价编辑页
+- 点击快速操作按钮 → 跳转到对应功能页面
+
+**数据展示需求：**
+
+```typescript
+// 项目基本信息
+interface ProjectOverview {
+  id: string;              // 项目编号
+  asacNumber: string;      // ASAC 编号
+  customerNumber: string;  // 客户编号
+  clientName: string;      // 客户名称
+  projectName: string;     // 项目名称
+  annualVolume: string;    // 年量
+  targetMargin?: number;   // 目标利润率
+  status: ProjectStatus;   // 状态
+  owners: ProjectOwner;    // 负责人
+  createdDate: string;
+  updatedDate: string;
+}
+
+// 产品 BOM 摘要
+interface ProductBOMSummary {
+  productId: string;
+  productName: string;
+  productCode: string;
+  materialCount: number;      // 物料数量
+  processCount: number;       // 工艺数量
+  needInquiryCount: number;   // 待询价数量
+  totalMaterialCost?: number; // 物料成本汇总
+  totalProcessCost?: number;  // 工艺成本汇总
+  materials: Material[];      // 物料列表（前5条）
+  processes: Process[];       // 工艺列表（前5条）
+}
+
+// 询价单
+interface ProcurementInquiry {
+  id: string;
+  projectId: string;
+  status: 'pending' | 'sent' | 'replied' | 'confirmed';
+  materials: Array<{
+    materialCode: string;
+    materialName: string;
+    quantity: number;
+    unit: string;
+  }>;
+  createdAt: string;
+  sentAt?: string;
+  repliedAt?: string;
+}
+
+// 报价单版本
+interface QuoteVersion {
+  id: string;
+  projectId: string;
+  versionNumber: number;      // 1.0, 1.1, 2.0...
+  status: 'draft' | 'submitted' | 'approved';
+  totalCost: number;
+  quotedPrice?: number;
+  actualMargin?: number;
+  createdAt: string;
+}
+
+// 附件
+interface ProjectAttachment {
+  id: string;
+  projectId: string;
+  fileName: string;
+  fileType: string;  // pdf, xlsx, png, etc.
+  fileSize: number;
+  uploadedBy: string;
+  uploadedAt: string;
+  fileUrl: string;
+}
+```
+
+**组件依赖：** Accordion, Card, Badge, Button, Table, Dialog, Progress, Tooltip
+
+**ShadcnUI 组件：**
+- `Card` 用于各区域卡片
+- `Accordion` 用于产品列表折叠
+- `Table` 用于 BOM 摘要展示
+- `Badge` 用于状态显示
+- `Button` 用于操作按钮
+- `Dialog` 用于邮件预览、附件预览
+- `Progress` 用于上传进度
+- `Tooltip` 用于信息提示
+
+**API 依赖：**
+| API | 方法 | 状态 | 说明 |
+|-----|------|------|------|
+| `/api/v1/projects/{id}` | GET | **已实现** | 获取项目详情 |
+| `/api/v1/projects/{id}/products` | GET | **已实现** | 获取产品列表 |
+| `/api/v1/bom/products/{projectId}` | GET | **已实现** | 获取 BOM 数据 |
+| `/api/v1/procurement/summary/{projectId}` | GET | **需新增** | 获取询价单列表 |
+| `/api/v1/quotations/{projectId}` | GET | **需新增** | 获取报价版本列表 |
+| `/api/v1/attachments/{projectId}` | GET | **需新增** | 获取附件列表 |
+| `/api/v1/attachments/{projectId}` | POST | **需新增** | 上传附件 |
+| `/api/v1/attachments/{id}` | DELETE | **需新增** | 删除附件 |
+
+**验收标准：**
+| 场景 | 预期结果 |
+|------|---------|
+| 页面加载 | 2秒内显示项目信息、产品列表、询价单、报价单 |
+| 展开产品 | 显示 BOM 摘要（前5条物料+工艺） |
+| 点击"查看完整 BOM" | 跳转到 BOM 管理页面，自动选中该产品 |
+| 发起询价 | 打开询价邮件预览对话框 |
+| 上传附件 | 支持拖拽上传，显示上传进度条 |
+| 下载附件 | 正确下载对应文件 |
+| 创建新报价版本 | 自动递增版本号，跳转到报价编辑页 |
+| 快速操作按钮 | 根据项目进度正确启用/禁用 |
+```
+
+---
+
+#### 12.2.6 Project Workflow（项目管理流程）
+
+```markdown
+**页面名称：** Project Workflow（项目管理流程）
+
+**功能描述：** 可视化展示项目从创建到完成的完整流程，显示各步骤的状态和进度，引导用户完成报价工作流。
+
+**UI 展示方式：** 左侧侧边栏流程图（当前已通过 AppSidebar 组件实现）
+
+**流程步骤（9步）：**
+
+| 序号 | 步骤名称 | 视图 | 子步骤 | 触发条件 |
+|------|---------|------|--------|----------|
+| 1 | 项目总览 | dashboard | - | 始终可访问 |
+| 2 | 创建项目 | new-project | - | 项目未创建时 |
+| 3 | 报价管理 | bom | 物料清单、工艺清单、投资清单(可选)、其他清单(可选) | BOM 未上传时 |
+| 4 | 分支：新工艺评估 | process | IE 工艺评估 | 检测到新工艺时触发 |
+| 5 | 分支：新物料询价 | - | 采购上传报价单 | 检测到新物料时触发 |
+| 6 | 成本核算 | cost-calc | 销售查看成本 | BOM 已解析后 |
+| 7 | QS/BC/Payback | quotation | QS 报价摘要、BC 成本分析、Payback 投资回收 | 成本计算完成后 |
+| 8 | 控制审核 | - | - | v2.0 已移除此步骤 |
+| 9 | 报价输出 | output | - | 所有步骤完成后 |
+
+**状态标识：**
+
+| 状态 | 图标 | 颜色 | 说明 |
+|------|------|------|------|
+| 已完成 | ✓ (CheckCircle) | 绿色 bg-green-500 | 该步骤已完成 |
+| 进行中 | ⏳ (Clock) | 蓝色 bg-blue-500 | 当前正在执行的步骤 |
+| 待执行 | ○ (Circle) | 灰色 bg-gray-300 | 尚未开始的步骤 |
+| 条件触发 | 虚线框 + Badge | 橙色 | 仅在特定条件下触发 |
+
+**布局结构：**
+```
+┌─────────────────────────┐
+│ 项目进度                │
+├─────────────────────────┤
+│ ✓ 项目总览              │ ← 已完成（绿色）
+│ ✓ 创建项目              │ ← 已完成（绿色）
+│ ⏳ 报价管理             │ ← 进行中（蓝色）
+│   ├─ 物料清单           │
+│   ├─ 工艺清单           │
+│   ├─ 投资清单           │
+│   └─ 其他清单           │
+│ ┌─ 分支：新工艺评估 ─┐  │ ← 条件触发（虚线框）
+│ │  [条件触发]        │  │
+│ └───────────────────┘  │
+│ ┌─ 分支：新物料询价 ─┐  │ ← 条件触发（虚线框）
+│ │  [条件触发]        │  │
+│ └───────────────────┘  │
+│ ○ 成本核算              │ ← 待执行（灰色）
+│ ○ QS/BC/Payback        │ ← 待执行（灰色）
+│ ○ 报价输出              │ ← 待执行（灰色）
+├─────────────────────────┤
+│ 图例说明                │
+│ ✓ 已完成  ⏳ 进行中     │
+│ ○ 待执行  ┈ 条件触发    │
+└─────────────────────────┘
+```
+
+**交互行为：**
+- 点击已完成步骤 → 跳转到对应页面，可查看/编辑
+- 点击进行中步骤 → 跳转到对应页面
+- 点击待执行步骤 → 显示 Tooltip 提示"需先完成前置步骤"
+- 悬停步骤 → 显示状态详情 Tooltip（完成时间、操作人等）
+- 流程自动更新 → 根据项目状态自动计算各步骤状态
+
+**状态判断逻辑：**
+
+```typescript
+// 步骤状态计算函数
+function getStepStatus(stepId: string, project: Project): StepStatus {
+  const { status, bomData, hasNewMaterials, hasNewProcesses } = project;
+
+  switch (stepId) {
+    case 'dashboard':
+      return 'completed'; // 始终可访问
+    case 'new-project':
+      return status !== 'draft' ? 'completed' : 'active';
+    case 'bom':
+      if (!bomData?.isParsed) return 'active';
+      return 'completed';
+    case 'process-assessment':
+      return hasNewProcesses ? 'active' : 'optional';
+    case 'procurement':
+      return hasNewMaterials ? 'active' : 'optional';
+    case 'cost-calc':
+      if (bomData?.isParsed) return 'active';
+      return 'pending';
+    case 'quotation':
+      if (status === 'calculated' || status === 'sales_input') return 'active';
+      if (status === 'completed') return 'completed';
+      return 'pending';
+    case 'output':
+      return status === 'completed' ? 'completed' : 'pending';
+    default:
+      return 'pending';
+  }
+}
+```
+
+**组件依赖：** Sidebar, SidebarContent, SidebarGroup, Badge, Tooltip
+
+**ShadcnUI 组件：**
+- `Sidebar` / `SidebarContent` / `SidebarGroup` 用于侧边栏容器
+- `Badge` 用于"条件触发"标签
+- `Tooltip` 用于步骤详情提示
+- 自定义图标组件（CheckCircle, Clock, Circle）
+
+**API 依赖：**
+| API | 方法 | 状态 | 说明 |
+|-----|------|------|------|
+| `/api/v1/projects/{id}` | GET | **已实现** | 获取项目状态 |
+| `/api/v1/bom/products/{projectId}` | GET | **已实现** | 获取 BOM 解析状态 |
+
+**验收标准：**
+| 场景 | 预期结果 |
+|------|---------|
+| 进入 BOM 管理页 | 侧边栏"报价管理"步骤显示为 active（蓝色时钟图标） |
+| 完成 BOM 上传 | 侧边栏"报价管理"步骤变为 completed（绿色勾） |
+| 检测到新工艺 | 侧边栏"分支：新工艺评估"显示"条件触发"徽章 |
+| 点击已完成步骤 | 正确跳转到对应页面，保留已填写数据 |
+| 点击待执行步骤 | 显示 Tooltip 提示需先完成前置步骤 |
+| 流程自动更新 | 项目状态变更后，侧边栏状态自动重新计算 |
+```
+
+---
+
 ### 12.3 通用组件 Prompt 规范
 
 #### 12.3.1 状态徽章（Status Badge）
