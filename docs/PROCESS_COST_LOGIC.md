@@ -274,90 +274,25 @@ $$Cost_{std} = (MHR_{total} + Rate_{labor}) \times \frac{Cycle\ Time}{3600}$$
 
 ---
 
-## 7. 数据库设计规范 (Schema)
+## 7. 数据库设计参考
 
-### 7.1 cost_centers (成本中心主数据)
+> **文档职责说明**：数据库表结构的详细定义请参考 [DATABASE_DESIGN.md](DATABASE_DESIGN.md)，本文档仅提供引用链接。
 
-| 字段名 | 类型 | 说明 | 示例值 |
-|--------|------|------|--------|
-| `id` | VARCHAR(20) | PK, 成本中心代码 | CC001 |
-| `factory_id` | VARCHAR(20) | FK, 所属工厂 | F001 |
-| `name` | VARCHAR(100) | 成本中心名称 | 注塑车间A线 |
-| `net_production_hours` | DECIMAL(8,2) | 年度额定生产小时数 | 4800.00 |
-| `efficiency_rate` | DECIMAL(5,4) | 稼动率 (0-1) | 0.8000 |
-| `plan_fx_rate` | DECIMAL(10,6) | 计划汇率 | 7.830000 |
-| `avg_wages_per_hour` | DECIMAL(10,2) | **小时工资** | 85.50 |
-| `useful_life_years` | INT | **折旧年限** | 8 |
-| `rent_unit_price` | DECIMAL(10,4) | **🆕 租金单价（元/㎡/年）** | 1200.00 |
-| `energy_unit_price` | DECIMAL(8,4) | **🆕 能源单价（元/kWh）** | 0.85 |
-| `interest_rate` | DECIMAL(5,4) | **🆕 利率（年）** | 0.0600 |
-| `status` | VARCHAR(20) | **🆕 TEMPORARY / ACTIVE / INACTIVE** | ACTIVE |
-| `created_at` | DATETIME | 创建时间 | DEFAULT NOW() |
+本模块涉及的数据表结构详见 DATABASE_DESIGN.md：
 
-> **status 字段说明**：
-> - `TEMPORARY`：临时工作中心，MHR 已计算但设备未投产
-> - `ACTIVE`：正式工作中心，已实际投产
-> - `INACTIVE`：停用，设备已退役
+| 表名 | 用途 | 详细定义位置 |
+|------|------|-------------|
+| `cost_centers` | 成本中心主数据（含租金单价、能源单价、利率等固定参数） | [DATABASE_DESIGN.md §3.3](DATABASE_DESIGN.md#master-data-extension) |
+| `process_rates` | 工序费率主数据（含 MHR 计算相关字段） | [DATABASE_DESIGN.md §3.1](DATABASE_DESIGN.md#master-data) |
+| `product_processes` | 产品工艺路线（含工时快照、人工费率快照） | [DATABASE_DESIGN.md §3.2](DATABASE_DESIGN.md#transaction-data) |
+| `work_center_time_rules` | 工作中心工时规则（长度法/点数法/时间法） | [DATABASE_DESIGN.md §3.3](DATABASE_DESIGN.md#master-data-extension) |
 
-### 7.2 process_rates (工序费率主数据) - 扩展
+**关键字段说明（与本逻辑文档相关）：**
 
-| 字段名 | 类型 | 说明 | 示例值 |
-|--------|------|------|--------|
-| `id` | INT | PK, AUTO_INCREMENT | - |
-| `process_code` | VARCHAR(50) | UNIQUE, **工序编号**（字母+数字） | I01 |
-| `cost_center_id` | VARCHAR(20) | FK, 关联成本中心 | CC001 |
-| `process_name` | VARCHAR(100) | 工序名称 | 注塑成型 |
-| `work_center` | VARCHAR(1) | **🆕 工作中心字母** | I |
-| `equipment_origin_value` | DECIMAL(14,2) | **🆕 设备购置原值** | 1500000.00 |
-| `floor_area` | DECIMAL(8,2) | **🆕 占用面积（㎡）** | 50.00 |
-| `rated_power` | DECIMAL(8,2) | **🆕 额定功率（kW）** | 120.00 |
-| `planned_hours` | DECIMAL(10,2) | **🆕 计划小时数** | 3840.00 |
-| `load_factor` | DECIMAL(3,2) | **🆕 负载系数** | 0.70 |
-| `std_mhr_var` | DECIMAL(10,2) | 标准变动费率（计算值） | 71.40 |
-| `std_mhr_fix` | DECIMAL(10,2) | 标准固定费率（计算值） | 85.00 |
-| `std_mhr_total` | DECIMAL(10,2) | **🆕 标准总费率** | 156.40 |
-| `efficiency_factor` | DECIMAL(4,2) | 效率系数 | 1.00 |
-| `status` | VARCHAR(20) | ACTIVE / INACTIVE | ACTIVE |
-| `created_at` | DATETIME | 创建时间 | DEFAULT NOW() |
-
-### 7.3 product_processes (产品工艺路线) - 扩展
-
-| 字段名 | 类型 | 说明 | 示例值 |
-|--------|------|------|--------|
-| `id` | CHAR(36) | PK, UUID | - |
-| `project_product_id` | CHAR(36) | FK, 关联产品 | - |
-| `process_code` | VARCHAR(50) | FK, 工序编号 | I01 |
-| `sequence_order` | INT | 工序顺序 | 10 |
-| `cycle_time_std` | INT | 标准工时（秒） | 45 |
-| **`cycle_time_source`** | **VARCHAR(10)** | **🆕 工时来源：auto / manual** | auto |
-| **`cycle_time_adjustment_reason`** | **TEXT** | **🆕 手动调整原因（manual 时必填）** | - |
-| `personnel_std` | DECIMAL(4,2) | 标准人工配置 | 1.0 |
-| `labor_rate` | DECIMAL(10,2) | **🆕 人工费率快照** | 85.50 |
-| `mhr_snapshot` | DECIMAL(10,2) | **🆕 MHR 快照** | 156.40 |
-| `std_cost` | DECIMAL(12,4) | 标准成本 | 3.0125 |
-| `remarks` | TEXT | 备注 | - |
-| `created_at` | DATETIME | 创建时间 | DEFAULT NOW() |
-
-### 7.4 work_center_time_rules (工作中心工时规则) 🆕
-
-| 字段名 | 类型 | 说明 | 示例值 |
-|--------|------|------|--------|
-| `id` | INT | PK, AUTO_INCREMENT | - |
-| `cost_center_id` | VARCHAR(20) | FK, 关联成本中心 | M01 |
-| `calc_method` | VARCHAR(20) | 计算方法：LENGTH / COUNT / TIME | COUNT |
-| `input_variable` | VARCHAR(50) | 输入变量名 | 管径 |
-| `range_min` | DECIMAL(10,2) | 范围下限 | 0 |
-| `range_max` | DECIMAL(10,2) | 范围上限（NULL 表示无上限） | 25 |
-| `std_time_seconds` | DECIMAL(10,2) | 标准工时（秒） | 12 |
-| `unit` | VARCHAR(20) | 单位 | 秒/点 |
-| `status` | VARCHAR(20) | ACTIVE / INACTIVE | ACTIVE |
-| `created_at` | DATETIME | 创建时间 | DEFAULT NOW() |
-
-> **规则匹配逻辑**：
-> 1. 根据成本中心 ID 查询所有 ACTIVE 规则
-> 2. 根据 `calc_method` 确定输入变量类型
-> 3. 匹配 `range_min` 和 `range_max` 范围
-> 4. 返回对应的 `std_time_seconds`
+- `cost_centers.status`：TEMPORARY / ACTIVE / INACTIVE（见 §5.2 状态说明）
+- `product_processes.cycle_time_source`：auto / manual（见 §4.1 工时来源分类）
+- `product_processes.cycle_time_adjustment_reason`：手动调整原因（manual 时必填）
+- `work_center_time_rules.calc_method`：LENGTH / COUNT / TIME（见 §6.1 规则配置）
 
 ---
 
