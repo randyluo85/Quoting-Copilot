@@ -225,7 +225,7 @@ $$UnitAmort = \frac{I_{total} \times (1 + R_{interest} \times Y_{amort})}{V_{amo
 
 ## 4. 数据库设计规范 (Schema)
 
-建议在 MySQL 中创建以下表结构：
+> **文档职责说明**：完整的数据库表结构定义请参考 [DATABASE_DESIGN.md](DATABASE_DESIGN.md)，本文档仅提供计算相关字段的补充说明。
 
 ### 表 1: `investment_items` (项目投资明细)
 
@@ -234,17 +234,40 @@ $$UnitAmort = \frac{I_{total} \times (1 + R_{interest} \times Y_{amort})}{V_{amo
 | `id` | CHAR(36) | PK, UUID | - |
 | `project_id` | CHAR(36) | FK, 关联项目 | - |
 | `product_id` | CHAR(36) | **FK, 关联 BOM/产品** | 指向 Housing |
-| `item_type` | VARCHAR(20) | 枚举: MOLD, GAUGE, JIG, FIXTURE | MOLD |
+| `item_type` | VARCHAR(20) | 枚举: MOLD, GAUGE, JIG, FIXTURE, FORMING_TOOL | MOLD |
 | `name` | VARCHAR(200) | 投资项名称 | Housing Injection Mold |
-| `unit_cost_est` | DECIMAL(12,2) | 预估单价 | 170000.00 |
+| `unit_cost_est` | DECIMAL(12,2) | **计算后单价**（= calc_param × unit_price_std） | 170000.00 |
 | `currency` | VARCHAR(10) | 币种 | CNY |
 | `quantity` | INT | 数量 | 1 |
 | `asset_lifecycle` | INT | 设计寿命 (模次) | 300000 |
 | `is_shared` | BOOLEAN | 是否共享资产 | FALSE |
 | `shared_source_id` | CHAR(36) | 若共享，指向源 ID | NULL |
 | `status` | VARCHAR(20) | 状态: DRAFT / CONFIRMED | DRAFT |
-| `created_at` | DATETIME | 创建时间 | DEFAULT NOW() |
-| `updated_at` | DATETIME | 更新时间 | ON UPDATE NOW() |
+
+#### 🆕 计算参数字段（v2.0 新增）
+
+| 字段名 | 类型 | 适用类型 | 说明 | 示例值 |
+|--------|------|----------|------|--------|
+| `calc_method` | VARCHAR(20) | ALL | 计算方法: FEATURE / POINTS / MODULES / LENGTH / FIXED | FEATURE |
+| `calc_param` | DECIMAL(10,2) | ALL | **计算参数值**（点位数/模块数/长度/特征值） | 32.00 |
+| `calc_param_unit` | VARCHAR(20) | ALL | 参数单位: kg / cm3 / ton / points / modules / mm | points |
+| `unit_price_std` | DECIMAL(10,2) | ALL | **标准单价**（从标准库获取或手动输入） | 500.00 |
+| `feature_type` | VARCHAR(20) | MOLD | 模具特征类型: WEIGHT / VOLUME / TONNAGE | WEIGHT |
+
+**计算逻辑：**
+```
+unit_cost_est = calc_param × unit_price_std
+total_cost = unit_cost_est × quantity
+```
+
+**各类型字段映射：**
+| 投资类型 | calc_method | calc_param | calc_param_unit | feature_type |
+|----------|-------------|------------|-----------------|--------------|
+| MOLD (模具) | FEATURE | 重量/体积/吨位 | kg / cm³ / ton | WEIGHT / VOLUME / TONNAGE |
+| GAUGE (检具) | POINTS | 点位数 | points | - |
+| FIXTURE (工装) | MODULES | 功能模块数 | modules | - |
+| FORMING_TOOL (成型工装) | LENGTH | 长度 | mm | - |
+| JIG (夹具) | FIXED | 1 | unit | - |
 
 ### 表 2: `amortization_strategies` (分摊策略)
 
