@@ -640,13 +640,9 @@ $$ Payback\ (月数) = \frac{项目总投资}{项目月度净利} $$
 
 **定义：** 工厂大门的制造成本，不含研发和模具分摊
 
-**包含内容：**
-- 物料成本（Raw Materials + Purchased Parts）
-- 工艺成本（Machine Cost + Labor Cost）
+**简要说明：** HK III = 物料成本 + 工艺成本
 
-**业务意义：** 衡量工厂生产这个产品是否赚钱的核心指标
-
-> **详细计算逻辑：** [docs/BUSINESS_CASE_LOGIC.md](BUSINESS_CASE_LOGIC.md) §3 HK III 计算
+> **详细定义与计算逻辑：** [商业案例计算逻辑.md](商业案例计算逻辑.md#hk-iii) - 唯一来源
 
 ---
 
