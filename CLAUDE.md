@@ -49,20 +49,20 @@
 
 | 表名 | 用途 | 详细定义 |
 |------|------|---------|
-| `materials` | 物料主数据 | [DATABASE_DESIGN.md §3.1](docs/DATABASE_DESIGN.md#master-data) |
-| `process_rates` | 工序费率 | [DATABASE_DESIGN.md §3.1](docs/DATABASE_DESIGN.md#master-data) |
-| `factories` | 工厂主数据 | [DATABASE_DESIGN.md §3.3](docs/DATABASE_DESIGN.md#master-data-extension) 🔴 v1.5 |
-| `std_investment_costs` | 投资项标准库 | [DATABASE_DESIGN.md §3.4](docs/DATABASE_DESIGN.md#investment-standards) 🔴 v1.5 |
-| `projects` | 项目表 | [DATABASE_DESIGN.md §3.2](docs/DATABASE_DESIGN.md#transaction-data) |
-| `project_products` | 项目-产品 | [DATABASE_DESIGN.md §3.2](docs/DATABASE_DESIGN.md#transaction-data) |
-| `product_materials` | BOM 行 | [DATABASE_DESIGN.md §3.2](docs/DATABASE_DESIGN.md#transaction-data) |
-| `product_processes` | 工艺路线 | [DATABASE_DESIGN.md §3.2](docs/DATABASE_DESIGN.md#transaction-data) |
-| `quote_summaries` | 报价汇总（多版本） | [DATABASE_DESIGN.md §3.2](docs/DATABASE_DESIGN.md#transaction-data) |
-| `material_vectors` | 物料语义向量 | [DATABASE_DESIGN.md §3.7](docs/DATABASE_DESIGN.md#vector-tables) 🆕 v1.7 |
-| `product_vectors` | 产品指纹向量 | [DATABASE_DESIGN.md §3.7](docs/DATABASE_DESIGN.md#vector-tables) 🆕 v1.7 |
+| `materials` | 物料主数据 | [数据库设计.md §3.1](docs/数据库设计.md#master-data) |
+| `process_rates` | 工序费率 | [数据库设计.md §3.1](docs/数据库设计.md#master-data) |
+| `factories` | 工厂主数据 | [数据库设计.md §3.3](docs/数据库设计.md#master-data-extension) 🔴 v1.5 |
+| `std_investment_costs` | 投资项标准库 | [数据库设计.md §3.4](docs/数据库设计.md#investment-standards) 🔴 v1.5 |
+| `projects` | 项目表 | [数据库设计.md §3.2](docs/数据库设计.md#transaction-data) |
+| `project_products` | 项目-产品 | [数据库设计.md §3.2](docs/数据库设计.md#transaction-data) |
+| `product_materials` | BOM 行 | [数据库设计.md §3.2](docs/数据库设计.md#transaction-data) |
+| `product_processes` | 工艺路线 | [数据库设计.md §3.2](docs/数据库设计.md#transaction-data) |
+| `quote_summaries` | 报价汇总（多版本） | [数据库设计.md §3.2](docs/数据库设计.md#transaction-data) |
+| `material_vectors` | 物料语义向量 | [数据库设计.md §3.7](docs/数据库设计.md#vector-tables) 🆕 v1.7 |
+| `product_vectors` | 产品指纹向量 | [数据库设计.md §3.7](docs/数据库设计.md#vector-tables) 🆕 v1.7 |
 
-> 完整设计文档：[docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md)
-> 向量化设计文档：[docs/VECTOR_DESIGN.md](docs/VECTOR_DESIGN.md) 🆕
+> 完整设计文档：[docs/数据库设计.md](docs/数据库设计.md)
+> 向量化设计文档：[docs/向量设计.md](docs/向量设计.md) 🆕
 
 ## 📝 API Data Models (Pydantic)
 
