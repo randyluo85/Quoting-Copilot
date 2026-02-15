@@ -335,20 +335,18 @@ flowchart TD
 
 #### 3.3.3 MHR 计算公式
 
-**固定成本/小时（由 Controlling 维护）：**
-$$Cost_{fix} = \frac{Rent \times Area}{Hours} + \frac{Equipment}{Years \times Hours} + \frac{Equipment \times Rate}{2 \times Hours}$$
+> **详细公式：** [工艺成本计算逻辑.md](工艺成本计算逻辑.md#mhr计算) - 唯一来源
 
-**变动成本/小时（由 IE 输入）：**
-$$Cost_{var} = EnergyPrice \times Power \times LoadFactor$$
-
-**MHR 总费率：**
-$$MHR_{total} = MHR_{fix} + MHR_{var}$$
+**摘要：**
+- 固定成本/小时 = 租金 + 折旧 + 利息
+- 变动成本/小时 = 能源消耗
+- MHR 总费率 = 固定成本 + 变动成本
 
 #### 3.3.4 工艺成本公式
 
-$$Cost_{process} = \sum_{j=1}^{m} \left( \frac{CycleTime_j}{3600} \times (MHR_{total,j} + Personnel_j \times LaborRate_j) \right)$$
+> **详细公式：** [工艺成本计算逻辑.md](工艺成本计算逻辑.md#工艺成本) - 唯一来源
 
-> **详细逻辑：** 参见 [PROCESS_COST_LOGIC.md](PROCESS_COST_LOGIC.md)
+**摘要：** 工艺成本 = (MHR + 人工成本) × (节拍 / 3600)
 
 ### 3.4 投资成本计算
 
