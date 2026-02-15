@@ -892,15 +892,15 @@ WHERE id = 'PRJ-2024-001';
 
 ## 10. 相关文档索引
 
-| 文档 | 说明 |
-|------|------|
-| [PRD.md](PRD.md) | 产品需求文档 |
-| [PROCESS_COST_LOGIC.md](PROCESS_COST_LOGIC.md) | 工艺成本计算逻辑 |
-| [NRE_INVESTMENT_LOGIC.md](NRE_INVESTMENT_LOGIC.md) | NRE 投资成本计算逻辑 |
-| [QUOTATION_SUMMARY_LOGIC.md](QUOTATION_SUMMARY_LOGIC.md) | QS 计算逻辑 |
-| [BUSINESS_CASE_LOGIC.md](BUSINESS_CASE_LOGIC.md) | BC 计算逻辑 |
-| [PAYBACK_LOGIC.md](PAYBACK_LOGIC.md) | Payback 计算逻辑 |
-| [DATABASE_DESIGN.md](DATABASE_DESIGN.md) | 数据库设计 |
+| 文档 | 说明 | 职责 |
+|------|------|------|
+| [产品需求文档.md](产品需求文档.md) | 产品需求文档 | 功能规格、角色职责 |
+| [工艺成本计算逻辑.md](工艺成本计算逻辑.md) | 工艺成本计算逻辑 | MHR 公式（唯一来源）|
+| [NRE投资成本计算逻辑.md](NRE投资成本计算逻辑.md) | NRE 投资成本计算逻辑 | 投资类型、分摊公式（唯一来源）|
+| [报价汇总计算逻辑.md](报价汇总计算逻辑.md) | QS 计算逻辑 | QS 公式（唯一来源）|
+| [商业案例计算逻辑.md](商业案例计算逻辑.md) | BC 计算逻辑 | HK/SK/DB 定义（唯一来源）|
+| [投资回收期计算逻辑.md](投资回收期计算逻辑.md) | Payback 计算逻辑 | Payback 公式（唯一来源）|
+| [数据库设计.md](数据库设计.md) | 数据库设计 | 表结构（唯一来源）|
 
 ---
 
