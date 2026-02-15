@@ -254,9 +254,10 @@ flowchart TD
 
 | 文档 | 关联点 |
 |------|--------|
-| `DATABASE_DESIGN.md` | 依赖 `projects`, `quote_summaries` 表 |
-| `BUSINESS_CASE_LOGIC.md` | 共享分摊逻辑、HK/SK 计算公式 |
-| `PAYBACK_LOGIC.md` | DB4 数据用于投资回收期分析 |
+| [数据库设计.md](数据库设计.md) | 依赖 `projects`, `quote_summaries` 表 |
+| [商业案例计算逻辑.md](商业案例计算逻辑.md) | 共享 HK/SK/DB 计算公式（唯一来源）|
+| [NRE投资成本计算逻辑.md](NRE投资成本计算逻辑.md) | 投资分摊计算公式（唯一来源）|
+| [投资回收期计算逻辑.md](投资回收期计算逻辑.md) | DB4 数据用于投资回收期分析 |
 
 ### 7.1 数据流向
 
