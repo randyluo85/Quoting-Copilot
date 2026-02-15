@@ -570,9 +570,9 @@ interface Material {
 ## 6. 相关文档
 
 - [CLAUDE.md](../CLAUDE.md) - 开发协作指南
-- [docs/VECTOR_DESIGN.md](VECTOR_DESIGN.md) - 向量化数据架构设计 🆕
-- [docs/TESTING_STRATEGY.md](TESTING_STRATEGY.md) - 测试策略
-- [docs/DEPLOYMENT.md](DEPLOYMENT.md) - 部署指南
+- [向量设计.md](向量设计.md) - 向量化数据架构设计 🆕
+- [测试策略.md](测试策略.md) - 测试策略
+- [部署指南.md](部署指南.md) - 部署指南
 
 ---
 
