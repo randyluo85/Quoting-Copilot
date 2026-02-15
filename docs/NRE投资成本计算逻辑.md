@@ -489,10 +489,10 @@ sequenceDiagram
 
 | 文档 | 关联点 |
 |------|--------|
-| `DATABASE_DESIGN.md` | 依赖 `projects`, `project_products` 表 |
-| `QUOTATION_SUMMARY_LOGIC.md` | 分摊结果影响 QS 表的 Tooling 列 |
-| `PAYBACK_LOGIC.md` | 投资总额是 Payback 计算的输入 |
-| `BUSINESS_CASE_LOGIC.md` | 分摊策略影响 BC 表的年度成本 |
+| [数据库设计.md](数据库设计.md) | 依赖 `projects`, `project_products` 表 |
+| [报价汇总计算逻辑.md](报价汇总计算逻辑.md) | 分摊结果影响 QS 表的 Tooling 列 |
+| [投资回收期计算逻辑.md](投资回收期计算逻辑.md) | 投资总额是 Payback 计算的输入 |
+| [商业案例计算逻辑.md](商业案例计算逻辑.md) | 分摊策略影响 BC 表的年度成本 |
 
 ### 8.1 数据流向
 
