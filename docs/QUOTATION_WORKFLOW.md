@@ -426,11 +426,82 @@ $$UnitRnD = \frac{RnD_{total} \times (1 + R_{interest} \times Y_{amort})}{V_{amo
 
 #### 3.6.2 成本计算公式汇总
 
-| 成本项 | 公式 |
-|--------|------|
-| **HK III** | $Cost_{material} + Cost_{process}$ |
-| **SK-1** | $HK\ III + (Net\_Sales \times S\&A\_Rate)$ |
-| **SK-2** | $SK\text{-}1 + Tooling + R\&D + WorkingCap + Logistics$ |
+| 成本项 | 公式 | 计算责任方 |
+|--------|------|-----------|
+| **HK III** | $Cost_{material} + Cost_{process}$ | **VM** |
+| **SK-1** | $HK\ III + (Net\_Sales \times S\&A\_Rate)$ | 系统（Sales 输入参数后） |
+| **SK-2** | $SK\text{-}1 + Tooling + R\&D + WorkingCap + Logistics$ | 系统（Sales 输入参数后） |
+
+#### 3.6.3 VM → Sales 交付流程 🔴
+
+```mermaid
+sequenceDiagram
+    participant VM as VM (成本核算)
+    participant System as 系统
+    participant Sales as Sales (商业参数)
+
+    Note over VM: 阶段二：成本核算
+    VM->>System: 计算物料成本
+    VM->>System: 计算工艺成本
+    VM->>System: 计算投资成本（分摊策略）
+    VM->>System: 计算研发成本（摊销策略）
+    System->>System: 汇总生成 HK III
+    System-->>VM: 显示成本汇总
+
+    Note over VM: VM 确认与校验
+    VM->>VM: 校验 HK III 合理性
+    VM->>VM: 检查红绿灯状态
+    VM->>VM: 确认成本数据准确
+
+    VM->>System: 确认成本核算完成
+    System->>System: 状态: calculated
+    System->>Sales: 📧 通知 Sales 介入
+
+    Note over Sales: 阶段三：商业参数
+    Sales->>System: 查看成本汇总 (HK III)
+    Sales->>System: 输入商业参数
+    System->>System: 计算 SK-1, SK-2
+    System->>System: 计算 QS/BC/Payback
+    System-->>Sales: 显示计算结果
+```
+
+#### 3.6.4 HK III 校验规则
+
+VM 在确认成本核算完成前，需要校验以下内容：
+
+| 校验项 | 校验规则 | 处理方式 |
+|--------|----------|----------|
+| 物料状态 | 所有物料状态不能为 🔴 | 触发询价或手动填写价格 |
+| 工艺状态 | 所有工序状态不能为 🔴 | 通知 IE 填写工时 |
+| 成本异常 | 单件成本与历史偏差 > 30% | 黄色警告，VM 确认后可继续 |
+| 数据完整性 | 必填字段不能为空 | 红色错误，必须补充 |
+
+#### 3.6.5 Sales 接收的 HK III 数据结构
+
+```json
+{
+  "projectId": "PRJ-2024-001",
+  "status": "calculated",
+  "hk3Summary": {
+    "materialCost": 3.00,
+    "processCost": 1.00,
+    "hk3Total": 4.00,
+    "currency": "CNY"
+  },
+  "investmentSummary": {
+    "totalInvestment": 170000,
+    "unitAmortization": 6.40,
+    "amortizationMode": "AMORTIZED"
+  },
+  "rdSummary": {
+    "totalRnD": 50000,
+    "unitAmortization": 0.54
+  },
+  "calculatedBy": "VM_USER_001",
+  "calculatedAt": "2024-02-13T10:30:00Z",
+  "validationStatus": "PASSED"
+}
+```
 
 ---
 
