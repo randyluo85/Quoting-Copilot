@@ -796,21 +796,21 @@ $$ Payback\ (月数) = \frac{项目总投资}{项目月度净利} $$
 - [README.md](../README.md) - 项目概览与入门
 
 **数据库与逻辑文档：**
-- [docs/DATABASE_DESIGN.md](DATABASE_DESIGN.md) - 数据库结构唯一真理源
-- [docs/GLOSSARY.md](GLOSSARY.md) - 项目术语表（完整版）
-- [docs/BUSINESS_CASE_LOGIC.md](BUSINESS_CASE_LOGIC.md) - Business Case 计算逻辑 (HK/SK/DB)
-- [docs/PROCESS_COST_LOGIC.md](PROCESS_COST_LOGIC.md) - 工艺成本计算逻辑 (MHR/标准成本)
-- [docs/NRE_INVESTMENT_LOGIC.md](NRE_INVESTMENT_LOGIC.md) - NRE 投资成本计算逻辑
-- [docs/PAYBACK_LOGIC.md](PAYBACK_LOGIC.md) - 投资回收期计算逻辑
-- [docs/QUOTATION_SUMMARY_LOGIC.md](QUOTATION_SUMMARY_LOGIC.md) - 报价汇总计算逻辑
+- [数据库设计.md](数据库设计.md) - 数据库结构唯一真理源
+- [术语表.md](术语表.md) - 项目术语表（完整版）
+- [商业案例计算逻辑.md](商业案例计算逻辑.md) - Business Case 计算逻辑 (HK/SK/DB) - 唯一来源
+- [工艺成本计算逻辑.md](工艺成本计算逻辑.md) - 工艺成本计算逻辑 (MHR/标准成本) - 唯一来源
+- [NRE投资成本计算逻辑.md](NRE投资成本计算逻辑.md) - NRE 投资成本计算逻辑 - 唯一来源
+- [投资回收期计算逻辑.md](投资回收期计算逻辑.md) - 投资回收期计算逻辑 - 唯一来源
+- [报价汇总计算逻辑.md](报价汇总计算逻辑.md) - 报价汇总计算逻辑 - 唯一来源
 
 **运维与测试：**
-- [docs/DEPLOYMENT.md](DEPLOYMENT.md) - 部署运维指南
-- [docs/TESTING_STRATEGY.md](TESTING_STRATEGY.md) - 测试策略指南
-- [docs/API_REFERENCE.md](API_REFERENCE.md) - API 完整参考
+- [部署指南.md](部署指南.md) - 部署运维指南
+- [测试策略.md](测试策略.md) - 测试策略指南
+- [API参考文档.md](API参考文档.md) - API 完整参考
 
 **变更记录：**
-- [docs/CHANGELOG.md](CHANGELOG.md) - 文档变更日志
+- [变更日志.md](变更日志.md) - 文档变更日志
 
 ---
 
