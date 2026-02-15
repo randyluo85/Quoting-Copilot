@@ -290,16 +290,33 @@ total_cost = unit_cost_est × quantity
 
 ```python
 from enum import Enum
-from typing import Literal
-from pydantic import BaseModel, Field
+from typing import Literal, Optional
+from pydantic import BaseModel, Field, field_validator
 from decimal import Decimal
 
 class InvestmentType(str, Enum):
     """投资类型"""
-    MOLD = "MOLD"       # 模具
-    GAUGE = "GAUGE"     # 检具
-    JIG = "JIG"         # 夹具
-    FIXTURE = "FIXTURE" # 工装
+    MOLD = "MOLD"               # 模具
+    GAUGE = "GAUGE"             # 检具
+    JIG = "JIG"                 # 夹具
+    FIXTURE = "FIXTURE"         # 工装
+    FORMING_TOOL = "FORMING_TOOL"  # 成型工装 🆕
+
+
+class CalcMethod(str, Enum):
+    """计算方法"""
+    FEATURE = "FEATURE"   # 产品特征（模具）
+    POINTS = "POINTS"     # 点位数（检具）
+    MODULES = "MODULES"   # 功能模块数（工装）
+    LENGTH = "LENGTH"     # 长度（成型工装）
+    FIXED = "FIXTED"      # 固定价格（夹具）
+
+
+class FeatureType(str, Enum):
+    """模具特征类型"""
+    WEIGHT = "WEIGHT"     # 重量 (kg)
+    VOLUME = "VOLUME"     # 体积 (cm³)
+    TONNAGE = "TONNAGE"   # 吨位 (ton)
 
 
 class InvestmentItem(BaseModel):
@@ -309,7 +326,16 @@ class InvestmentItem(BaseModel):
     product_id: str
     item_type: InvestmentType
     name: str
-    unit_cost_est: Decimal
+
+    # 🆕 v2.0 计算参数
+    calc_method: CalcMethod
+    calc_param: Decimal = Field(default=Decimal("1"), description="计算参数值（点位数/模块数/长度/特征值）")
+    calc_param_unit: str = Field(default="unit", description="参数单位")
+    unit_price_std: Decimal = Field(description="标准单价（从标准库获取或手动输入）")
+
+    # 计算后的单价
+    unit_cost_est: Decimal | None = Field(default=None, description="计算后单价 = calc_param × unit_price_std")
+
     currency: str = "CNY"
     quantity: int = 1
     asset_lifecycle: int | None = None  # 设计寿命（模次），空表示无限
@@ -317,10 +343,54 @@ class InvestmentItem(BaseModel):
     shared_source_id: str | None = None
     status: Literal["DRAFT", "CONFIRMED"] = "DRAFT"
 
+    # 模具专用字段
+    feature_type: FeatureType | None = None
+
+    def model_post_init(self, __context):
+        """自动计算单价"""
+        if self.unit_cost_est is None:
+            self.unit_cost_est = self.calc_param * self.unit_price_std
+
     @property
     def total_investment(self) -> Decimal:
         """总投资"""
-        return self.unit_cost_est * self.quantity
+        return (self.unit_cost_est or self.calc_param * self.unit_price_std) * self.quantity
+
+    @field_validator('calc_method', mode='before')
+    @classmethod
+    def set_default_calc_method(cls, v, info):
+        """根据投资类型自动设置计算方法"""
+        if v is None:
+            item_type = info.data.get('item_type')
+            mapping = {
+                InvestmentType.MOLD: CalcMethod.FEATURE,
+                InvestmentType.GAUGE: CalcMethod.POINTS,
+                InvestmentType.FIXTURE: CalcMethod.MODULES,
+                InvestmentType.FORMING_TOOL: CalcMethod.LENGTH,
+                InvestmentType.JIG: CalcMethod.FIXED,
+            }
+            return mapping.get(item_type, CalcMethod.FIXED)
+        return v
+
+
+class InvestmentItemCreate(BaseModel):
+    """创建投资项请求"""
+    project_id: str
+    product_id: str
+    item_type: InvestmentType
+    name: str
+
+    # 计算参数
+    calc_param: Decimal = Field(default=Decimal("1"), description="计算参数值")
+    calc_param_unit: str = Field(default="unit", description="参数单位")
+    unit_price_std: Decimal = Field(description="标准单价")
+
+    # 可选参数
+    quantity: int = 1
+    asset_lifecycle: int | None = None
+    feature_type: FeatureType | None = None
+    is_shared: bool = False
+    shared_source_id: str | None = None
 
 
 class AmortizationMode(str, Enum):
@@ -363,6 +433,9 @@ class InvestmentCalculationResult(BaseModel):
     total_investment: Decimal
     unit_amortization: Decimal
     replacement_warning: list[str] = []  # 寿命不足警告
+
+    # 🆕 v2.0 计算明细
+    calculation_details: list[dict] = []  # 各投资项的计算明细
 ```
 
 ---
