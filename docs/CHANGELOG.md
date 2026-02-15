@@ -10,6 +10,11 @@
 
 | 日期 | 文档 | 版本 | 变更内容 | 影响范围 | 责任人 |
 |------|------|------|----------|----------|------|
+| 2026-02-15 | docs/PRD.md | v2.5 → **v2.6** | ✅ **BOM Management 页面描述更新**：根据实际 UI 实现，新增顶部 Tab 导航（7项）、产品管理区域、产品卡片展示、详细表格列定义、状态标签中文文案 | 产品需求 | Randy Luo |
+| 2026-02-15 | docs/PRD.md | v2.4 → **v2.5** | ✅ **Project Overview 页面描述更新**：根据实际 UI 实现，更新为垂直堆叠布局（项目信息卡片+附件网格），新增备注、工艺路线编号、所属工厂字段 | 产品需求 | Randy Luo |
+| 2026-02-15 | docs/QUOTATION_WORKFLOW.md | v1.0 → **v1.1** | 🔴 **明确 HK III 交付流程**：新增 §3.6.3 VM → Sales 交付流程图；明确 VM 交付成果物为 HK III（制造成本）；新增 HK III 校验规则和 Sales 接收数据结构 | 业务流程 | Randy Luo |
+| 2026-02-15 | docs/NRE_INVESTMENT_LOGIC.md | v1.3 → **v2.0** | 🔴 **重大重构**：新增第五种投资类型（FORMING_TOOL 成型工装）；重构计算公式为 `calc_param × unit_price_std`；新增计算参数字段（calc_method, calc_param, calc_param_unit, unit_price_std, feature_type） | 业务逻辑 | Randy Luo |
+| 2026-02-15 | 全部 docs/ 文档 | - | 🔄 **文档重命名**：15个英文文档名改为中文；**唯一来源整理**：消除重复定义，建立信息来源映射表 | 全部 | Randy Luo |
 | 2026-02-13 | docs/QUOTATION_WORKFLOW.md | **v1.0 新增** | 🆕 **报价流程详解**：端到端流程图、5阶段详细说明（项目创建→成本核算→商业参数→计算校验→报价输出）、角色职责矩阵、数据流向图 | 业务流程 | Randy Luo |
 | 2026-02-13 | docs/PRD.md | v2.1 → **v2.2** | 🆕 **AI驱动开发规范**：新增 §12 Figma Make 集成规范，包含核心页面 Prompt 模板、组件规范、设计系统、响应式断点 | 产品需求 | Randy Luo |
 | 2026-02-13 | docs/PRD.md | v2.0 → **v2.1** | ✅ **职责澄清**：Sales 负责创建项目（手动/导入）；VM 审核工时合理性；IE 填写标准工时+维护工艺路线库；Controlling 仅维护 MHR 固定参数 | 产品需求 | Randy Luo |
