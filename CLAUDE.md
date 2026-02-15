@@ -363,7 +363,7 @@ interface Process {
 3. **向量汇集规则 🆕 v1.7:**
    - **物料层**：汇集 `name` + `material` + `remarks` + `material_type`，排除 `std_price` 等数值噪音
    - **产品层**：汇集 `product_name` + Level 1 关键组件 + 工艺名称序列，排除 `quantity` 等数值噪音
-   - 详细规则参考：[docs/VECTOR_DESIGN.md §4](docs/VECTOR_DESIGN.md#field-aggregation)
+   - 详细规则参考：[docs/向量设计.md §4](docs/向量设计.md#field-aggregation)
 
 4. **不确定的逻辑:** 如果遇到 PRD 未定义的逻辑，优先询问用户，不要自行假设。
 
