@@ -394,7 +394,11 @@ $$UnitAmort = \frac{I_{total} \times (1 + R_{interest} \times Y_{amort})}{V_{amo
 
 $$UnitRnD = \frac{RnD_{total} \times (1 + R_{interest} \times Y_{amort})}{V_{amort}}$$
 
-### 3.6 成本汇总
+### 3.6 成本汇总（HK III）与 VM 交付
+
+> **🔴 核心概念**：VM 完成成本核算后，交付给 Sales 的成果物是 **HK III（制造成本）**。
+>
+> **HK III** 是工厂大门的成本，不包含管销费用、投资分摊、研发分摊等。Sales 基于 HK III 输入商业参数后，系统自动计算 SK（完全成本）和 QS/BC/Payback。
 
 #### 3.6.1 成本层级结构
 
