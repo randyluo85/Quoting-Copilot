@@ -696,7 +696,7 @@ $$ Payback\ (月数) = \frac{项目总投资}{项目月度净利} $$
 - 办公场地租金
 - 其他运营费用
 
-> **详细计算逻辑：** [docs/BUSINESS_CASE_LOGIC.md](BUSINESS_CASE_LOGIC.md) §6 S&A 计算
+> **详细计算逻辑：** [商业案例计算逻辑.md](商业案例计算逻辑.md#sa计算)
 
 ---
 
