@@ -580,6 +580,16 @@ Content-Type: application/json
 
 ### 5.1 自动计算流程
 
+系统根据商业参数自动计算以下指标：
+
+| 指标 | 详细逻辑文档（唯一来源） |
+|------|------------------------|
+| **QS（报价摘要）** | [报价汇总计算逻辑.md](报价汇总计算逻辑.md) |
+| **BC（Business Case）** | [商业案例计算逻辑.md](商业案例计算逻辑.md) |
+| **Payback（投资回收期）** | [投资回收期计算逻辑.md](投资回收期计算逻辑.md) |
+
+### 5.2 计算流程图
+
 ```mermaid
 flowchart LR
     A[输入参数] --> B[计算 QS]
@@ -589,29 +599,7 @@ flowchart LR
     E --> F[生成报告]
 ```
 
-### 5.2 QS（Quote Summary）计算
-
-#### 5.2.1 年度数据计算
-
-**遍历每一年（Base Year → End Year）：**
-
-1. **计算年降后单价：**
-   $$VP_n = VP_{base} \times (1 - LTA)^{n - base}$$
-
-2. **计算净销售额：**
-   $$Net\_Sales_n = Volume_n \times VP_n$$
-
-3. **计算成本层级：**
-   | 成本项 | 计算公式 |
-   |--------|----------|
-   | HK III | 物料成本 + 工艺成本 |
-   | SK-1 | HK III + (Net Sales × S&A Rate) |
-   | SK-2 | SK-1 + Tooling + R&D + WorkingCap + Logistics |
-
-4. **计算利润指标：**
-   $$DB4 = \frac{VP - SK\_2}{VP}$$
-
-#### 5.2.2 QS 输出示例
+### 5.3 QS 输出示例
 
 | Year | Volume | HK3 | SK1 | Tooling | R&D | Working Cap | SK2 | VP | DB4% | 预警 |
 |------|--------|-----|-----|---------|-----|-------------|-----|----|----|------|
@@ -619,49 +607,7 @@ flowchart LR
 | 2027 | 8,500 | 44.85 | 52.70 | 6.40 | 0.54 | 0.70 | 62.01 | 56.16 | -10.40% | ⚠️ |
 | 2028 | 9,000 | 43.50 | 51.12 | 0 | 0 | 0.68 | 55.05 | 54.48 | -1.06% | |
 
-> **详细逻辑：** 参见 [QUOTATION_SUMMARY_LOGIC.md](QUOTATION_SUMMARY_LOGIC.md)
-
-### 5.3 BC（Business Case）计算
-
-#### 5.3.1 收入侧计算
-
-| 指标 | 公式 |
-|------|------|
-| Gross Sales | $Volume \times Base\_Price$ |
-| Net Price | $Base\_Price \times (1 - \sum Reduction\_Rate)$ |
-| Net Sales | $Volume \times Net\_Price$ |
-
-#### 5.3.2 利润指标计算
-
-| 指标 | 公式 | 业务含义 |
-|------|------|----------|
-| **DB I** | $Net\_Sales - HK\_III$ | 生产毛利 |
-| **DB IV** | $Net\_Sales - SK$ | 净利润 |
-
-> **详细逻辑：** 参见 [BUSINESS_CASE_LOGIC.md](BUSINESS_CASE_LOGIC.md)
-
-### 5.4 Payback（投资回收期）计算
-
-#### 5.4.1 静态回收期公式
-
-$$Payback\ (月) = \frac{项目总投资}{月度净利}$$
-
-#### 5.4.2 月度净利计算
-
-$$P_{monthly} = (Price_{quoted} - Cost_{unit}) \times \frac{Volume_{annual}}{12}$$
-
-#### 5.4.3 推荐等级
-
-| 等级 | 回收期 | 建议 |
-|------|--------|------|
-| 🟢 极力推荐 | ≤ 12 个月 | 投资回报快 |
-| 🟡 推荐 | 12 - 24 个月 | 风险可控 |
-| 🟠 谨慎 | 24 - 36 个月 | 需评估风险 |
-| 🔴 不推荐 | > 36 个月 | 建议调整策略 |
-
-> **详细逻辑：** 参见 [PAYBACK_LOGIC.md](PAYBACK_LOGIC.md)
-
-### 5.5 校验与预警
+### 5.4 校验与预警
 
 #### 5.5.1 预警规则
 
