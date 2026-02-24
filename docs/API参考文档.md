@@ -251,11 +251,13 @@
 
 | 方法 | 端点 | 功能 | 认证 |
 |------|------|------|------|
-| GET | `/quotation/{projectId}` | 获取报价摘要 | 🟡 需要 |
+| GET | `/quotation/{projectId}` | 获取报价摘要（支持组合报价） | 🟡 需要 |
 | POST | `/quotation/generate` | 生成报价单 | 🟡 需要 |
 | GET | `/quotation/{projectId}/export` | 导出报价单 (PDF) | 🟡 需要 |
 
 #### GET /quotation/{projectId}
+
+> **v1.4 升级说明：** 新增 `package_total`、`volume_params`、`new_cost_items`、`voss_metrics` 字段
 
 **响应示例:**
 ```json
@@ -267,7 +269,8 @@
       "total_cost": 474950.00,
       "quoted_price": 550000.00,
       "target_margin": 15.0,
-      "actual_margin": 13.65
+      "actual_margin": 13.65,
+      "currency": "CNY"
     },
     "breakdown": {
       "material_cost": {
@@ -277,32 +280,122 @@
       "process_cost": {
         "amount": 264000.00,
         "percentage": 55.6
+      },
+      "logistics_cost": {
+        "amount": 5000.00,
+        "percentage": 1.05
+      },
+      "other_mfg_cost": {
+        "amount": 3000.00,
+        "percentage": 0.63
       }
+    },
+    "new_cost_items": {
+      "sap_surcharge": {
+        "rate": 0.005,
+        "amount": 2750.00
+      },
+      "consign_stock": {
+        "rate": 0.02,
+        "amount": 11000.00
+      },
+      "tooling_amortizations": {
+        "Tooling 1": 6.40,
+        "Tooling 2": 1.80
+      }
+    },
+    "volume_params": {
+      "vehicle_vol": 105000,
+      "factor_per_vehicle": 0.15,
+      "calculated_volume": 15750
+    },
+    "target_params": {
+      "target_db4": 0.08,
+      "target_db1": 0.15,
+      "reverse_pricing_result": 20.11
     },
     "investment": {
       "tooling": 49468.00,
       "rnd": 48079.00,
       "total": 97547.00,
-      "amortization_period": "3_years"
+      "amortization_mode": "total_volume_based",
+      "amortization_groups": [
+        {
+          "group_name": "Tooling 1",
+          "total_invest": 40000.00,
+          "per_piece": 6.40
+        },
+        {
+          "group_name": "Tooling 2",
+          "total_invest": 9468.00,
+          "per_piece": 1.80
+        }
+      ]
+    },
+    "voss_metrics": {
+      "gm_percent": 15.5,
+      "db1_hk3": 26188.00,
+      "db1_all_costs": 15000.00,
+      "db4": 15000.00
     },
     "business_case": {
       "years": [
         {
           "year": 2026,
+          "vehicle_vol": 105000,
+          "factor_per_vehicle": 0.15,
           "volume": 15750,
           "net_sales": 342658.00,
           "hk_3_cost": 316470.00,
-          "sk_cost": 364023.00,
+          "sk_1_cost": 323666.00,
+          "sk_2_cost": 364023.00,
+          "sap_surcharge": 1713.29,
+          "consign_stock": 6853.16,
           "db_1": 26188.00,
           "db_4": -21365.00
         }
       ],
       "total_db_4": 45680.00,
       "break_even_year": 2028
+    },
+    "package_total": {
+      "product_count": 3,
+      "total_hk3": 1424850.00,
+      "total_sk": 1460123.00,
+      "weighted_gm_percent": 14.8,
+      "weighted_db4": 0.065
     }
   }
 }
 ```
+
+**响应字段说明（v1.4 新增）：**
+
+| 字段路径 | 类型 | 说明 |
+|----------|------|------|
+| `new_cost_items.sap_surcharge` | object | SAP 系统附加费（rate × net_sales） |
+| `new_cost_items.consign_stock` | object | 寄售库存/VMI 成本（rate × net_sales） |
+| `new_cost_items.tooling_amortizations` | object | 多模具分组摊销（JSON: `{"Tooling 1": 6.40}`） |
+| `volume_params.vehicle_vol` | int | 整车产量（台/年） |
+| `volume_params.factor_per_vehicle` | decimal | 单车用量（件/台） |
+| `volume_params.calculated_volume` | int | 计算销量 = 整车产量 × 单车用量 |
+| `target_params.target_db4` | decimal | 目标 DB4 净利率 |
+| `target_params.target_db1` | decimal | 目标 DB1 边际贡献率 |
+| `target_params.reverse_pricing_result` | decimal | 反推基准单价 |
+| `investment.amortization_groups` | array | 摊销分组列表（含 group_name, total_invest, per_piece） |
+| `voss_metrics.gm_percent` | decimal | 毛利率 GM% |
+| `voss_metrics.db1_hk3` | decimal | DB1 (HK3) 边际贡献 |
+| `voss_metrics.db1_all_costs` | decimal | DB1 (all costs) 含所有成本 |
+| `voss_metrics.db4` | decimal | DB4 净利润 |
+| `business_case.years[].sk_1_cost` | decimal | SK-1 项目综合成本 |
+| `business_case.years[].sk_2_cost` | decimal | SK-2 项目全成本 |
+| `business_case.years[].sap_surcharge` | decimal | 年度 SAP 附加费 |
+| `business_case.years[].consign_stock` | decimal | 年度寄售库存成本 |
+| `package_total.product_count` | int | 组合报价产品数量 |
+| `package_total.total_hk3` | decimal | 组合 HK3 汇总 |
+| `package_total.total_sk` | decimal | 组合 SK 汇总 |
+| `package_total.weighted_gm_percent` | decimal | 加权平均毛利率 |
+| `package_total.weighted_db4` | decimal | 加权平均 DB4 |
 
 ---
 
