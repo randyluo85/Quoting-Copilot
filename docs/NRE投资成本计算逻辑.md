@@ -221,6 +221,47 @@ $$UnitAmort = \frac{I_{total} \times (1 + R_{interest} \times Y_{amort})}{V_{amo
 
 **注意**：这 6.40 元已包含 Capital Interest，在 QS 表的 Tooling 列中列示，**不再额外计算利息**。
 
+#### 🆕 投资项分组分摊 (Amortization Group)
+
+**业务场景：** 当项目存在多个不同设计寿命或归属的模具/夹具时，Sales 可以将它们分配到不同的 **Group** 进行独立分摊。
+
+**分组规则：**
+
+| Group 名称 | 适用场景 | 分摊策略 |
+|-----------|---------|---------|
+| **Tooling 1** | 主模具（设计寿命 3 年） | 分摊 2 年 |
+| **Tooling 2** | 辅助模具（设计寿命 5 年） | 分摊 3 年 |
+| **Tooling 3** | 后期追加投资 | 按实际情况分摊 |
+
+**实现方式：**
+
+1. 在 `amortization_strategies` 表中，通过 `group_name` 字段区分不同分组
+2. 每个分组独立计算 `UnitAmort` 值
+3. 在 QS 报表中，各分组独立成列（Tooling 1, Tooling 2, ...）
+
+**示例：**
+
+| 投资项 | Group | 投资额 | 分摊量 | 单件分摊 |
+|--------|-------|--------|--------|---------|
+| Housing Mold | Tooling 1 | ¥170,000 | 29,750 | ¥6.40 |
+| Gauge Set | Tooling 2 | ¥48,000 | 40,000 | ¥1.20 |
+| **合计** | - | ¥218,000 | - | **¥7.60** |
+
+**JSON 存储格式（business_case_years.tooling_amortizations）：**
+
+```json
+{
+  "Tooling 1": 6.40,
+  "Tooling 2": 1.20
+}
+```
+
+**SK-2 计算公式：**
+
+$$SK\text{-}2 = SK\text{-}1 + \sum_{i=1}^{n} UnitAmort_i + SAP + Logistics + R\&D + Interest + Consign$$
+
+其中 $\sum_{i=1}^{n} UnitAmort_i$ 为所有分摊分组的单件分摊额合计。
+
 ---
 
 ## 4. 数据库设计规范 (Schema)
