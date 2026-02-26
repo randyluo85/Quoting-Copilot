@@ -59,11 +59,24 @@
 | `product_materials` | BOM 行 | [数据库设计.md §3.2](docs/数据库设计.md#transaction-data) |
 | `product_processes` | 工艺路线 | [数据库设计.md §3.2](docs/数据库设计.md#transaction-data) |
 | `quote_summaries` | 报价汇总（多版本） | [数据库设计.md §3.2](docs/数据库设计.md#transaction-data) |
+| `business_case_params` | Business Case 参数 | [数据库设计.md §3.6](docs/数据库设计.md#business-case-tables) 🆕 v1.9 |
+| `business_case_years` | Business Case 年度数据 | [数据库设计.md §3.6](docs/数据库设计.md#business-case-tables) 🆕 v1.9 |
+| `amortization_strategies` | 分摊策略（含溢价） | [数据库设计.md §3.5](docs/数据库设计.md#nre-tables) 🆕 v1.9 |
 | `material_vectors` | 物料语义向量 | [数据库设计.md §3.7](docs/数据库设计.md#vector-tables) 🆕 v1.7 |
 | `product_vectors` | 产品指纹向量 | [数据库设计.md §3.7](docs/数据库设计.md#vector-tables) 🆕 v1.7 |
 
 > 完整设计文档：[docs/数据库设计.md](docs/数据库设计.md)
 > 向量化设计文档：[docs/向量设计.md](docs/向量设计.md) 🆕
+
+### 🔴 v1.9 核心变更摘要
+
+| 变更类型 | 说明 |
+|----------|------|
+| **价格瀑布模型** | 收入侧独立计算，消除循环引用：`Gross_Sales → Sales_Reduction → Net_Sales` |
+| **去汽车化** | `Vehicle_Vol → Project_Volume`，`Factor_per_Vehicle → Usage_per_System` |
+| **混合分摊** | 支持 `Lump Sum + Piece Price` 组合，追踪 `Unrecovered Balance` |
+| **总费率调整** | 工艺成本支持手动调整总费率，需填写原因 |
+| **管理决策字段** | `projects` 表新增 `business_type`、`project_phase`、`risks_assessment`、`opportunities_assessment` |
 
 ## 📝 API Data Models (Pydantic)
 
