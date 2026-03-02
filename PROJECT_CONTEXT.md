@@ -70,7 +70,7 @@
 |---------|--------|---------|
 | 物料主数据 | `materials` | `id` (物料编码), `std_price` |
 | 工序费率 | `process_rates` | `process_code`, `work_center`, `std_mhr_var`, `std_mhr_fix`, `std_mhr_total` |
-| 成本中心 | `cost_centers` | `avg_wages_per_hour`, `rent_unit_price`, `energy_unit_price`, `interest_rate` |
+| 产线 | `cost_centers` | `avg_wages_per_hour`, `rent_unit_price`, `energy_unit_price`, `interest_rate` |
 | 项目 | `projects` | `id`, `project_code`, `status`, `annual_volume`, `factory_id` |
 | BOM 行 | `product_materials` | `std_cost`, `confidence` |
 
@@ -127,7 +127,7 @@ $$ Cost_{std} = \sum (Qty \times MaterialPrice_{std}) + \sum \left( \frac{CycleT
 > - `CycleTime`: 标准工时（单位：**秒**），需除以 3600 转换为小时
 > - `MHR_total`: 机时费率 = `std_mhr_var` (变动) + `std_mhr_fix` (固定)
 > - `Personnel`: 标准人工配置（人/机）
-> - `LaborRate`: 小时工资（从成本中心获取）
+> - `LaborRate`: 小时工资（从产线获取）
 >
 > **详细计算逻辑**：参见 [`docs/PROCESS_COST_LOGIC.md`](docs/PROCESS_COST_LOGIC.md)
 
