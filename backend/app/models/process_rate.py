@@ -30,12 +30,12 @@ class ProcessRate(Base):
     process_name: Mapped[str] = mapped_column(String(100), nullable=False)
     equipment: Mapped[str | None] = mapped_column(String(100))  # 规范命名
 
-    # ========== v1.3 新增：成本中心关联 ==========
-    cost_center_id: Mapped[str | None] = mapped_column(
-        String(20), ForeignKey("cost_centers.id"), nullable=True
+    # ========== v1.3 新增：产线关联 ==========
+    production_line_id: Mapped[str | None] = mapped_column(
+        String(20), ForeignKey("production_lines.id"), nullable=True
     )
-    cost_center: Mapped["CostCenter"] = relationship(
-        "CostCenter", back_populates="process_rates"
+    production_line: Mapped["ProductionLine"] = relationship(
+        "ProductionLine", back_populates="process_rates"
     )
 
     # ========== v1.3 新增：MHR 拆分字段 ==========
