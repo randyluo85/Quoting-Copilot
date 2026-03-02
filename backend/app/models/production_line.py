@@ -32,7 +32,7 @@ class ProductionLine(Base):
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
 
-    # 反向关系：一条产线可以关联多个工序费率
-    process_rates: Mapped[list["ProcessRate"]] = relationship(
-        "ProcessRate", back_populates="production_line"
+    # 反向关系：一条产线关联一个工序费率（1:1）
+    process_rate: Mapped["ProcessRate | None"] = relationship(
+        "ProcessRate", back_populates="production_line", uselist=False
     )
