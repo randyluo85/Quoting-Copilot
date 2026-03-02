@@ -70,7 +70,7 @@
 |---------|--------|---------|
 | 物料主数据 | `materials` | `id` (物料编码), `std_price` |
 | 工序费率 | `process_rates` | `process_code`, `work_center`, `std_mhr_var`, `std_mhr_fix`, `std_mhr_total` |
-| 产线 | `cost_centers` | `avg_wages_per_hour`, `rent_unit_price`, `energy_unit_price`, `interest_rate` |
+| 产线 | `production_lines` | `avg_wages_per_hour`, `rent_unit_price`, `energy_unit_price`, `interest_rate` |
 | 项目 | `projects` | `id`, `project_code`, `status`, `annual_volume`, `factory_id` |
 | BOM 行 | `product_materials` | `std_cost`, `confidence` |
 
