@@ -28,25 +28,25 @@ class TestProcessRateMHRSplit:
         assert rate.vave_mhr_var == Decimal("90.00")
         assert rate.vave_mhr_fix == Decimal("45.00")
 
-    async def test_cost_center_fk_constraint(self, clean_db: AsyncSession):
-        """测试成本中心外键约束."""
-        # 首先创建成本中心
-        from app.models.cost_center import CostCenter
-        center = CostCenter(id="CC001", name="测试车间", net_production_hours=4000)
-        clean_db.add(center)
+    async def test_production_line_fk_constraint(self, clean_db: AsyncSession):
+        """测试产线外键约束."""
+        # 首先创建产线
+        from app.models.production_line import ProductionLine
+        line = ProductionLine(id="PL001", name="测试产线", net_production_hours=4000)
+        clean_db.add(line)
         await clean_db.commit()
 
         # 然后创建关联的工序费率
         rate = ProcessRate(
             process_code="PROC-002",
             process_name="测试工序2",
-            cost_center_id="CC001",
+            production_line_id="PL001",
         )
         clean_db.add(rate)
         await clean_db.commit()
         await clean_db.refresh(rate)
 
-        assert rate.cost_center_id == "CC001"
+        assert rate.production_line_id == "PL001"
 
     async def test_total_mhr_property(self, clean_db: AsyncSession):
         """测试总 MHR 计算属性."""
