@@ -25,7 +25,7 @@
 
 ## Sprint 0: 数据库 v1.3 迁移与 MHR 拆分
 
-### Task 1: CostCenter 模型与测试
+### Task 1: ProductionLine 模型与测试
 
 **文件:**
 - Create: `backend/app/models/production_line.py`
@@ -38,16 +38,16 @@
 # backend/app/tests/test_models/test_production_line.py
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.production_line import CostCenter
+from app.models.production_line import ProductionLine
 
 
 @pytest.mark.asyncio
-class TestCostCenterModel:
-    """CostCenter 模型测试."""
+class TestProductionLineModel:
+    """ProductionLine 模型测试."""
 
     async def test_create_production_line(self, clean_db: AsyncSession):
         """测试创建产线."""
-        center = CostCenter(
+        center = ProductionLine(
             id="CC001",
             name="铸造车间",
             net_production_hours=4000.00,
@@ -67,11 +67,11 @@ class TestCostCenterModel:
 
     async def test_production_line_unique_id(self, clean_db: AsyncSession):
         """测试 ID 唯一约束."""
-        center1 = CostCenter(
+        center1 = ProductionLine(
             id="CC002", name="车间1", net_production_hours=4000,
             efficiency_rate=0.85, status="ACTIVE"
         )
-        center2 = CostCenter(
+        center2 = ProductionLine(
             id="CC002", name="车间2", net_production_hours=4000,
             efficiency_rate=0.85, status="ACTIVE"
         )
@@ -83,7 +83,7 @@ class TestCostCenterModel:
 
     async def test_production_line_default_values(self, clean_db: AsyncSession):
         """测试默认值."""
-        center = CostCenter(
+        center = ProductionLine(
             id="CC003", name="焊接车间", net_production_hours=3000
         )
         clean_db.add(center)
@@ -99,7 +99,7 @@ class TestCostCenterModel:
 ```bash
 pytest backend/app/tests/test_models/test_production_line.py -v
 ```
-Expected: `ImportError: cannot import name 'CostCenter'`
+Expected: `ImportError: cannot import name 'ProductionLine'`
 
 **Step 3: 最小实现**
 
@@ -111,7 +111,7 @@ from datetime import datetime
 from app.db.session import Base
 
 
-class CostCenter(Base):
+class ProductionLine(Base):
     """产线主数据表.
 
     设计规范: docs/DATABASE_DESIGN.md §3.3
@@ -135,11 +135,11 @@ class CostCenter(Base):
 
 更新 `backend/app/models/__init__.py`:
 ```python
-from app.models.production_line import CostCenter
+from app.models.production_line import ProductionLine
 
 __all__ = [
     # ... existing ...
-    "CostCenter",
+    "ProductionLine",
 ]
 ```
 
@@ -154,7 +154,7 @@ Expected: 3 passed
 
 ```bash
 git add backend/app/models/production_line.py backend/app/models/__init__.py backend/app/tests/test_models/test_production_line.py
-git commit -m "feat: add CostCenter model with tests"
+git commit -m "feat: add ProductionLine model with tests"
 ```
 
 ---
@@ -202,8 +202,8 @@ class TestProcessRateMHRSplit:
     async def test_production_line_fk_constraint(self, clean_db: AsyncSession):
         """测试产线外键约束."""
         # 首先创建产线
-        from app.models.production_line import CostCenter
-        center = CostCenter(id="CC001", name="测试车间", net_production_hours=4000)
+        from app.models.production_line import ProductionLine
+        center = ProductionLine(id="CC001", name="测试车间", net_production_hours=4000)
         clean_db.add(center)
         await clean_db.commit()
 
