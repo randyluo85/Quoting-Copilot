@@ -28,24 +28,24 @@
 ### Task 1: CostCenter 模型与测试
 
 **文件:**
-- Create: `backend/app/models/cost_center.py`
+- Create: `backend/app/models/production_line.py`
 - Modify: `backend/app/models/__init__.py`
-- Test: `backend/app/tests/test_models/test_cost_center.py`
+- Test: `backend/app/tests/test_models/test_production_line.py`
 
 **Step 1: 写失败测试**
 
 ```python
-# backend/app/tests/test_models/test_cost_center.py
+# backend/app/tests/test_models/test_production_line.py
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.cost_center import CostCenter
+from app.models.production_line import CostCenter
 
 
 @pytest.mark.asyncio
 class TestCostCenterModel:
     """CostCenter 模型测试."""
 
-    async def test_create_cost_center(self, clean_db: AsyncSession):
+    async def test_create_production_line(self, clean_db: AsyncSession):
         """测试创建产线."""
         center = CostCenter(
             id="CC001",
@@ -65,7 +65,7 @@ class TestCostCenterModel:
         assert center.name == "铸造车间"
         assert center.efficiency_rate == 0.85
 
-    async def test_cost_center_unique_id(self, clean_db: AsyncSession):
+    async def test_production_line_unique_id(self, clean_db: AsyncSession):
         """测试 ID 唯一约束."""
         center1 = CostCenter(
             id="CC002", name="车间1", net_production_hours=4000,
@@ -81,7 +81,7 @@ class TestCostCenterModel:
         with pytest.raises(Exception):  # IntegrityError expected
             await clean_db.commit()
 
-    async def test_cost_center_default_values(self, clean_db: AsyncSession):
+    async def test_production_line_default_values(self, clean_db: AsyncSession):
         """测试默认值."""
         center = CostCenter(
             id="CC003", name="焊接车间", net_production_hours=3000
@@ -97,14 +97,14 @@ class TestCostCenterModel:
 **Step 2: 运行测试确认失败**
 
 ```bash
-pytest backend/app/tests/test_models/test_cost_center.py -v
+pytest backend/app/tests/test_models/test_production_line.py -v
 ```
 Expected: `ImportError: cannot import name 'CostCenter'`
 
 **Step 3: 最小实现**
 
 ```python
-# backend/app/models/cost_center.py
+# backend/app/models/production_line.py
 from sqlalchemy import String, Numeric, Integer, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
@@ -117,7 +117,7 @@ class CostCenter(Base):
     设计规范: docs/DATABASE_DESIGN.md §3.3
     """
 
-    __tablename__ = "cost_centers"
+    __tablename__ = "production_lines"
 
     id: Mapped[str] = mapped_column(String(20), primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -135,7 +135,7 @@ class CostCenter(Base):
 
 更新 `backend/app/models/__init__.py`:
 ```python
-from app.models.cost_center import CostCenter
+from app.models.production_line import CostCenter
 
 __all__ = [
     # ... existing ...
@@ -146,14 +146,14 @@ __all__ = [
 **Step 4: 运行测试确认通过**
 
 ```bash
-pytest backend/app/tests/test_models/test_cost_center.py -v
+pytest backend/app/tests/test_models/test_production_line.py -v
 ```
 Expected: 3 passed
 
 **Step 5: 提交**
 
 ```bash
-git add backend/app/models/cost_center.py backend/app/models/__init__.py backend/app/tests/test_models/test_cost_center.py
+git add backend/app/models/production_line.py backend/app/models/__init__.py backend/app/tests/test_models/test_production_line.py
 git commit -m "feat: add CostCenter model with tests"
 ```
 
@@ -184,7 +184,7 @@ class TestProcessRateMHRSplit:
         rate = ProcessRate(
             process_code="PROC-001",
             process_name="测试工序",
-            cost_center_id="CC001",
+            production_line_id="CC001",
             std_mhr_var=Decimal("100.00"),
             std_mhr_fix=Decimal("50.00"),
             vave_mhr_var=Decimal("90.00"),
@@ -199,10 +199,10 @@ class TestProcessRateMHRSplit:
         assert rate.vave_mhr_var == Decimal("90.00")
         assert rate.vave_mhr_fix == Decimal("45.00")
 
-    async def test_cost_center_fk_constraint(self, clean_db: AsyncSession):
+    async def test_production_line_fk_constraint(self, clean_db: AsyncSession):
         """测试产线外键约束."""
         # 首先创建产线
-        from app.models.cost_center import CostCenter
+        from app.models.production_line import CostCenter
         center = CostCenter(id="CC001", name="测试车间", net_production_hours=4000)
         clean_db.add(center)
         await clean_db.commit()
@@ -211,13 +211,13 @@ class TestProcessRateMHRSplit:
         rate = ProcessRate(
             process_code="PROC-002",
             process_name="测试工序2",
-            cost_center_id="CC001",
+            production_line_id="CC001",
         )
         clean_db.add(rate)
         await clean_db.commit()
         await clean_db.refresh(rate)
 
-        assert rate.cost_center_id == "CC001"
+        assert rate.production_line_id == "CC001"
 
     async def test_total_mhr_property(self, clean_db: AsyncSession):
         """测试总 MHR 计算属性."""
@@ -299,8 +299,8 @@ class ProcessRate(Base):
     equipment: Mapped[str | None] = mapped_column(String(100))
 
     # 🔴 v1.3 新增: 产线外键
-    cost_center_id: Mapped[str | None] = mapped_column(
-        String(20), ForeignKey("cost_centers.id"), nullable=True
+    production_line_id: Mapped[str | None] = mapped_column(
+        String(20), ForeignKey("production_lines.id"), nullable=True
     )
 
     # 🔴 v1.3 新增: MHR 拆分为变动/固定费率
@@ -1450,9 +1450,9 @@ def upgrade():
 
     # ============ 新增表 ============
 
-    # 1. cost_centers 表
+    # 1. production_lines 表
     op.create_table(
-        'cost_centers',
+        'production_lines',
         sa.Column('id', sa.String(20), primary_key=True),
         sa.Column('name', sa.String(100), nullable=False),
         sa.Column('net_production_hours', sa.Numeric(8, 2)),
@@ -1464,7 +1464,7 @@ def upgrade():
         sa.Column('created_at', sa.DateTime, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.Column('updated_at', sa.DateTime, server_default=sa.text('CURRENT_TIMESTAMP'), onupdate=sa.text('CURRENT_TIMESTAMP')),
     )
-    op.create_index('idx_cc_status', 'cost_centers', ['status'])
+    op.create_index('idx_cc_status', 'production_lines', ['status'])
 
     # 2. investment_items 表
     op.create_table(
@@ -1545,7 +1545,7 @@ def upgrade():
     # ============ 修改现有表 ============
 
     # process_rates 表扩展
-    op.add_column('process_rates', sa.Column('cost_center_id', sa.String(20), sa.ForeignKey('cost_centers.id')))
+    op.add_column('process_rates', sa.Column('production_line_id', sa.String(20), sa.ForeignKey('production_lines.id')))
     op.add_column('process_rates', sa.Column('std_mhr_var', sa.Numeric(10, 2)))
     op.add_column('process_rates', sa.Column('std_mhr_fix', sa.Numeric(10, 2)))
     op.add_column('process_rates', sa.Column('vave_mhr_var', sa.Numeric(10, 2)))
@@ -1581,14 +1581,14 @@ def downgrade():
     op.drop_column('process_rates', 'vave_mhr_var')
     op.drop_column('process_rates', 'std_mhr_fix')
     op.drop_column('process_rates', 'std_mhr_var')
-    op.drop_column('process_rates', 'cost_center_id')
+    op.drop_column('process_rates', 'production_line_id')
 
     # 删除新增的表
     op.drop_table('business_case_years')
     op.drop_table('business_case_params')
     op.drop_table('amortization_strategies')
     op.drop_table('investment_items')
-    op.drop_table('cost_centers')
+    op.drop_table('production_lines')
 ```
 
 **Step 2: 提交**
