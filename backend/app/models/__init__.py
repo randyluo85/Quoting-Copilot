@@ -21,7 +21,7 @@ __all__ = [
     "ProcessRate",
     "ProcessRoute",
     "ProcessRouteItem",
-    "CostCenter",
+    "ProductionLine",
     # 交易数据表
     "Project",
     "ProjectStatus",
