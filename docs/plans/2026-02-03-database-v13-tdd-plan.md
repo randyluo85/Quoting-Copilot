@@ -46,7 +46,7 @@ class TestCostCenterModel:
     """CostCenter 模型测试."""
 
     async def test_create_cost_center(self, clean_db: AsyncSession):
-        """测试创建成本中心."""
+        """测试创建产线."""
         center = CostCenter(
             id="CC001",
             name="铸造车间",
@@ -112,7 +112,7 @@ from app.db.session import Base
 
 
 class CostCenter(Base):
-    """成本中心主数据表.
+    """产线主数据表.
 
     设计规范: docs/DATABASE_DESIGN.md §3.3
     """
@@ -200,8 +200,8 @@ class TestProcessRateMHRSplit:
         assert rate.vave_mhr_fix == Decimal("45.00")
 
     async def test_cost_center_fk_constraint(self, clean_db: AsyncSession):
-        """测试成本中心外键约束."""
-        # 首先创建成本中心
+        """测试产线外键约束."""
+        # 首先创建产线
         from app.models.cost_center import CostCenter
         center = CostCenter(id="CC001", name="测试车间", net_production_hours=4000)
         clean_db.add(center)
@@ -298,7 +298,7 @@ class ProcessRate(Base):
     process_name: Mapped[str] = mapped_column(String(100), nullable=False)
     equipment: Mapped[str | None] = mapped_column(String(100))
 
-    # 🔴 v1.3 新增: 成本中心外键
+    # 🔴 v1.3 新增: 产线外键
     cost_center_id: Mapped[str | None] = mapped_column(
         String(20), ForeignKey("cost_centers.id"), nullable=True
     )
