@@ -49,6 +49,21 @@ class ProcessRate(Base):
     vave_mhr_fix: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)  # 固定费率
     vave_depreciation_rate: Mapped[Decimal | None] = mapped_column(Numeric(8, 4), nullable=True)  # VAVE 折旧率
 
+    # ========== v1.8 新增：MHR 计算参数 ==========
+    equipment_origin_value: Mapped[Decimal | None] = mapped_column(Numeric(14, 2), nullable=True)  # 设备购置原值
+    floor_area: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)  # 占用面积（㎡）
+    rated_power: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)  # 额定功率
+    planned_hours: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)  # 计划小时数
+    load_factor: Mapped[Decimal | None] = mapped_column(Numeric(3, 2), nullable=True, default=Decimal("0.78"))  # 负载系数（v2.4 固定 0.78）
+
+    # ========== v2.4 新增：VOSS 标准规则参数 ==========
+    machine_count: Mapped[int] = mapped_column(default=1)  # 机器数量（折旧计算用）
+    setup_hours: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True, default=Decimal("0"))  # 调试/换型时间（MHR 分母）
+    tools_cost: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True, default=Decimal("0"))  # 刀具成本
+    supplies_cost: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True, default=Decimal("0"))  # 耗材成本
+    maintenance_cost: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True, default=Decimal("0"))  # 维护成本
+    other_variable_cost: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True, default=Decimal("0"))  # 其他变动成本
+
     # ========== 向后兼容：保留原有字段作为计算属性 ==========
     # 注意：std_mhr 和 vave_mhr 不再是数据库列，而是 @property 计算属性
 
