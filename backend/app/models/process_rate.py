@@ -64,6 +64,9 @@ class ProcessRate(Base):
     maintenance_cost: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True, default=Decimal("0"))  # 维护成本
     other_variable_cost: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True, default=Decimal("0"))  # 其他变动成本
 
+    # ========== v2.5 新增：人工成本参数 ==========
+    operators: Mapped[int] = mapped_column(default=1)  # 操作员人数（用于分段计算加班工资）
+
     # ========== 向后兼容：保留原有字段作为计算属性 ==========
     # 注意：std_mhr 和 vave_mhr 不再是数据库列，而是 @property 计算属性
 
