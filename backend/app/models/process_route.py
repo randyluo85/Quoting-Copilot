@@ -149,15 +149,8 @@ class ProcessRouteItem(Base):
         Integer, nullable=True, comment='VAVE工时（秒）'
     )
 
-    # 人工配置
-    personnel_std: Mapped[float] = mapped_column(
-        Numeric(4, 2), default=1.0, nullable=False, comment='标准人工配置'
-    )
-    personnel_vave: Mapped[float | None] = mapped_column(
-        Numeric(4, 2), nullable=True, comment='VAVE人工配置'
-    )
-
     # 费率快照（从 process_rates 复制，用于历史追溯）
+    # v2.5: MHR 已包含人工成本
     std_mhr_var: Mapped[Decimal | None] = mapped_column(
         Numeric(10, 2), nullable=True, comment='标准变动费率（快照）'
     )
