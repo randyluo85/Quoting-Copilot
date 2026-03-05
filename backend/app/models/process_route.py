@@ -214,15 +214,15 @@ class ProcessRouteItem(Base):
 
     def calculate_std_cost(
         self,
-        labor_rate: Decimal | None = None,
         cycle_time_override: int | None = None
     ) -> Decimal:
         """计算标准成本.
 
-        公式: std_cost = (cycle_time_std / 3600) × (std_mhr_var + std_mhr_fix + personnel_std × labor_rate)
+        公式: std_cost = (cycle_time_std / 3600) × MHR_total
+
+        注意: MHR 已包含人工成本 (v2.5)
 
         Args:
-            labor_rate: 人工时薪（如未提供，则使用 MHR 总值）
             cycle_time_override: 覆盖的工时值（秒）
 
         Returns:
@@ -235,29 +235,22 @@ class ProcessRouteItem(Base):
         # 计算小时数
         hours = cycle_time / Decimal("3600")
 
-        # 获取 MHR 总值
+        # 获取 MHR 总值（已包含人工成本）
         mhr_total = self.std_mhr_total or Decimal("0")
 
-        # 加上人工成本
-        if labor_rate is not None:
-            personnel_cost = Decimal(str(self.personnel_std)) * labor_rate
-            rate = mhr_total + personnel_cost
-        else:
-            rate = mhr_total
-
-        return hours * rate
+        return hours * mhr_total
 
     def calculate_vave_cost(
         self,
-        labor_rate: Decimal | None = None,
         cycle_time_override: int | None = None
     ) -> Decimal:
         """计算 VAVE 成本.
 
-        公式: vave_cost = (cycle_time_vave / 3600) × (vave_mhr_var + vave_mhr_fix + personnel_vave × labor_rate)
+        公式: vave_cost = (cycle_time_vave / 3600) × MHR_total
+
+        注意: MHR 已包含人工成本 (v2.5)
 
         Args:
-            labor_rate: 人工时薪（如未提供，则使用 MHR 总值）
             cycle_time_override: 覆盖的工时值（秒）
 
         Returns:
@@ -270,18 +263,10 @@ class ProcessRouteItem(Base):
         # 计算 VAVE 小时数
         hours = cycle_time / Decimal("3600")
 
-        # 获取 VAVE MHR 总值
+        # 获取 VAVE MHR 总值（已包含人工成本）
         mhr_total = self.vave_mhr_total or self.std_mhr_total or Decimal("0")
 
-        # 加上人工成本
-        personnel = Decimal(str(self.personnel_vave or self.personnel_std))
-        if labor_rate is not None:
-            personnel_cost = personnel * labor_rate
-            rate = mhr_total + personnel_cost
-        else:
-            rate = mhr_total
-
-        return hours * rate
+        return hours * mhr_total
 
     @property
     def std_cost(self) -> Decimal:
