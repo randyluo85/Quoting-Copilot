@@ -2,13 +2,13 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.0   | 2026-03-07 | 2026-03-07 | 表格组件规范 | Randy Luo |
+| v1.1   | 2026-03-07 | 2026-03-08 | 表格组件规范 | Randy Luo |
 
 ---
 
 ## Purpose
 
-Tables display structured data in rows and columns. They are ideal for comparing, scanning, and analyzing data.
+Tables display structured data in rows and columns. Used extensively in BOMView, ProcessMhrLibrary, and Quotation Summary.
 
 ---
 
@@ -19,283 +19,167 @@ Tables display structured data in rows and columns. They are ideal for comparing
 - Showing process routes
 - Presenting cost breakdowns
 - Comparing quotation data
-- Users need to scan across data points
 
 **DO NOT use a table when:**
 - Showing single data items (use Card)
 - Displaying hierarchical data (use Tree)
-- Layout purposes (use Grid)
-- Simple lists (use List)
 
 ---
 
-## Table Structure
+## Shadcn UI Table Pattern
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  Table Controls (Search, Filter, Actions)                       │
-├─────────────────────────────────────────────────────────────────┤
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │ Column 1    │ Column 2    │ Column 3    │ Status │ Actions│ │
-│  ├───────────────────────────────────────────────────────────┤ │
-│  │ Data        │ Data        │ Data        │  🟢    │ [Edit] │ │
-│  │ Data        │ Data        │ Data        │  🟡    │ [Edit] │ │
-│  │ Data        │ Data        │ Data        │  🔴    │ [Edit] │ │
-│  └───────────────────────────────────────────────────────────┘ │
-├─────────────────────────────────────────────────────────────────┤
-│  Pagination: [< 1] [2] [3] ... [16] [>]  Total: 156 items      │
-└─────────────────────────────────────────────────────────────────┘
-```
+```tsx
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
----
-
-## Column Sizing
-
-### Recommended Column Widths
-
-| Column Type | Width | Example |
-|-------------|-------|---------|
-| Row number | 60px | 1, 2, 3... |
-| Status badge | 80px | 🟢, 🟡, 🔴 |
-| Checkbox | 40px | ☑ |
-| Small code | 100px | PRJ-001 |
-| Code | 120px | A356-T6 |
-| Name | 200px | 铝合金材料 |
-| Quantity | 100px | 3.5 kg |
-| Price | 100px | ¥28.50 |
-| Date | 120px | 2026-03-07 |
-| Actions | 100px | [编辑] [删除] |
-| Flexible | 1fr | Auto-stretch |
-
-```html
-<!-- Example table layout -->
-<table class="w-full">
-  <colgroup>
-    <col style="width: 60px;">   <!-- Row number -->
-    <col style="width: 120px;">  <!-- Material code -->
-    <col style="width: 200px;">  <!-- Material name -->
-    <col style="width: 100px;">  <!-- Quantity -->
-    <col style="width: 80px;">   <!-- Unit -->
-    <col style="width: 100px;">  <!-- Unit price -->
-    <col style="width: 100px;">  <!-- Total -->
-    <col style="width: 80px;">   <!-- Status -->
-    <col style="width: 100px;">  <!-- Actions -->
-  </colgroup>
-  <!-- ... -->
-</table>
+<Table>
+  <TableHeader>
+    <TableRow className="bg-slate-50 hover:bg-slate-50">
+      <TableHead className="text-xs font-semibold text-slate-500">物料号</TableHead>
+      <TableHead className="text-xs font-semibold text-slate-500 text-right">单价</TableHead>
+      <TableHead className="text-xs font-semibold text-slate-500 text-center">状态</TableHead>
+      <TableHead className="text-xs font-semibold text-slate-500 text-right">操作</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow className="hover:bg-slate-50/50">
+      <TableCell className="p-2 font-mono">A356-T6</TableCell>
+      <TableCell className="p-2 text-right font-mono">¥28.50</TableCell>
+      <TableCell className="p-2 text-center">
+        <div className="w-2 h-2 rounded-full bg-emerald-500 mx-auto" />
+      </TableCell>
+      <TableCell className="p-2 text-right">
+        <Button variant="ghost" size="sm">编辑</Button>
+      </TableCell>
+    </TableRow>
+  </TableBody>
+</Table>
 ```
 
 ---
 
-## Table Header
+## Table Styling Rules
 
-### Styling
+### Header
 
-```css
-/* Header background */
-thead { background-color: #f1f5f9; }
-
-/* Header text */
-th {
-  padding: 12px 16px;
-  text-align: left;
-  font-size: 14px;
-  font-weight: 600;
-  color: #334155;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-/* Sortable header */
-th.sortable {
-  cursor: pointer;
-  user-select: none;
-}
-
-th.sortable:hover {
-  background-color: #e2e8f0;
-}
+```tsx
+<TableRow className="bg-slate-50 hover:bg-slate-50">
+  <TableHead className="text-xs font-semibold text-slate-500 p-2">
+    Column Name
+  </TableHead>
+</TableRow>
 ```
 
-```html
-<thead>
-  <tr>
-    <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-      行号
-    </th>
-    <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700 cursor-pointer hover:bg-slate-200">
-      物料号 ↑
-    </th>
-    <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-      物料名称
-    </th>
-    <th class="px-4 py-3 text-right text-sm font-semibold text-slate-700">
-      单价
-    </th>
-    <th class="px-4 py-3 text-center text-sm font-semibold text-slate-700">
-      状态
-    </th>
-    <th class="px-4 py-3 text-right text-sm font-semibold text-slate-700">
-      操作
-    </th>
-  </tr>
-</thead>
+**Rules:**
+- Background: `bg-slate-50`
+- Text: `text-xs font-semibold text-slate-500`
+- Padding: `p-2` or `p-3` (compact)
+- No hover effect on header
+
+### Row
+
+```tsx
+<TableRow className="hover:bg-slate-50/50">
+  <TableCell className="p-2">Data</TableCell>
+</TableRow>
+```
+
+**Rules:**
+- Default: `bg-white`
+- Hover: `hover:bg-slate-50/50`
+- Border bottom: automatic with Shadcn
+
+### Status-based Row Backgrounds
+
+```tsx
+{/* 🟢 Verified - Matched */}
+<TableRow className="bg-emerald-50 hover:bg-emerald-50/80">
+  <TableCell className="p-2">A356-T6</TableCell>
+</TableRow>
+
+{/* 🟡 Warning - AI Matched */}
+<TableRow className="bg-amber-50 hover:bg-amber-50/80">
+  <TableCell className="p-2">UNKNOWN</TableCell>
+</TableRow>
+
+{/* 🔴 Missing - No Match */}
+<TableRow className="bg-red-50 hover:bg-red-50/80">
+  <TableCell className="p-2">MISSING</TableCell>
+</TableRow>
 ```
 
 ---
 
-## Table Body
+## Column Alignment
 
-### Row Styling
+| Content Type | Alignment | Class |
+|--------------|-----------|--------|
+| Text | Left | `text-left` (default) |
+| Numbers | Right | `text-right` |
+| Currency | Right | `text-right font-mono` |
+| Percentages | Right | `text-right font-mono` |
+| Status | Center | `text-center` |
+| Actions | Right | `text-right` |
 
-```css
-/* Default row */
-tbody tr {
-  background-color: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  transition: background-color 150ms;
-}
-
-/* Hover state */
-tbody tr:hover {
-  background-color: #f8fafc;
-}
-
-/* Status-based backgrounds */
-tbody tr.status-verified { background-color: #ffffff; }
-tbody tr.status-warning { background-color: #fefce8; }
-tbody tr.status-missing { background-color: #fef2f2; }
-
-/* Selected row */
-tbody tr.selected {
-  background-color: #eff6ff;
-  box-shadow: inset 2px 0 0 #3b82f6;
-}
-```
-
-```html
-<tbody>
-  <!-- Verified row (green) -->
-  <tr class="bg-white hover:bg-slate-50">
-    <td class="px-4 py-3 text-sm">1</td>
-    <td class="px-4 py-3 text-sm font-mono">A356-T6</td>
-    <td class="px-4 py-3 text-sm">铝合金</td>
-    <td class="px-4 py-3 text-sm text-right">¥28.50</td>
-    <td class="px-4 py-3 text-sm">
-      <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">🟢</span>
-    </td>
-    <td class="px-4 py-3 text-sm text-right">
-      <button class="text-slate-600 hover:text-primary">编辑</button>
-    </td>
-  </tr>
-
-  <!-- Warning row (yellow) -->
-  <tr class="bg-yellow-50 hover:bg-yellow-100">
-    <td class="px-4 py-3 text-sm">2</td>
-    <td class="px-4 py-3 text-sm font-mono">UNKNOWN</td>
-    <td class="px-4 py-3 text-sm">未知物料</td>
-    <td class="px-4 py-3 text-sm text-right">—</td>
-    <td class="px-4 py-3 text-sm">
-      <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">🟡</span>
-    </td>
-    <td class="px-4 py-3 text-sm text-right">
-      <button class="text-slate-600 hover:text-primary">编辑</button>
-    </td>
-  </tr>
-
-  <!-- Missing row (red) -->
-  <tr class="bg-red-50 hover:bg-red-100">
-    <td class="px-4 py-3 text-sm">3</td>
-    <td class="px-4 py-3 text-sm font-mono text-red-600">MISSING</td>
-    <td class="px-4 py-3 text-sm text-red-600">数据缺失</td>
-    <td class="px-4 py-3 text-sm text-right">—</td>
-    <td class="px-4 py-3 text-sm">
-      <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">🔴</span>
-    </td>
-    <td class="px-4 py-3 text-sm text-right">
-      <button class="text-red-600 hover:text-red-800">询价</button>
-    </td>
-  </tr>
-</tbody>
+```tsx
+<TableCell className="p-2 text-left">铝合金</TableCell>
+<TableCell className="p-2 text-right font-mono">¥28.50</TableCell>
+<TableCell className="p-2 text-center">
+  <div className="w-2 h-2 rounded-full bg-emerald-500" />
+</TableCell>
+<TableCell className="p-2 text-right">120,000</TableCell>
 ```
 
 ---
 
-## Cell Content
+## Status Indicators
 
-### Text Alignment
+### Dot Style (Compact)
 
-| Content Type | Alignment | Example |
-|--------------|-----------|---------|
-| Text (left) | `text-left` | Names, descriptions |
-| Numbers | `text-right` | Prices, quantities |
-| Status | `text-center` | Badges |
-| Actions | `text-right` | Buttons |
+```tsx
+{/* 🟢 Verified */}
+<div className="w-2 h-2 rounded-full bg-emerald-500" />
 
-```html
-<!-- Left aligned text -->
-<td class="px-4 py-3 text-sm text-left">铝合金</td>
+{/* 🟡 Warning */}
+<div className="w-2 h-2 rounded-full bg-amber-500" />
 
-<!-- Right aligned number -->
-<td class="px-4 py-3 text-sm text-right tabular-nums">¥28.50</td>
-
-<!-- Center aligned status -->
-<td class="px-4 py-3 text-sm text-center">
-  <span class="badge">🟢</span>
-</td>
+{/* 🔴 Missing */}
+<div className="w-2 h-2 rounded-full bg-red-500" />
 ```
 
-### Number Formatting
+### With Label
 
-```html
-<!-- Currency -->
-<td class="px-4 py-3 text-sm text-right font-mono">¥1,234.56</td>
-
-<!-- Quantity -->
-<td class="px-4 py-3 text-sm text-right font-mono">120,000</td>
-
-<!-- Percentage -->
-<td class="px-4 py-3 text-sm text-right font-mono">15.5%</td>
-
-<!-- Profit (positive) -->
-<td class="px-4 py-3 text-sm text-right font-mono text-green-600">+5.2%</td>
-
-<!-- Profit (negative) -->
-<td class="px-4 py-3 text-sm text-right font-mono text-red-600">-3.8%</td>
+```tsx
+<div className="flex items-center gap-2">
+  <div className="w-2 h-2 rounded-full bg-emerald-500" />
+  <span className="text-xs text-emerald-700">已匹配</span>
+</div>
 ```
 
 ---
 
-## Status Badges in Tables
+## Number Formatting
 
-### Badge Positioning
+### Currency
 
-Place status badges in the rightmost column before actions, or in a dedicated status column.
-
-```html
-<td class="px-4 py-3 text-sm text-center">
-  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-    ✓ 已确认
-  </span>
-</td>
+```tsx
+<TableCell className="p-2 text-right font-mono">¥1,234.56</TableCell>
+<TableCell className="p-2 text-right font-mono">€21.76</TableCell>
 ```
 
-### Traffic Light Colors
+### Thousands Separator
 
-| Status | Background | Text | Badge |
-|--------|-----------|------|-------|
-| 🟢 Verified | `#d1fae5` | `#065f46` | ✓ 已确认 |
-| 🟡 Warning | `#fef3c7` | `#92400e` | △ 待确认 |
-| 🔴 Missing | `#fee2e2` | `#991b1b` | ⚠ 缺失 |
+```tsx
+<TableCell className="p-2 text-right font-mono">120,000</TableCell>
+```
 
-```html
-<!-- Verified -->
-<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">🟢 已确认</span>
+### Percentage
 
-<!-- Warning -->
-<span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">🟡 待确认</span>
+```tsx
+{/* Positive */}
+<TableCell className="p-2 text-right font-mono text-emerald-700">+5.2%</TableCell>
 
-<!-- Missing -->
-<span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">🔴 缺失</span>
+{/* Negative */}
+<TableCell className="p-2 text-right font-mono text-red-700">-3.8%</TableCell>
 ```
 
 ---
@@ -304,124 +188,62 @@ Place status badges in the rightmost column before actions, or in a dedicated st
 
 ### Inline Actions
 
-```html
-<td class="px-4 py-3 text-sm text-right">
-  <div class="flex justify-end gap-2">
-    <button class="text-slate-600 hover:text-primary hover:bg-slate-100 px-2 py-1 rounded">
-      编辑
-    </button>
-    <button class="text-slate-600 hover:text-red-600 hover:bg-red-50 px-2 py-1 rounded">
-      删除
-    </button>
+```tsx
+<TableCell className="p-2 text-right">
+  <div className="flex justify-end gap-2">
+    <Button variant="ghost" size="sm">编辑</Button>
+    <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">删除</Button>
   </div>
-</td>
+</TableCell>
 ```
 
 ### Icon Actions (Compact)
 
-```html
-<td class="px-4 py-3 text-sm text-right">
-  <div class="flex justify-end gap-1">
-    <button class="p-1.5 hover:bg-slate-100 rounded" aria-label="编辑">
-      <EditIcon class="w-4 h-4 text-slate-600" />
-    </button>
-    <button class="p-1.5 hover:bg-red-50 rounded" aria-label="删除">
-      <TrashIcon class="w-4 h-4 text-red-600" />
-    </button>
+```tsx
+<TableCell className="p-2 text-right">
+  <div className="flex justify-end gap-1">
+    <Button variant="ghost" size="icon" className="h-8 w-8">
+      <Pencil className="h-4 w-4" />
+    </Button>
+    <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600">
+      <Trash2 className="h-4 w-4" />
+    </Button>
   </div>
-</td>
+</TableCell>
 ```
 
 ---
 
 ## Empty State
 
-```html
-<tbody>
-  <tr>
-    <td colspan="9" class="px-4 py-12 text-center">
-      <div class="flex flex-col items-center justify-center">
-        <span class="text-4xl mb-4">📭</span>
-        <p class="text-slate-600 font-medium">暂无物料数据</p>
-        <p class="text-slate-400 text-sm mt-1">请上传 BOM 文件或手动添加物料</p>
-        <div class="mt-4 flex gap-2">
-          <button class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90">
-            导入Excel
-          </button>
-          <button class="px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-md">
-            添加物料
-          </button>
-        </div>
+```tsx
+<TableBody>
+  <TableRow>
+    <TableCell colSpan={5} className="h-24 text-center">
+      <div className="flex flex-col items-center justify-center text-slate-500">
+        <span className="text-2xl mb-2">📭</span>
+        <p className="text-sm">暂无物料数据</p>
       </div>
-    </td>
-  </tr>
-</tbody>
+    </TableCell>
+  </TableRow>
+</TableBody>
 ```
 
 ---
 
-## Loading State
+## Loading State (Skeleton)
 
-```html
-<tbody>
-  <tr>
-    <td colspan="9" class="px-4 py-12 text-center">
-      <div class="flex flex-col items-center justify-center">
-        <LoadingIcon class="w-8 h-8 text-primary animate-spin mb-4" />
-        <p class="text-slate-600">正在加载数据...</p>
-      </div>
-    </td>
-  </tr>
-</tbody>
-```
-
----
-
-## Sorting
-
-### Sortable Headers
-
-```html
-<th class="px-4 py-3 text-left text-sm font-semibold text-slate-700 cursor-pointer hover:bg-slate-200">
-  <button class="flex items-center gap-1">
-    物料号
-    <SortIcon class="w-4 h-4 text-slate-400" />
-  </button>
-</th>
-```
-
-### Sort Indicators
-
-| State | Icon | Description |
-|-------|------|-------------|
-| Unsorted | ⇅ | Column is sortable |
-| Ascending | ↑ | A to Z, 0 to 9 |
-| Descending | ↓ | Z to A, 9 to 0 |
-
----
-
-## Pagination
-
-```html
-<div class="flex items-center justify-between px-4 py-3 border-t">
-  <div class="text-sm text-slate-600">
-    显示 <span class="font-medium">1</span> 到 <span class="font-medium">10</span>
-    共 <span class="font-medium">156</span> 条
-  </div>
-  <div class="flex gap-1">
-    <button class="px-3 py-1 text-sm border rounded hover:bg-slate-50 disabled:opacity-50">
-      &lt; 上一页
-    </button>
-    <button class="px-3 py-1 text-sm bg-primary text-white rounded">1</button>
-    <button class="px-3 py-1 text-sm border rounded hover:bg-slate-50">2</button>
-    <button class="px-3 py-1 text-sm border rounded hover:bg-slate-50">3</button>
-    <span class="px-2 py-1">...</span>
-    <button class="px-3 py-1 text-sm border rounded hover:bg-slate-50">16</button>
-    <button class="px-3 py-1 text-sm border rounded hover:bg-slate-50">
-      下一页 &gt;
-    </button>
-  </div>
-</div>
+```tsx
+<TableBody>
+  {[...Array(5)].map((_, i) => (
+    <TableRow key={i}>
+      <TableCell className="p-2"><Skeleton className="h-4 w-24" /></TableCell>
+      <TableCell className="p-2"><Skeleton className="h-4 w-32" /></TableCell>
+      <TableCell className="p-2"><Skeleton className="h-4 w-16" /></TableCell>
+      <TableCell className="p-2"><Skeleton className="h-4 w-20" /></TableCell>
+    </TableRow>
+  ))}
+</TableBody>
 ```
 
 ---
@@ -430,65 +252,33 @@ Place status badges in the rightmost column before actions, or in a dedicated st
 
 ### Mobile (< 768px)
 
-On mobile, tables have two options:
+**Option 1: Horizontal Scroll**
 
-**Option 1: Card View**
-```html
-<!-- Each row becomes a card -->
-<div class="md:hidden">
-  <div class="border rounded-lg p-4 mb-3">
-    <div class="flex justify-between mb-2">
-      <span class="font-medium">A356-T6</span>
-      <span class="badge green">🟢</span>
-    </div>
-    <div class="text-sm text-slate-600">
-      <div>名称: 铝合金</div>
-      <div>数量: 3.5 kg</div>
-      <div>单价: ¥28.50</div>
-    </div>
-    <div class="mt-3 flex gap-2">
-      <button>编辑</button>
-      <button>删除</button>
-    </div>
-  </div>
+```tsx
+<div className="overflow-x-auto">
+  <Table>
+    {/* Normal table */}
+  </Table>
 </div>
 ```
 
-**Option 2: Horizontal Scroll**
-```html
-<div class="overflow-x-auto">
-  <table class="min-w-full">
-    <!-- Normal table structure -->
-  </table>
+**Option 2: Card View**
+
+```tsx
+<div className="md:hidden space-y-3">
+  {materials.map((mat) => (
+    <Card key={mat.id} className="p-4">
+      <div className="flex justify-between mb-2">
+        <span className="font-mono text-sm">{mat.code}</span>
+        <div className={`w-2 h-2 rounded-full ${getStatusColor(mat.status)}`} />
+      </div>
+      <div className="text-sm text-slate-600">
+        <div>名称: {mat.name}</div>
+        <div>单价: {mat.price}</div>
+      </div>
+    </Card>
+  ))}
 </div>
-```
-
----
-
-## Accessibility
-
-Tables MUST:
-
-1. Have proper `<thead>`, `<tbody>`, `<tfoot>` structure
-2. Include `<caption>` or aria-label for context
-3. Use `<th scope="col">` for column headers
-4. Use `<th scope="row">` for row headers
-5. Support keyboard navigation
-
-```html
-<table role="table" aria-label="物料清单">
-  <caption class="sr-only">项目物料清单，共156条记录</caption>
-  <thead>
-    <tr>
-      <th scope="col">行号</th>
-      <th scope="col">物料号</th>
-      <!-- ... -->
-    </tr>
-  </thead>
-  <tbody>
-    <!-- ... -->
-  </tbody>
-</table>
 ```
 
 ---
@@ -499,22 +289,69 @@ Tables MUST:
 ┌─────────────────────────────────────────────────────────┐
 │  Table Quick Reference                                   │
 ├─────────────────────────────────────────────────────────┤
-│  Header: #f1f5f9 bg, 600 weight, bottom border           │
-│  Row: #ffffff bg, hover #f8fafc, bottom border           │
+│  Header: bg-slate-50, text-xs font-semibold             │
+│  Row: bg-white, hover:bg-slate-50/50                   │
+│  Cell: p-2 (compact), p-3 (standard)                    │
 │                                                         │
-│  Cell padding: 12px 16px (px-4 py-3)                    │
-│  Text size: 14px (text-sm)                              │
+│  Status Rows:                                            │
+│    🟢 Verified: bg-emerald-50                            │
+│    🟡 Warning:   bg-amber-50                             │
+│    🔴 Missing:   bg-red-50                               │
 │                                                         │
-│  Status rows:                                            │
-│    🟢 Verified: #ffffff bg                               │
-│    🟡 Warning:   #fefce8 bg                              │
-│    🔴 Missing:   #fef2f2 bg                              │
+│  Alignment:                                              │
+│    Text: left (default)                                 │
+│    Numbers: right + font-mono                            │
+│    Status: center                                       │
+│    Actions: right                                       │
 │                                                         │
-│  Numbers: right align, tabular-nums                     │
-│  Status: center align, pill badge                        │
-│  Actions: right align, gap-2                            │
+│  Status Dot: w-2 h-2 rounded-full                        │
+│    🟢 bg-emerald-500                                    │
+│    🟡 bg-amber-500                                      │
+│    🔴 bg-red-500                                        │
 │                                                         │
-│  Empty: centered, 48px padding, icon + message           │
-│  Loading: centered, spinner + "加载中..."               │
+│  Numbers: tabular-nums, comma separators               │
+│    Currency: ¥1,234.56                                  │
+│    Percent: +5.2% (emerald), -3.8% (red)                │
 └─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Figma Make Prompt
+
+```
+Data Table for Dr.aiVOSS BOM Management:
+
+Header:
+- Background: Slate-50 (#f8fafc)
+- Text: 12px (text-xs), semibold, slate-500
+- Padding: 12px
+
+Row:
+- Background: White (#ffffff)
+- Hover: Slate-50 (#f8fafc) with 50% opacity
+- Padding: 8px (p-2) for compact, 12px (p-3) for standard
+- Border bottom: 1px Slate-200 (#e2e8f0)
+
+Status Rows:
+- 🟢 Verified: Emerald-50 (#ecfdf5) background
+- 🟡 Warning: Amber-50 (#fffbeb) background
+- 🔴 Missing: Red-50 (#fef2f2) background
+
+Status Dot:
+- 8px (w-2 h-2), rounded-full
+- Colors: Emerald-500, Amber-500, Red-500
+
+Columns:
+- Material Code: left align, 120px, monospace font
+- Name: left align, 200px
+- Quantity: right align, 100px, monospace
+- Unit Price: right align, 100px, monospace
+- Status: center align, 80px
+- Actions: right align, 100px
+
+Numbers:
+- Use comma separators (120,000)
+- Currency prefix (¥28.50)
+- Percentage with color (+5.2% green, -3.8% red)
 ```
