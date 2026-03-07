@@ -2,13 +2,13 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.0   | 2026-03-07 | 2026-03-07 | 颜色设计令牌 | Randy Luo |
+| v1.1   | 2026-03-07 | 2026-03-08 | 颜色设计令牌 | Randy Luo |
 
 ---
 
 ## Color Philosophy
 
-Dr.aiVOSS uses a minimal color palette focused on data clarity. The system uses **blue** as primary, with **semantic colors** (green/yellow/red) exclusively for the traffic light status system.
+Dr.aiVOSS uses a minimal color palette focused on data clarity. The system uses **slate-900** as primary, with **semantic colors** (emerald/amber/red) exclusively for the traffic light status system.
 
 ### Core Principles
 
@@ -19,227 +19,286 @@ Dr.aiVOSS uses a minimal color palette focused on data clarity. The system uses 
 
 ---
 
-## Primary Colors
+## Primary Colors (Slate)
 
-### Blue (Primary Action)
+### Primary Action
 
-| Token | Value | Usage | Example |
-|-------|-------|-------|---------|
-| `--primary` | `#3b82f6` | Main buttons, links, active states | "创建项目" button |
-| `--primary-hover` | `#2563eb` | Hover state (90% opacity) | Button hover |
-| `--primary-foreground` | `#ffffff` | Text on primary | Button text |
+| Tailwind Class | Usage | Example |
+|----------------|-------|---------|
+| `bg-slate-900 text-white` | Main buttons, links | "生成报价单" button |
+| `bg-slate-100 text-slate-900` | Secondary buttons | "取消" button |
+| `hover:bg-slate-200` | Hover state | Button hover |
 
-```css
-/* Tailwind classes */
-bg-primary           /* #3b82f6 */
-bg-primary/90        /* #2563eb (hover) */
-text-white           /* #ffffff (on primary) */
+```tsx
+{/* Primary Button */}
+<Button className="bg-slate-900 text-white hover:bg-slate-800">
+  生成报价单
+</Button>
+
+{/* Secondary Button */}
+<Button className="bg-slate-100 text-slate-900 hover:bg-slate-200">
+  取消
+</Button>
 ```
-
-**When to Use:**
-- Main call-to-action buttons
-- Navigation active states
-- Links within content
-- Primary interactive elements
-
-**When NOT to Use:**
-- Background colors (use surface colors)
-- Text (use foreground colors)
-- Decorative elements
 
 ---
 
 ## Semantic Colors (Traffic Light System)
 
-### Green (Success / Verified)
+### Success/Green (🟢 正常 / 匹配成功)
 
-| Token | Value | Usage | Example |
-|-------|-------|-------|---------|
-| `--success` | `#10b981` | Verified status badge | 🟢 物料已确认 |
-| `--success-light` | `#d1fae5` | Badge background | Green badge bg |
-| `--success-dark` | `#065f46` | Badge text | Green badge text |
+| Tailwind Class | Usage | Example |
+|----------------|-------|---------|
+| `text-emerald-700` | Status text | "已匹配" label |
+| `bg-emerald-50` | Row background | Verified material row |
+| `border-emerald-200` | Badge border | Status badge |
+| `bg-emerald-500` | Status dot | `w-2 h-2 rounded-full` |
 
-```css
-/* Tailwind classes */
-bg-green-100          /* #d1fae5 (badge bg) */
-text-green-800        /* #065f46 (badge text) */
+```tsx
+{/* Status Indicator */}
+<div className="flex items-center gap-2">
+  <div className="w-2 h-2 rounded-full bg-emerald-500" />
+  <span className="text-xs text-emerald-700">已匹配</span>
+</div>
+
+{/* Table Row */}
+<tr className="bg-emerald-50">
+  <td>A356-T6</td>
+</tr>
+
+{/* Badge */}
+<Badge className="bg-emerald-50 border-emerald-200 text-emerald-700">
+  ✓ 已确认
+</Badge>
 ```
 
 **DO use for:**
-- Verified status indicators
+- Verified/Matched status indicators
+- Positive profit margins (DB4 >= 0%)
 - Completed states
-- Positive profit margins
-- Successful operations
-
-**DO NOT use for:**
-- Primary buttons
-- Background decoration
-- General positive messaging (use neutral colors instead)
+- Passed validation
 
 ---
 
-### Yellow (Warning / Review Needed)
+### Warning/Amber (🟡 警告 / AI匹配需确认)
 
-| Token | Value | Usage | Example |
-|-------|-------|-------|---------|
-| `--warning` | `#f59e0b` | Warning status badge | 🟡 需人工复核 |
-| `--warning-light` | `#fef3c7` | Badge background | Yellow badge bg |
-| `--warning-dark` | `#92400e` | Badge text | Yellow badge text |
+| Tailwind Class | Usage | Example |
+|----------------|-------|---------|
+| `text-amber-700` | Status text | "需确认" label |
+| `bg-amber-50` | Row background | AI-matched material row |
+| `border-amber-200` | Badge border | Status badge |
+| `bg-amber-500` | Status dot | `w-2 h-2 rounded-full` |
 
-```css
-/* Tailwind classes */
-bg-yellow-100         /* #fef3c7 (badge bg) */
-text-yellow-800       /* #92400e (badge text) */
+```tsx
+{/* Status Indicator */}
+<div className="flex items-center gap-2">
+  <div className="w-2 h-2 rounded-full bg-amber-500" />
+  <span className="text-xs text-amber-700">需确认</span>
+</div>
+
+{/* Table Row */}
+<tr className="bg-amber-50">
+  <td>UNKNOWN</td>
+</tr>
+
+{/* Badge */}
+<Badge className="bg-amber-50 border-amber-200 text-amber-700">
+  △ 需确认
+</Badge>
 ```
 
 **DO use for:**
 - AI-matched items (85%+ confidence)
 - Pending review states
-- Warnings that don't block action
-
-**DO NOT use for:**
-- Error states (use red)
-- Informational messages (use neutral)
+- Warning alerts (DB4 < 0% but >= -5%)
+- Low-risk warnings
 
 ---
 
-### Red (Error / Missing)
+### Danger/Red (🔴 严重亏损 / 无物料匹配)
 
-| Token | Value | Usage | Example |
-|-------|-------|-------|---------|
-| `--destructive` | `#ef4444` | Missing status badge | 🔴 数据缺失 |
-| `--destructive-light` | `#fee2e2` | Badge background | Red badge bg |
-| `--destructive-dark` | `#991b1b` | Badge text | Red badge text |
+| Tailwind Class | Usage | Example |
+|----------------|-------|---------|
+| `text-red-700` | Status text | "需询价" label |
+| `bg-red-50` | Row background | Missing material row |
+| `border-red-200` | Badge border | Status badge |
+| `bg-red-500` | Status dot | `w-2 h-2 rounded-full` |
 
-```css
-/* Tailwind classes */
-bg-red-100            /* #fee2e2 (badge bg) */
-text-red-800          /* #991b1b (badge text) */
+```tsx
+{/* Status Indicator */}
+<div className="flex items-center gap-2">
+  <div className="w-2 h-2 rounded-full bg-red-500" />
+  <span className="text-xs text-red-700">需询价</span>
+</div>
+
+{/* Table Row */}
+<tr className="bg-red-50">
+  <td>MISSING</td>
+</tr>
+
+{/* Badge */}
+<Badge className="bg-red-50 border-red-200 text-red-700">
+  ⚠ 缺失
+</Badge>
 ```
 
 **DO use for:**
-- Missing data indicators
-- Error states
-- Delete/destroy actions
-- Negative profit margins
+- Missing/Unmatched materials
 - High-risk warnings (DB4 < -5%)
-
-**DO NOT use for:**
-- General emphasis
-- Price highlights
-- Secondary actions
+- Error states
+- Negative profit margins
+- Delete/destroy actions
 
 ---
 
-## Neutral Colors
+## Neutral Colors (Slate)
 
 ### Backgrounds
 
-| Token | Value | Usage | Example |
-|-------|-------|-------|---------|
-| `--background` | `#ffffff` | Page background | Main content area |
-| `--surface` | `#f8fafc` | Card background | Project card bg |
-| `--surface-variant` | `#f1f5f9` | Nested card bg | Info box within card |
-| `--surface-highlight` | `#e2e8f0` | Table header bg | Column headers |
+| Tailwind Class | Usage | Example |
+|----------------|-------|---------|
+| `bg-slate-50` | App background | Main page background |
+| `bg-white` | Card/module background | Card, modal content |
+| `bg-slate-100` | Selected/hover states | Hover background |
+| `bg-slate-200` | Table header | Column headers |
 
-```css
-/* Tailwind classes */
-bg-white              /* #ffffff */
-bg-slate-50           /* #f8fafc */
-bg-slate-100          /* #f1f5f9 */
-bg-slate-200          /* #e2e8f0 */
+```tsx
+{/* App Layout */}
+<div className="bg-slate-50 min-h-screen">
+  <Card className="bg-white">Content</Card>
+</div>
+
+{/* Table Header */}
+<TableRow className="bg-slate-50">
+  <TableHead className="text-xs font-semibold text-slate-500">物料号</TableHead>
+</TableRow>
 ```
 
 ---
 
 ### Borders
 
-| Token | Value | Usage | Example |
-|-------|-------|-------|---------|
-| `--border` | `#e2e8f0` | Default borders | Input border |
-| `--border-strong` | `#cbd5e1` | Strong borders | Modal border |
-| `--border-subtle` | `#f1f5f9` | Subtle borders | Card divider |
+| Tailwind Class | Usage | Example |
+|----------------|-------|---------|
+| `border-slate-200` | Default borders | Input, card borders |
+| `border-slate-300` | Strong borders | Modal borders |
 
-```css
-/* Tailwind classes */
-border-slate-200      /* #e2e8f0 */
-border-slate-300      /* #cbd5e1 */
-border-slate-100      /* #f1f5f9 */
+```tsx
+<Card className="border border-slate-200 rounded-lg">
+  {/* Card content */}
+</Card>
+
+<Input className="border border-slate-200" />
 ```
 
 ---
 
 ### Text
 
-| Token | Value | Usage | Example |
-|-------|-------|-------|---------|
-| `--foreground` | `#0f172a` | Primary text | Headings, labels |
-| `--foreground-secondary` | `#475569` | Secondary text | Descriptions |
-| `--foreground-tertiary` | `#94a3b8` | Tertiary text | Placeholder, disabled |
+| Tailwind Class | Usage | Example |
+|----------------|-------|---------|
+| `text-slate-900` | Primary text | Page titles, headings |
+| `text-slate-800` | Section titles | Card titles |
+| `text-slate-700` | Labels | Form labels |
+| `text-slate-600` | Body text | Descriptions, content |
+| `text-slate-500` | Secondary text | Help text, metadata |
+| `text-slate-400` | Tertiary text | Placeholder, disabled |
 
-```css
-/* Tailwind classes */
-text-slate-900         /* #0f172a */
-text-slate-600         /* #475569 */
-text-slate-400         /* #94a3b8 */
+```tsx
+<h1 className="text-2xl font-bold text-slate-900">Page Title</h1>
+<h2 className="text-lg font-semibold text-slate-800">Section Title</h2>
+<Label className="text-sm font-medium text-slate-700">Label</Label>
+<p className="text-sm text-slate-600">Body text</p>
+<p className="text-xs text-slate-500">Help text</p>
 ```
 
 ---
 
 ## Color Usage Patterns
 
-### Pattern 1: Status Badge
+### Pattern 1: Material Status Row
 
-```html
-<!-- Green Verified Badge -->
-<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-  ✓ 已确认
-</span>
+```tsx
+{/* 🟢 Verified - Matched */}
+<tr className="bg-emerald-50 hover:bg-emerald-50/80">
+  <TableCell className="p-2">A356-T6</TableCell>
+  <TableCell className="p-2 text-emerald-700">已匹配</TableCell>
+</tr>
 
-<!-- Yellow Warning Badge -->
-<span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
-  △ 待确认
-</span>
+{/* 🟡 Warning - AI Matched */}
+<tr className="bg-amber-50 hover:bg-amber-50/80">
+  <TableCell className="p-2">UNKNOWN</TableCell>
+  <TableCell className="p-2 text-amber-700">需确认</TableCell>
+</tr>
 
-<!-- Red Missing Badge -->
-<span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm">
-  ⚠ 缺失
-</span>
+{/* 🔴 Missing - No Match */}
+<tr className="bg-red-50 hover:bg-red-50/80">
+  <TableCell className="p-2 text-red-600">MISSING</TableCell>
+  <TableCell className="p-2 text-red-700">需询价</TableCell>
+</tr>
 ```
 
-### Pattern 2: Table Row Status
+### Pattern 2: Status Badge
 
-```css
-/* Green row - Verified */
-tr.verified { background-color: #ffffff; }
-tr.verified td:last-child .badge {
-  background-color: #d1fae5;
-  color: #065f46;
-}
+```tsx
+{/* Verified Badge */}
+<Badge className="bg-emerald-50 border-emerald-200 text-emerald-700">
+  ✓ 已确认
+</Badge>
 
-/* Yellow row - Pending review */
-tr.warning { background-color: #fefce8; }
-tr.warning td:last-child .badge {
-  background-color: #fef3c7;
-  color: #92400e;
-}
+{/* Warning Badge */}
+<Badge className="bg-amber-50 border-amber-200 text-amber-700">
+  △ 需确认
+</Badge>
 
-/* Red row - Missing */
-tr.missing { background-color: #fef2f2; }
-tr.missing td:last-child .badge {
-  background-color: #fee2e2;
-  color: #991b1b;
-}
+{/* Missing Badge */}
+<Badge className="bg-red-50 border-red-200 text-red-700">
+  ⚠ 缺失
+</Badge>
 ```
 
 ### Pattern 3: Profit Display
 
-```html
-<!-- Positive Profit -->
-<span class="text-green-600 font-semibold">+5.2%</span>
+```tsx
+{/* Positive Profit */}
+<span className="text-emerald-700 font-semibold">+5.2%</span>
 
-<!-- Negative Profit -->
-<span class="text-red-600 font-semibold">-3.8%</span>
+{/* Negative Profit */}
+<span className="text-red-700 font-semibold">-3.8%</span>
+
+{/* Warning Profit */}
+<span className="text-amber-700 font-semibold">-1.2%</span>
+```
+
+### Pattern 4: Alert Component
+
+```tsx
+{/* High Risk Alert - DB4 < -5% */}
+<Alert variant="destructive" className="border-red-200 bg-red-50">
+  <AlertCircle className="h-4 w-4" />
+  <AlertTitle className="text-red-800">高风险警告</AlertTitle>
+  <AlertDescription className="text-red-700">
+    DB4 利润率低于 -5%
+  </AlertDescription>
+</Alert>
+
+{/* Warning Alert - DB4 < 0% */}
+<Alert className="border-amber-200 bg-amber-50">
+  <AlertTriangle className="h-4 w-4 text-amber-600" />
+  <AlertTitle className="text-amber-800">利润警告</AlertTitle>
+  <AlertDescription className="text-amber-700">
+    DB4 利润率为负
+  </AlertDescription>
+</Alert>
+
+{/* Success Alert - DB4 >= 0% */}
+<Alert className="border-emerald-200 bg-emerald-50">
+  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+  <AlertTitle className="text-emerald-800">计算通过</AlertTitle>
+  <AlertDescription className="text-emerald-700">
+    所有指标符合要求
+  </AlertDescription>
+</Alert>
 ```
 
 ---
@@ -250,10 +309,10 @@ DO NOT combine these colors:
 
 | Background | Foreground | Reason |
 |------------|-----------|--------|
-| Green | Red | Traffic light colors clash |
-| Yellow | White text | Insufficient contrast |
-| Red | Green text | Color blindness issue |
-| Primary | Primary | Low contrast |
+| Emerald | Red | Traffic light colors clash |
+| Amber | White text | Insufficient contrast |
+| Red | Emerald text | Color blindness issue |
+| Slate-900 | Slate-900 | Low contrast |
 
 ---
 
@@ -266,31 +325,62 @@ All color combinations MUST meet WCAG 2.1 AA standards:
 - **UI components:** 3:1 contrast ratio against adjacent colors
 
 Verified combinations:
-- `#0f172a` on `#ffffff` ✓ (15.7:1)
-- `#ffffff` on `#3b82f6` ✓ (4.6:1)
-- `#065f46` on `#d1fae5` ✓ (6.8:1)
-- `#92400e` on `#fef3c7` ✓ (6.2:1)
-- `#991b1b` on `#fee2e2` ✓ (5.9:1)
+- `text-slate-900` on `bg-white` ✓ (15.7:1)
+- `text-white` on `bg-slate-900` ✓ (13.5:1)
+- `text-emerald-700` on `bg-emerald-50` ✓ (6.8:1)
+- `text-amber-700` on `bg-amber-50` ✓ (6.2:1)
+- `text-red-700` on `bg-red-50` ✓ (5.9:1)
 
 ---
 
-## Quick Reference Card
+## Quick Reference
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  Dr.aiVOSS Color Palette                                │
 ├─────────────────────────────────────────────────────────┤
-│  Primary:     #3b82f6 (blue)                            │
-│  Success:     #10b981 (green)  🟢 Verified              │
-│  Warning:     #f59e0b (yellow) 🟡 Review Needed         │
-│  Destructive: #ef4444 (red)     🔴 Missing               │
+│  Primary:     bg-slate-900 text-white                   │
+│  Secondary:   bg-slate-100 text-slate-900               │
 │                                                         │
-│  Background:  #ffffff                                    │
-│  Surface:    #f8fafc                                     │
-│  Border:     #e2e8f0                                     │
+│  🟢 Green:     text-emerald-700 bg-emerald-50           │
+│               border-emerald-200                          │
+│               已匹配 / 正常                               │
 │                                                         │
-│  Text:       #0f172a (primary)                          │
-│              #475569 (secondary)                        │
-│              #94a3b8 (tertiary)                         │
+│  🟡 Yellow:    text-amber-700 bg-amber-50              │
+│               border-amber-200                            │
+│               需确认 / 警告                               │
+│                                                         │
+│  🔴 Red:       text-red-700 bg-red-50                   │
+│               border-red-200                             │
+│               需询价 / 亏损 / 错误                         │
+│                                                         │
+│  Background:  bg-slate-50 (app)                          │
+│               bg-white (card)                            │
+│  Border:     border-slate-200                           │
+│                                                         │
+│  Text:        text-slate-900 (title)                     │
+│               text-slate-600 (body)                      │
+│               text-slate-500 (help)                      │
+│               font-mono (numbers)                         │
 └─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Figma Make Prompt
+
+```
+Color System for Dr.aiVOSS:
+
+Primary: Slate-900 (#0f172a) for main actions
+Secondary: Slate-100 (#f1f5f9) for secondary actions
+
+Traffic Light Status:
+- Green: Emerald-50 (#ecfdf5) bg, Emerald-700 (#047857) text - Verified/Matched
+- Yellow: Amber-50 (#fffbeb) bg, Amber-700 (#b45309) text - Needs review
+- Red: Red-50 (#fef2f2) bg, Red-700 (#b91c1c) text - Missing/Error
+
+Backgrounds: Slate-50 (#f8fafc) for app, White (#ffffff) for cards
+Borders: Slate-200 (#e2e8f0)
+Text: Slate-900 (#0f172a) for headings, Slate-600 (#475569) for body
 ```
