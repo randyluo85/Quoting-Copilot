@@ -1,1 +1,0 @@
-"""SmartQuote Backend Application"""

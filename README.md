@@ -1,18 +1,20 @@
-# Dr.aiVOSS 智能快速报价助手 (Quoting-Copilot) - v2.0
+# Dr.aiVOSS 智能快速报价助手 (Quoting-Copilot)
 
 > **产品名称:** Dr.aiVOSS 智能快速报价助手 (Quoting-Copilot)
-> **项目代号:** SmartQuote MVP
+> **项目阶段:** 文档设计与规范定义
 > **核心理念:** 文档驱动 | 精确核算 | 人机协同
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.4   | 2026-02-02 | 2026-02-05 | Dr.aiVOSS 智能快速报价助手项目说明 | Randy Luo |
+| v2.0   | 2026-02-02 | 2026-03-07 | Dr.aiVOSS 智能快速报价助手项目说明 | Randy Luo |
 
 ---
 
 **版本变更记录：**
 | 版本 | 日期 | 变更内容 |
 |------|------|----------|
+| v2.0 | 2026-03-07 | 🔴 **文档完善**：完成工时规则细化与工序编码体系设计（M01/A01/T01）；统一数据库设计与工艺成本计算逻辑；移除代码/脚本/测试内容，专注文档规范 |
+| v1.5 | 2026-02-25 | 🔴 **重大更新**：管理层决策支持（价格瀑布、混合分摊、年降绝对值）；去汽车化术语泛化；支持通用制造行业（储能、数据中心等） |
 | v1.4 | 2026-02-05 | 🆕 新增向量数据库相关文档链接；移除 VAVE 相关内容 |
 | v1.3 | 2026-02-04 | 初始版本 |
 
@@ -26,13 +28,13 @@
 
 ## 2. 核心功能 (Features)
 
-- **标准知识库:** 维护物料主数据和工艺费率表，支持标准成本录入。
-- **AI 智能解析:** 基于 LLM 提取 BOM 中 `Comments` 列的非结构化特征（如："折弯：32次"）。
-- **向量语义匹配:** 当物料号无法精确匹配时，使用向量搜索找到相似历史物料。
+- **标准知识库:** 维护物料主数据和工艺费率表，支持标准成本录入
+- **AI 智能解析:** 基于 LLM 提取 BOM 中 `Comments` 列的非结构化特征（如："折弯：32次"）
+- **向量语义匹配:** 当物料号无法精确匹配时，使用向量搜索找到相似历史物料
 - **红绿灯审核:**
-  - 🟢 **Green:** 完全匹配，价格有效。
-  - 🟡 **Yellow:** AI 估算或模糊匹配，需人工确认。
-  - 🔴 **Red:** 缺数，需人工询价。
+  - 🟢 **Green:** 完全匹配，价格有效
+  - 🟡 **Yellow:** AI 估算或模糊匹配，需人工确认
+  - 🔴 **Red:** 缺数，需人工询价
 
 ## 3. 技术栈 (Tech Stack)
 
@@ -43,125 +45,109 @@
     * **PostgreSQL (pgvector):** 非结构化历史报价 & 向量检索 (RAG)
 * **AI:** 通义千问 Qwen-Plus (阿里云 DashScope)
 
-## 4. 环境搭建 (Setup)
-
-### 前端 (Client)
-
-```bash
-cd frontend
-npm install
-npm run dev      # 开发模式: http://localhost:3001
-npm run build    # 生产构建
-```
-
-### 后端 (Server)
-
-```bash
-# 安装 uv（如果尚未安装）
-curl -LsSf https://astral.sh/uv/install.sh | sh
-# 或使用 pip: pip install uv
-
-cd backend
-# 使用 uv 运行（自动管理虚拟环境）
-uv run uvicorn app.main:app --reload --port 8000
-# API 文档: http://localhost:8000/docs
-```
-
-## 5. 核心业务逻辑公式
-
-系统后端标准成本计算公式：
-
-**Standard Cost (标准成本):**
-$$ Cost_{std} = \sum (Qty \times P_{std}) + \sum (CycleTime \times (MHR_{std} + Labor_{std})) $$
-
-## 6. 🚀 快速找到你要的文档
+## 4. 🚀 快速找到你要的文档
 
 | 我想... | 查看文档 |
 |---------|----------|
 | 了解项目全貌 | [README.md](README.md) ← 当前文档 |
 | 理解业务逻辑 | [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) |
 | 开始开发 | [CLAUDE.md](CLAUDE.md) |
-| 理解产品需求 | [docs/PRD.md](docs/PRD.md) |
-| 查看数据库设计 | [docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md) |
-| 查找术语定义 | [docs/GLOSSARY.md](docs/GLOSSARY.md) |
-| 向量化架构设计 | [docs/VECTOR_DESIGN.md](docs/VECTOR_DESIGN.md) 🆕 |
-| 部署系统 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
-| 测试指南 | [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) |
-| API 参考 | [docs/API_REFERENCE.md](docs/API_REFERENCE.md) |
-| 文档变更记录 | [docs/CHANGELOG.md](docs/CHANGELOG.md) |
+| 理解产品需求 | [docs/产品需求文档.md](docs/产品需求文档.md) |
+| 查看数据库设计 | [docs/数据库设计.md](docs/数据库设计.md) |
+| 查找术语定义 | [docs/术语表.md](docs/术语表.md) |
+| 向量化架构设计 | [docs/向量设计.md](docs/向量设计.md) |
+| 文档变更记录 | [docs/变更记录.md](docs/变更记录.md) |
 
 ### 完整文档索引
 
 | 文档 | 用途 | 目标读者 |
 |------|------|---------|
-| [docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md) | 数据库结构唯一真理源 | 后端开发、DBA |
-| [docs/VECTOR_DESIGN.md](docs/VECTOR_DESIGN.md) | 向量化数据架构设计 🆕 | 后端开发、算法工程师 |
-| [docs/PAYBACK_LOGIC.md](docs/PAYBACK_LOGIC.md) | 投资回收期计算逻辑与 BOM 映射 | 全体开发者 |
-| [docs/BUSINESS_CASE_LOGIC.md](docs/BUSINESS_CASE_LOGIC.md) | Business Case 计算逻辑 (HK/SK/DB) | 全体开发者 |
-| [docs/QUOTATION_SUMMARY_LOGIC.md](docs/QUOTATION_SUMMARY_LOGIC.md) | Quotation Summary 报价汇总逻辑 | 全体开发者 |
-| [docs/NRE_INVESTMENT_LOGIC.md](docs/NRE_INVESTMENT_LOGIC.md) | NRE 投资成本计算逻辑 (模具/检具/夹具) | IE、后端开发 |
-| [docs/PROCESS_COST_LOGIC.md](docs/PROCESS_COST_LOGIC.md) | 工艺成本计算逻辑 (MHR) | IE、后端开发 |
-| [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) | 业务逻辑与 API 契约 | 全体开发者 |
+| [docs/数据库设计.md](docs/数据库设计.md) | 数据库结构唯一真理源 | 后端开发、DBA |
+| [docs/向量设计.md](docs/向量设计.md) | 向量化数据架构设计 | 后端开发、算法工程师 |
+| [docs/工艺成本计算逻辑.md](docs/工艺成本计算逻辑.md) | 工艺成本计算逻辑 (MHR、工时规则) | IE、后端开发 |
+| [docs/计算公式手册.md](docs/计算公式手册.md) | 完整计算公式速查手册 | 全体开发者 |
+| [docs/NRE投资成本计算逻辑.md](docs/NRE投资成本计算逻辑.md) | NRE 投资成本计算逻辑 (模具/检具/夹具) | IE、后端开发 |
+| [docs/商业案例计算逻辑.md](docs/商业案例计算逻辑.md) | Business Case 计算逻辑 (HK/SK/DB) | 全体开发者 |
+| [docs/报价汇总计算逻辑.md](docs/报价汇总计算逻辑.md) | Quotation Summary 报价汇总逻辑 | 全体开发者 |
+| [docs/投资回收期计算逻辑.md](docs/投资回收期计算逻辑.md) | Payback 投资回收期计算 | 全体开发者 |
+| [docs/报价流程详解.md](docs/报价流程详解.md) | 完整报价流程说明 | Sales、VM |
+| [docs/工作流.md](docs/工作流.md) | 开发工作流规范 | 开发团队 |
+| [docs/产品需求文档.md](docs/产品需求文档.md) | 产品需求文档 (PRD) | 产品经理、开发者 |
+| [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) | 业务逻辑唯一真理源 | 全体开发者 |
 | [CLAUDE.md](CLAUDE.md) | AI 编码协作指南 | AI 助手、开发者 |
-| [README.md](README.md) | 项目概览与入门 | 新成员 |
 
-> 💡 **规则：** 当数据库结构需要变更时，仅更新 `docs/DATABASE_DESIGN.md`，其他文档引用即可。
+> 💡 **规则：** 当数据库结构需要变更时，仅更新 `docs/数据库设计.md`，其他文档引用即可。
 
-## 7. 目录结构
+## 5. 目录结构
 
 ```
-smartquote/
-├── backend/
-│   ├── app/
-│   │   ├── api/          # 路由
-│   │   ├── core/         # 配置 & 工具
-│   │   ├── models/       # Pydantic & SQLAlchemy Models
-│   │   ├── services/     # 业务逻辑 (Calculator, Parser)
-│   │   └── main.py
-│   └── tests/
-├── frontend/
-│   ├── src/              # Vite 源码目录
-│   │   ├── components/   # 业务组件
-│   │   │   ├── ui/       # ShadcnUI 基础组件
-│   │   │   ├── Dashboard.tsx
-│   │   │   ├── BOMManagement.tsx
-│   │   │   ├── CostCalculation.tsx
-│   │   │   ├── QuoteSummary.tsx
-│   │   │   └── ...       # 其他业务组件
-│   │   ├── App.tsx       # 应用入口（含类型定义）
-│   │   └── main.tsx
-│   ├── index.html
-│   ├── vite.config.ts
-│   └── package.json
-├── CLAUDE.md             # AI 协作指南
-├── PROJECT_CONTEXT.md    # 业务逻辑唯一真理源
-└── README.md             # 本文件
+sofia/
+├── .git/                        # Git 仓库
+├── .context/                    # 上下文目录
+├── CLAUDE.md                    # AI 协作指南
+├── PROJECT_CONTEXT.md           # 业务逻辑唯一真理源
+├── README.md                    # 本文件
+├── 标准工时 -ASUS.xlsx          # ASUS 标准工时参考数据
+└── docs/                        # 文档目录
+    ├── NRE投资成本计算逻辑.md
+    ├── 产品需求文档.md
+    ├── 变更记录.md
+    ├── 向量设计.md
+    ├── 商业案例计算逻辑.md
+    ├── 工作流.md
+    ├── 工艺成本计算逻辑.md
+    ├── 投资回收期计算逻辑.md
+    ├── 报价汇总计算逻辑.md
+    ├── 报价流程详解.md
+    ├── 数据库设计.md
+    ├── 术语表.md
+    └── 计算公式手册.md
 ```
 
-## 8. 前端组件说明
+## 6. 核心业务逻辑公式
 
-| 组件 | 功能 | 对应视图 |
-|------|------|---------|
-| Dashboard | 项目列表仪表板 | dashboard |
-| NewProject | 创建新项目 | - |
-| ProjectCreationSuccess | 项目创建成功页 | project-success |
-| BOMManagement | BOM 管理（物料/工艺清单） | bom |
-| ProcessAssessment | 新工艺评估（条件触发） | process |
-| CostCalculation | 成本核算 | cost-calc |
-| QuoteSummary | QS/BC 报价摘要 | quotation |
-| InvestmentRecovery | Payback 投资回收 | investment |
-| QuotationOutput | 报价输出 | output |
-| AppSidebar | 侧边栏流程导航 | - |
-| QualityAssessment | 质量评估 | - |
-| InvestmentAnalysis | 投资分析 | - |
-| WorkflowGuide | 工作流指南 | - |
-| QuotationGeneration | 报价生成 | - |
+系统后端标准成本计算公式：
 
-**视图流程顺序：**
-```
-dashboard → project-success → bom → process → cost-calc → quotation → investment → output
-```
+**Standard Cost (标准成本):**
+$$ Cost_{std} = \sum (Qty \times P_{std}) + \sum (CycleTime \times MHR_{std}) $$
 
-**分支流程（条件触发）：**
-- `process` - 当识别到新工艺路线时触发，需 IE 工程师评估
-- 采购询价 - 当物料无历史数据时触发
+其中：
+- $CycleTime$ = 标准工时（秒）
+- $MHR_{std}$ = MHR_var + MHR_fix（已含人工成本）
+
+## 7. 工序编码体系 🆕
+
+系统采用统一的工序编码规则：
+
+| 格式 | 说明 | 示例 |
+|------|------|------|
+| `字母 + 两位数字` | 工序编码 | M01, A01, T01 |
+| 字母 | 工作中心类型 | I=注塑, A=装配, M=机加, T=检测, P=包装, S=表处 |
+
+**示例工序：**
+| 编码 | 名称 | 类别 |
+|------|------|------|
+| M01 | 切PA管 | 机加 Machining |
+| A01 | 组装护套 | 装配 Assembly |
+| T01 | 气密检测 | 检测 Testing |
+
+## 8. 文档状态
+
+| 状态 | 文档 | 说明 |
+|------|------|------|
+| ✅ 最新 | 工艺成本计算逻辑.md | v2.7 - 含工时规则细化 |
+| ✅ 最新 | 数据库设计.md | v1.19 - 同步工时规则 |
+| ✅ 最新 | 计算公式手册.md | v2.6 |
+| ✅ 最新 | 术语表.md | v1.5 |
+| ⏸️ 归档 | API参考.md | 已删除（文档阶段暂不需要） |
+| ⏸️ 归档 | 测试策略.md | 已删除（文档阶段暂不需要） |
+| ⏸️ 归档 | 部署指南.md | 已删除（文档阶段暂不需要） |
+
+---
+
+**当前项目阶段:** 文档规范定义
+
+**下一步计划:**
+- 后端开发
+- 前端开发
+- 集成测试

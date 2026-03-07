@@ -1,7 +1,0 @@
-{
-  "scripts": {
-    "setup": "bash scripts/setup.sh",
-    "run": "bash scripts/run.sh"
-  },
-  "runScriptMode": "nonconcurrent"
-}
