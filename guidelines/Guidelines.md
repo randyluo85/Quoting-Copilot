@@ -50,6 +50,26 @@ This document defines the design language, UI patterns, and component guidelines
 - **Component Gaps**: `gap-2` (compact), `gap-4` (standard), `gap-6` (spacious)
 - **Card Padding**: `p-4` (compact), `p-6` (standard)
 
+### 2.4 Transitions
+
+- **Duration**: 150-300ms for smooth state changes
+- **Properties**: `transition-colors` for background/text, `transition-opacity` for fade effects
+- **DO**: Add transitions to all interactive elements (buttons, links, cards)
+- **DON'T**: Use instant state changes or overly slow transitions (>500ms)
+
+```tsx
+<Button className="bg-slate-900 text-white hover:bg-slate-800 transition-colors duration-200">
+  按钮
+</Button>
+```
+
+### 2.5 Icon Standards
+
+- **Library**: Use Lucide Icons (Shadcn UI default)
+- **Size**: `h-4 w-4` (16px) default, `h-5 w-5` (20px) for titles
+- **DO**: Use SVG icons only - NO emoji as UI icons (🎨🚀⚙️)
+- **Consistent**: Fixed viewBox (24x24), consistent sizing
+
 ---
 
 ## 3. Component Guidelines (Shadcn UI Based)
