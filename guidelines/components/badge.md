@@ -2,193 +2,182 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.0   | 2026-03-07 | 2026-03-07 | 标签组件规范 | Randy Luo |
+| v1.1   | 2026-03-07 | 2026-03-08 | 标签组件规范 | Randy Luo |
 
 ---
 
 ## Purpose
 
-Badges display status, categories, or counts. They provide visual context at a glance.
-
----
-
-## When to Use
-
-**DO use a badge when:**
-- Showing status (Verified, Pending, Missing)
-- Displaying counts (Items, Notifications)
-- Categorizing items (Tag, Label)
-- Indicating state (New, Updated)
-
-**DO NOT use a badge when:**
-- Displaying complex information (use Card)
-- Showing detailed status (use Progress/Status component)
-- Primary actions (use Button)
+Badges display status, categories, or counts. They provide visual context at a glance for material matching status and financial validation.
 
 ---
 
 ## Traffic Light Status Badges
 
-### Verified (Green)
+### Verified (Green 🟢)
 
-```html
-<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+```tsx
+import { Badge } from "@/components/ui/badge";
+
+<Badge className="bg-emerald-50 border-emerald-200 text-emerald-700">
   ✓ 已确认
-</span>
+</Badge>
+
+{/* Compact version */}
+<div className="flex items-center gap-2">
+  <div className="w-2 h-2 rounded-full bg-emerald-500" />
+  <span className="text-xs text-emerald-700">已匹配</span>
+</div>
 ```
 
-**Use when:** Data is verified from database, auto-approved, no action needed.
+**Use when:** Material is matched from database, auto-approved, no action needed.
 
-**Background:** `#d1fae5` (green-100)
-**Text:** `#065f46` (green-800)
+**Classes:**
+- Background: `bg-emerald-50`
+- Border: `border-emerald-200`
+- Text: `text-emerald-700`
+- Dot: `bg-emerald-500`
 
 ---
 
-### Warning (Yellow)
+### Warning (Amber 🟡)
 
-```html
-<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-  △ 待确认
-</span>
+```tsx
+<Badge className="bg-amber-50 border-amber-200 text-amber-700">
+  △ 需确认
+</Badge>
+
+{/* Compact version */}
+<div className="flex items-center gap-2">
+  <div className="w-2 h-2 rounded-full bg-amber-500" />
+  <span className="text-xs text-amber-700">需确认</span>
+</div>
 ```
 
 **Use when:** AI match >85%, estimated values, needs human review.
 
-**Background:** `#fef3c7` (yellow-100)
-**Text:** `#92400e` (yellow-800)
+**Classes:**
+- Background: `bg-amber-50`
+- Border: `border-amber-200`
+- Text: `text-amber-700`
+- Dot: `bg-amber-500`
 
 ---
 
-### Missing (Red)
+### Missing (Red 🔴)
 
-```html
-<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+```tsx
+<Badge className="bg-red-50 border-red-200 text-red-700">
   ⚠ 缺失
-</span>
+</Badge>
+
+{/* Compact version */}
+<div className="flex items-center gap-2">
+  <div className="w-2 h-2 rounded-full bg-red-500" />
+  <span className="text-xs text-red-700">需询价</span>
+</div>
 ```
 
 **Use when:** No data found, manual intervention required, urgent action needed.
 
-**Background:** `#fee2e2` (red-100)
-**Text:** `#991b1b` (red-800)
+**Classes:**
+- Background: `bg-red-50`
+- Border: `border-red-200`
+- Text: `text-red-700`
+- Dot: `bg-red-500`
 
 ---
 
 ## Badge Variants
 
-### Pill Badge (Default)
+### Default Badge
 
-```html
-<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+```tsx
+<Badge variant="outline" className="px-2 py-1 rounded-full text-xs">
   标签
-</span>
+</Badge>
 ```
 
-**Use for:** Most cases, standard status labels
+### Status Badge with Border
 
----
-
-### Square Badge
-
-```html
-<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700">
-  标签
-</span>
+```tsx
+<Badge className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-2 py-1 rounded-full text-xs">
+  ✓ 已确认
+</Badge>
 ```
 
-**Use for:** When badges need to align with square UI elements
+### Dot Style (Most Compact)
 
----
+```tsx
+{/* In table cells */}
+<div className="w-2 h-2 rounded-full bg-emerald-500 mx-auto" />
 
-### Dot Badge
-
-```html
-<span class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-700">
-  <span class="w-2 h-2 rounded-full bg-green-500"></span>
-  在线
-</span>
-```
-
-**Use for:** Compact status indicators, user presence states
-
----
-
-## Badge with Icon
-
-```html
-<!-- Icon + Text -->
-<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-  <CheckIcon class="w-3 h-3" />
-  已完成
-</span>
-
-<!-- Text + Icon -->
-<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-  新建
-  <SparklesIcon class="w-3 h-3" />
-</span>
+{/* With gap */}
+<div className="flex items-center gap-2">
+  <div className="w-2 h-2 rounded-full bg-emerald-500" />
+  <span className="text-xs text-emerald-700">已匹配</span>
+</div>
 ```
 
 ---
 
 ## Badge Sizes
 
-| Size | Padding | Font | Icon | Usage |
-|------|---------|------|------|-------|
-| Small | 4px 8px | 11px | 12px | Compact tables |
-| Medium (default) | 4px 8px | 12px | 14px | Most cases |
-| Large | 6px 12px | 14px | 16px | Emphasis |
+| Size | Padding | Font | Dot | Usage |
+|------|---------|------|-----|-------|
+| Small | 4px 8px | 11px | 6px | Compact tables |
+| Medium (default) | 4px 8px | 12px | 8px | Most cases |
 
-```html
-<!-- Small -->
-<span class="px-2 py-1 rounded-full text-xs">标签</span>
+```tsx
+{/* Small */}
+<Badge className="px-2 py-1 rounded-full text-xs">标签</Badge>
 
-<!-- Medium -->
-<span class="px-2.5 py-1 rounded-full text-sm">标签</span>
-
-<!-- Large -->
-<span class="px-3 py-1.5 rounded-full text-base">标签</span>
+{/* With icon */}
+<div className="flex items-center gap-1.5">
+  <div className="w-2 h-2 rounded-full bg-emerald-500" />
+  <span className="text-xs">已确认</span>
+</div>
 ```
 
 ---
 
 ## Count Badges
 
-### Notification Count
-
-```html
-<div class="relative">
-  <BellIcon class="w-5 h-5 text-slate-600" />
-  <span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
-    3
-  </span>
-</div>
-```
-
 ### Tab Count
 
-```html
-<button class="flex items-center gap-2 px-4 py-2">
+```tsx
+<button className="flex items-center gap-2 px-4 py-2">
   <span>物料清单</span>
-  <span class="px-1.5 py-0.5 rounded bg-slate-200 text-slate-600 text-xs font-medium">
+  <Badge variant="secondary" className="px-1.5 py-0 bg-slate-200 text-slate-600 text-xs">
     24
-  </span>
+  </Badge>
 </button>
+```
+
+### Notification Count
+
+```tsx
+<div className="relative">
+  <Bell className="h-5 w-5 text-slate-600" />
+  {count > 0 && (
+    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
+      {count}
+    </span>
+  )}
+</div>
 ```
 
 ---
 
 ## Color Meanings
 
-| Color | Background | Text | Meaning | Use Case |
-|-------|-----------|------|---------|----------|
-| Green | `bg-green-100` | `text-green-800` | Positive, verified | 已确认, 完成 |
-| Yellow | `bg-yellow-100` | `text-yellow-800` | Warning, pending | 待确认, 审核中 |
-| Red | `bg-red-100` | `text-red-800` | Negative, missing | 缺失, 错误 |
-| Blue | `bg-blue-100` | `text-blue-800` | Information | 新建, 进行中 |
-| Gray | `bg-slate-100` | `text-slate-700` | Neutral | 默认, 其他 |
-| Purple | `bg-purple-100` | `text-purple-800` | Special | VIP, 优先 |
-| Orange | `bg-orange-100` | `text-orange-800` | Attention | 重要, 紧急 |
+| Color | Classes | Meaning | Use Case |
+|-------|---------|---------|----------|
+| Green | `bg-emerald-50 border-emerald-200 text-emerald-700` | Positive, verified | 已确认, 完成, DB4 >= 0% |
+| Amber | `bg-amber-50 border-amber-200 text-amber-700` | Warning, pending | 需确认, 审核中, DB4 < 0% |
+| Red | `bg-red-50 border-red-200 text-red-700` | Negative, missing | 缺失, 错误, DB4 < -5% |
+| Slate | `bg-slate-100 text-slate-700` | Neutral | 默认, 其他 |
+| Blue | `bg-blue-50 text-blue-700` | Information | 新建, 进行中 |
 
 ---
 
@@ -196,111 +185,72 @@ Badges display status, categories, or counts. They provide visual context at a g
 
 ### In Table Cells
 
-```html
-<td class="px-4 py-3 text-center">
-  <span class="px-2 py-1 rounded-full bg-green-100 text-green-800 text-xs">🟢</span>
-</td>
+```tsx
+<TableCell className="p-2 text-center">
+  <div className="w-2 h-2 rounded-full bg-emerald-500 mx-auto" />
+</TableCell>
 ```
 
 ### On Cards
 
-```html
-<div class="flex items-start justify-between">
-  <h3>项目名称</h3>
-  <span class="px-2 py-1 rounded-full bg-green-100 text-green-800 text-xs">🟢 进行中</span>
-</div>
+```tsx
+<Card>
+  <CardHeader className="flex items-center justify-between">
+    <CardTitle>项目名称</CardTitle>
+    <Badge className="bg-emerald-50 border-emerald-200 text-emerald-700">
+      🟢 进行中
+    </Badge>
+  </CardHeader>
+</Card>
 ```
 
 ### Next to Text
 
-```html
-<div class="flex items-center gap-2">
+```tsx
+<div className="flex items-center gap-2">
   <span>项目状态</span>
-  <span class="px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs">🟡 待审核</span>
+  <Badge className="bg-amber-50 border-amber-200 text-amber-700">
+    🟡 待审核
+  </Badge>
 </div>
 ```
 
 ---
 
-## Status Badge Combinations
+## Financial Status Badges
 
-### Single Status
+### DB4 Profit Status
 
-```html
-<span class="px-2 py-1 rounded-full bg-green-100 text-green-800 text-xs">🟢 已确认</span>
+```tsx
+{/* Pass - DB4 >= 0% */}
+<Badge className="bg-emerald-50 border-emerald-200 text-emerald-700">
+  ✓ 计算通过
+</Badge>
+
+{/* Warning - DB4 < 0% */}
+<Badge className="bg-amber-50 border-amber-200 text-amber-700">
+  ⚠ 利润为负
+</Badge>
+
+{/* High Risk - DB4 < -5% */}
+<Badge className="bg-red-50 border-red-200 text-red-700">
+  🔴 高风险
+</Badge>
 ```
 
-### Status + Count
+### Payback Status
 
-```html
-<span class="px-2 py-1 rounded-full bg-green-100 text-green-800 text-xs">
-  🟢 已确认 <span class="text-green-900 font-medium">24</span>
-</span>
-```
+```tsx
+<Badge className={getPaybackBadgeClass(months)}>
+  {getPaybackStatus(months)}
+</Badge>
 
-### Multiple Badges
-
-```html
-<div class="flex gap-1">
-  <span class="px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-xs">新业务</span>
-  <span class="px-2 py-1 rounded-full bg-purple-100 text-purple-800 text-xs">样件阶段</span>
-</div>
-```
-
----
-
-## Interactive Badges
-
-```html
-<!-- Clickable -->
-<button class="px-2 py-1 rounded-full bg-slate-100 text-slate-700 text-xs hover:bg-slate-200 transition-colors">
-  标签
-</button>
-
-<!-- Removable -->
-<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-xs">
-  标签
-  <button class="hover:bg-blue-200 rounded-full p-0.5">
-    <XIcon class="w-3 h-3" />
-  </button>
-</span>
-```
-
----
-
-## Gradient Badges (Special Use Only)
-
-```html
-<!-- Reserved for premium/special status -->
-<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-  ⭐ 重要
-</span>
-```
-
-**DO NOT** use gradient badges for standard status indicators.
-
----
-
-## Badge Accessibility
-
-Badges MUST:
-
-1. Have sufficient contrast (4.5:1 minimum)
-2. Include visible text (icon-only badges need aria-label)
-3. Be readable at small sizes
-4. Convey meaning through color AND text/icon
-
-```html
-<!-- Good: Text + Color -->
-<span class="px-2 py-1 rounded-full bg-green-100 text-green-800 text-xs">已确认</span>
-
-<!-- Good: Icon + Label -->
-<span class="sr-only">状态</span>
-<span aria-label="已确认" class="px-2 py-1 rounded-full bg-green-100 text-green-800 text-xs">🟢</span>
-
-<!-- Bad: Color only (no meaning without color) -->
-<!-- Don't do this -->
-<span class="px-2 py-1 rounded-full text-xs"></span>
+// Helper
+function getPaybackBadgeClass(months: number) {
+  if (months <= 24) return "bg-emerald-50 border-emerald-200 text-emerald-700";
+  if (months <= 36) return "bg-amber-50 border-amber-200 text-amber-700";
+  return "bg-red-50 border-red-200 text-red-700";
+}
 ```
 
 ---
@@ -309,32 +259,55 @@ Badges MUST:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  Badge Quick Reference                                  │
+│  Badge Quick Reference                                   │
 ├─────────────────────────────────────────────────────────┤
 │  Padding: 4px 8px (px-2 py-1)                           │
-│  Radius: full (rounded-full)                           │
-│  Font: text-xs (12px), font-medium                      │
+│  Radius: rounded-full                                    │
+│  Font: text-xs (12px)                                   │
 │                                                         │
 │  Traffic Light System:                                  │
-│    🟢 Green:  #d1fae5 bg, #065f46 text                 │
-│              ✓ Verified, completed                     │
-│    🟡 Yellow: #fef3c7 bg, #92400e text                 │
-│              △ Pending, needs review                   │
-│    🔴 Red:    #fee2e2 bg, #991b1b text                 │
-│              ⚠ Missing, error                          │
+│    🟢 Green:  bg-emerald-50 border-emerald-200           │
+│              text-emerald-700                            │
+│              ✓ 已确认, 已匹配                             │
 │                                                         │
-│  Colors:                                               │
-│    Blue:    Information, new, in-progress              │
-│    Gray:    Neutral, default                           │
-│    Purple:  Special, VIP                               │
-│    Orange:  Important, urgent                          │
+│    🟡 Amber:   bg-amber-50 border-amber-200             │
+│              text-amber-700                              │
+│              △ 需确认, AI匹配                            │
 │                                                         │
-│  Placement:                                            │
-│    Table: Center-align in cell                         │
-│    Card: Top-right corner                               │
-│    Text: After label with gap-2                        │
+│    🔴 Red:     bg-red-50 border-red-200                 │
+│              text-red-700                               │
+│              ⚠ 缺失, 需询价                              │
 │                                                         │
-│  With icon: gap-1 between icon and text                │
-│  Count: Absolute position on top-right                 │
+│  Dot Style: w-2 h-2 rounded-full (most compact)         │
+│    Use in tables: mx-auto for center alignment          │
+│                                                         │
+│  With text: gap-2 between dot and label                 │
+│  Count badge: Absolute position, top-right              │
 └─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Figma Make Prompt
+
+```
+Status Badge for Dr.aiVOSS:
+
+Size: 4px padding (px-2), rounded-full
+Font: 12px (text-xs), font-medium
+
+Traffic Light Colors:
+- 🟢 Green (Verified): Emerald-50 bg, Emerald-200 border, Emerald-700 text
+- 🟡 Amber (Warning): Amber-50 bg, Amber-200 border, Amber-700 text
+- 🔴 Red (Missing): Red-50 bg, Red-200 border, Red-700 text
+
+Dot Style (for tables):
+- 8px diameter (w-2 h-2)
+- rounded-full
+- Colors: Emerald-500, Amber-500, Red-500
+
+Placement:
+- Table: center-align in cell
+- Card: top-right corner
+- Inline: gap-2 from label
 ```
