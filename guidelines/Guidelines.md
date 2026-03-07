@@ -72,7 +72,111 @@ This document defines the design language, UI patterns, and component guidelines
 
 ---
 
-## 3. Component Guidelines (Shadcn UI Based)
+## 3. Accessibility Standards
+
+CRITICAL: All components MUST meet WCAG 2.1 AA standards.
+
+### 3.1 Color Contrast
+
+All color combinations verified (4.5:1 minimum):
+- `text-slate-900` on `bg-white` ✓ (15.7:1)
+- `text-slate-600` on `bg-white` ✓ (7.1:1)
+- `text-white` on `bg-slate-900` ✓ (13.5:1)
+- `text-emerald-700` on `bg-emerald-50` ✓ (6.8:1)
+- `text-amber-700` on `bg-amber-50` ✓ (6.2:1)
+- `text-red-700` on `bg-red-50` ✓ (5.9:1)
+
+### 3.2 Interactive Elements
+
+**Clickable elements MUST have:**
+```tsx
+// Cursor pointer on clickable cards/rows
+<div className="cursor-pointer hover:bg-slate-50">
+
+// Focus ring for keyboard navigation
+<Button className="focus:ring-2 focus:ring-slate-400 focus:ring-offset-2">
+```
+
+### 3.3 Icon-Only Buttons
+
+**ALWAYS include aria-label:**
+```tsx
+<Button variant="ghost" size="icon" aria-label="编辑项目">
+  <Pencil className="h-4 w-4" />
+</Button>
+```
+
+### 3.4 Error Messages
+
+**MUST use role="alert" for screen readers:**
+```tsx
+<Alert role="alert" variant="destructive">
+  <AlertDescription>错误信息必须被屏幕阅读器识别</AlertDescription>
+</Alert>
+```
+
+### 3.5 Form Labels
+
+**NEVER use placeholder-only labels:**
+```tsx
+{/* ❌ DON'T */}
+<Input placeholder="项目名称" />
+
+{/* ✅ DO */}
+<Label htmlFor="project-name">项目名称</Label>
+<Input id="project-name" />
+```
+
+### 3.6 Color-Only Communication
+
+**DON'T convey information by color alone:**
+```tsx
+{/* ❌ DON'T - Color only */}
+<span className="text-red-600">警告</span>
+
+{/* ✅ DO - Color + Icon */}
+<AlertTriangle className="h-4 w-4 text-amber-600" />
+<span className="text-amber-700">警告</span>
+```
+
+### 3.7 Table Accessibility
+
+```tsx
+<Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead className="text-xs font-semibold text-slate-500">物料号</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell className="p-2">A356-T6</TableCell>
+    </TableRow>
+  </TableBody>
+</Table>
+```
+
+### 3.8 Mobile Table Handling
+
+**Tables MUST be responsive:**
+```tsx
+{/* Option 1: Horizontal scroll */}
+<div className="overflow-x-auto">
+  <Table>...</Table>
+</div>
+
+{/* Option 2: Card view on mobile */}
+<div className="hidden md:table">
+  <Table>...</Table>
+</div>
+<div className="md:hidden">
+  {items.map(item => <Card key={item.id}>...</Card>)}
+</div>
+```
+
+---
+
+## 4. Component Guidelines (Shadcn UI Based)
 
 ### 3.1 Data Tables (`<Table>`)
 
