@@ -2,7 +2,7 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v1.0   | 2026-03-07 | 2026-03-07 | 按钮组件规范 | Randy Luo |
+| v1.1   | 2026-03-07 | 2026-03-08 | 按钮组件规范 | Randy Luo |
 
 ---
 
@@ -19,12 +19,10 @@ Buttons trigger actions or navigate to new locations. They are the primary way u
 - Triggering an action ("重新计算", "导出")
 - Opening a modal ("添加物料", "编辑项目")
 - Navigating to a new page
-- Canceling an operation
 
 **DO NOT use a button when:**
 - Displaying information (use text or badge)
 - Linking to external sites (use a link with button styling)
-- Selecting from options (use radio or select)
 
 ---
 
@@ -32,25 +30,27 @@ Buttons trigger actions or navigate to new locations. They are the primary way u
 
 ### Primary Button
 
-The main action on a page. Each page or section should have only ONE primary button.
+Main action on a page. Each page or section should have only ONE primary button.
 
-```html
-<button class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90">
+```tsx
+import { Button } from "@/components/ui/button";
+
+<Button className="bg-slate-900 text-white hover:bg-slate-800">
   创建项目
-</button>
+</Button>
 ```
 
 **Styling:**
-- Background: `#3b82f6` (primary blue)
-- Text: `#ffffff` (white)
-- Padding: 12px 16px (px-4 py-3)
-- Border radius: 6px (rounded-md)
-- Hover: 90% opacity
+- Background: `bg-slate-900`
+- Text: `text-white`
+- Padding: `px-4 py-2`
+- Radius: `rounded-md`
+- Hover: `hover:bg-slate-800`
 
 **Use for:**
 - Main form submit
 - Primary page action
-- Call-to-action
+- "生成报价单"
 
 ---
 
@@ -58,21 +58,21 @@ The main action on a page. Each page or section should have only ONE primary but
 
 Alternative actions that are less important than the primary action.
 
-```html
-<button class="bg-secondary text-white px-4 py-2 rounded-md hover:bg-secondary/90">
+```tsx
+<Button className="bg-slate-100 text-slate-900 hover:bg-slate-200">
   取消
-</button>
+</Button>
 ```
 
 **Styling:**
-- Background: `#64748b` (gray)
-- Text: `#ffffff` (white)
-- Same padding and radius as primary
+- Background: `bg-slate-100`
+- Text: `text-slate-900`
+- Hover: `hover:bg-slate-200`
 
 **Use for:**
 - Cancel actions
 - Go back
-- Alternative options
+- "返回", "重置"
 
 ---
 
@@ -80,43 +80,45 @@ Alternative actions that are less important than the primary action.
 
 Dangerous or irreversible actions.
 
-```html
-<button class="bg-destructive text-white px-4 py-2 rounded-md hover:bg-destructive/90">
+```tsx
+<Button className="bg-red-600 text-white hover:bg-red-700">
   删除
-</button>
+</Button>
 ```
 
 **Styling:**
-- Background: `#ef4444` (red)
-- Text: `#ffffff` (white)
-- Same padding and radius as primary
+- Background: `bg-red-600`
+- Text: `text-white`
+- Hover: `hover:bg-red-700`
 
 **Use for:**
 - Delete actions
-- Remove operations
-- Cancel subscriptions
+- "删除项目", "移除"
 
-**DO NOT** use for:
+**DO NOT use for:**
 - Navigation
 - Normal form actions
-- Non-destructive operations
 
 ---
 
 ### Ghost Button
 
-Low-emphasis actions that don't need visual weight.
+Low-emphasis actions.
 
-```html
-<button class="text-slate-700 hover:bg-slate-100 px-4 py-2 rounded-md">
+```tsx
+<Button variant="ghost">
   编辑
-</button>
+</Button>
+
+<Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+  编辑
+</Button>
 ```
 
 **Styling:**
 - Background: transparent
-- Text: `#334155` (slate-700)
-- Hover background: `#f1f5f9` (slate-100)
+- Hover: `hover:bg-slate-100`
+- Text: `text-slate-700`
 
 **Use for:**
 - Edit actions in tables
@@ -127,76 +129,62 @@ Low-emphasis actions that don't need visual weight.
 
 ### Icon Button
 
-Buttons with only an icon, no text. Include a tooltip for accessibility.
+Buttons with only an icon.
 
-```html
-<button class="p-2 hover:bg-slate-100 rounded-md" aria-label="Edit">
-  <EditIcon class="w-4 h-4" />
-</button>
+```tsx
+<Button variant="ghost" size="icon" className="h-8 w-8">
+  <Pencil className="h-4 w-4" />
+</Button>
 ```
 
-**Styling:**
-- Padding: 8px (p-2)
-- Hover background: `#f1f5f9`
-- Icon size: 16px (w-4 h-4)
+**ALWAYS include** `aria-label` for screen readers:
 
-**Use for:**
-- Toolbar actions
-- Table row actions
-- Compact controls
-
-**ALWAYS include** `aria-label` for screen readers.
+```tsx
+<Button variant="ghost" size="icon" aria-label="编辑">
+  <Pencil className="h-4 w-4" />
+</Button>
+```
 
 ---
 
 ## Sizes
 
-| Size | Padding | Font Size | Icon | Usage |
-|------|---------|-----------|------|-------|
-| Small | 8px 12px | 14px | 16px | Compact areas, tables |
-| Medium (default) | 12px 16px | 16px | 18px | Most cases |
-| Large | 16px 24px | 16px | 20px | Prominent CTAs |
+| Size | Padding | Font | Icon | Usage |
+|------|---------|------|------|-------|
+| Small (sm) | 8px 12px | 14px | 16px | Compact areas, tables |
+| Medium (default) | 12px 16px | 14px | 18px | Most cases |
+| Large (lg) | 16px 24px | 16px | 20px | Prominent CTAs |
 
-```html
-<!-- Small -->
-<button class="px-3 py-2 text-sm">Small Button</button>
-
-<!-- Medium -->
-<button class="px-4 py-3 text-base">Medium Button</button>
-
-<!-- Large -->
-<button class="px-6 py-4 text-base">Large Button</button>
+```tsx
+<Button size="sm">Small Button</Button>
+<Button size="default">Default Button</Button>
+<Button size="lg">Large Button</Button>
 ```
 
 ---
 
 ## States
 
-| State | Visual Treatment | Example |
-|-------|------------------|---------|
-| Default | Base styling | Normal appearance |
-| Hover | Darken background 10% | Mouse over |
-| Focus | Blue ring (`ring-2 ring-primary`) | Keyboard navigation |
-| Active | Scale 0.98 | Being clicked |
-| Disabled | 50% opacity, not-allowed cursor | Form not valid |
-| Loading | Spinner + disabled state | Processing action |
+| State | Class | Example |
+|-------|-------|---------|
+| Default | Base classes | Normal appearance |
+| Hover | `hover:bg-slate-800` (primary) | Mouse over |
+| Focus | `focus:ring-2 focus:ring-slate-400` | Keyboard navigation |
+| Active | `active:scale-95` | Being clicked |
+| Disabled | `disabled:opacity-50 disabled:cursor-not-allowed` | Form not valid |
 
-```html
-<!-- Disabled -->
-<button disabled class="bg-primary text-white px-4 py-2 rounded-md opacity-50 cursor-not-allowed">
-  保存
-</button>
+```tsx
+{/* Default */}
+<Button>Default</Button>
 
-<!-- Loading -->
-<button disabled class="bg-primary text-white px-4 py-2 rounded-md opacity-70">
-  <LoadingIcon class="animate-spin mr-2 w-4 h-4" />
-  处理中...
-</button>
+{/* Hover */}
+<Button className="hover:bg-slate-800">Hover</Button>
 
-<!-- Focus -->
-<button class="bg-primary text-white px-4 py-2 rounded-md focus:ring-2 focus:ring-primary focus:ring-offset-2">
-  按钮
-</button>
+{/* Focus */}
+<Button className="focus:ring-2 focus:ring-slate-400 focus:ring-offset-2">Focus</Button>
+
+{/* Disabled */}
+<Button disabled className="opacity-50 cursor-not-allowed">Disabled</Button>
 ```
 
 ---
@@ -205,21 +193,14 @@ Buttons with only an icon, no text. Include a tooltip for accessibility.
 
 Related buttons should be grouped with consistent spacing.
 
-```html
-<!-- Horizontal group -->
-<div class="flex gap-2">
-  <button class="bg-primary text-white px-4 py-2 rounded-md">确认</button>
-  <button class="bg-secondary text-white px-4 py-2 rounded-md">取消</button>
-</div>
-
-<!-- Vertical group -->
-<div class="flex flex-col gap-2">
-  <button class="bg-primary text-white px-4 py-2 rounded-md w-full">选项 1</button>
-  <button class="bg-slate-100 text-slate-700 px-4 py-2 rounded-md w-full">选项 2</button>
+```tsx
+<div className="flex gap-2">
+  <Button className="bg-slate-900 text-white">确认</Button>
+  <Button className="bg-slate-100 text-slate-900">取消</Button>
 </div>
 ```
 
-**Spacing: 8px (gap-2) between buttons**
+**Spacing: `gap-2` (8px) between buttons**
 
 ---
 
@@ -230,19 +211,18 @@ DO follow these rules:
 1. **Use verbs** - "创建项目" not "项目创建"
 2. **Be specific** - "保存草稿" not "保存"
 3. **Show outcome** - "导出 PDF" not "导出"
-4. **Keep short** - Maximum 4 Chinese characters or 20 letters
+4. **Keep short** - Maximum 4 Chinese characters
 
 **Good Examples:**
 - ✓ "创建项目"
 - ✓ "保存草稿"
 - ✓ "删除项目"
-- ✓ "导出报价单"
+- ✓ "生成报价单"
 
 **Bad Examples:**
 - ✗ "项目创建"
-- ✗ "保存" (ambiguous - what?)
+- ✗ "保存" (ambiguous)
 - ✗ "执行删除操作"
-- ✗ "点击此处创建新项目"
 
 ---
 
@@ -266,23 +246,22 @@ DO follow these rules:
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│  [Filter] [Search]      [+ Add Item]    [Export]   │
+│  [Filter] [Search]      [+ Add]    [Export]       │
 └─────────────────────────────────────────────────────┘
 ```
 
-- Left: Context actions (filter, search)
-- Right: Primary actions (add, export)
+- Left: Context actions
+- Right: Primary actions
 
-### Modals
+---
 
-```
-┌─────────────────────────────────────┐
-│  Modal Title               [X]      │
-├─────────────────────────────────────┤
-│  Content...                         │
-├─────────────────────────────────────┤
-│  [Cancel]              [Confirm]    │
-└─────────────────────────────────────┘
+## Loading State
+
+```tsx
+<Button disabled className="opacity-50 cursor-not-allowed">
+  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+  处理中...
+</Button>
 ```
 
 ---
@@ -295,62 +274,21 @@ Buttons MUST:
 2. Support keyboard navigation (Tab, Enter, Space)
 3. Show focus state clearly
 4. Indicate disabled state properly
-5. Include loading state feedback
 
-```html
-<!-- Good: Text button -->
-<button>创建项目</button>
+```tsx
+{/* Good: Text button */}
+<Button>创建项目</Button>
 
-<!-- Good: Icon with label -->
-<button aria-label="编辑项目">
-  <EditIcon />
-</button>
+{/* Good: Icon with label */}
+<Button aria-label="编辑项目">
+  <Pencil className="h-4 w-4" />
+</Button>
 
-<!-- Good: Loading state -->
-<button disabled aria-busy="true">
-  <Spinner /> 处理中...
-</button>
-```
-
----
-
-## Common Patterns
-
-### Pattern 1: Form Actions
-
-```html
-<div class="flex justify-end gap-3 mt-6">
-  <button type="button" class="px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-md">
-    取消
-  </button>
-  <button type="submit" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90">
-    创建项目
-  </button>
-</div>
-```
-
-### Pattern 2: Table Row Actions
-
-```html
-<td class="px-3 py-2">
-  <div class="flex gap-2 justify-end">
-    <button class="p-1.5 hover:bg-slate-100 rounded" aria-label="编辑">
-      <EditIcon class="w-4 h-4 text-slate-600" />
-    </button>
-    <button class="p-1.5 hover:bg-red-50 rounded" aria-label="删除">
-      <TrashIcon class="w-4 h-4 text-red-600" />
-    </button>
-  </div>
-</td>
-```
-
-### Pattern 3: Icon + Text Button
-
-```html
-<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90">
-  <PlusIcon class="w-4 h-4" />
-  添加物料
-</button>
+{/* Good: Loading state */}
+<Button disabled aria-busy="true">
+  <Loader2 className="animate-spin mr-2 h-4 w-4" />
+  处理中...
+</Button>
 ```
 
 ---
@@ -359,24 +297,64 @@ Buttons MUST:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  Button Quick Reference                                 │
+│  Button Quick Reference                                  │
 ├─────────────────────────────────────────────────────────┤
-│  Primary:   #3b82f6 bg, #ffffff text                   │
-│  Secondary: #64748b bg, #ffffff text                   │
-│  Destructive: #ef4444 bg, #ffffff text                │
-│  Ghost:     transparent bg, #334155 text               │
+│  Primary:   bg-slate-900 text-white                    │
+│             hover:bg-slate-800                           │
+│  Secondary: bg-slate-100 text-slate-900                │
+│             hover:bg-slate-200                           │
+│  Destructive: bg-red-600 text-white                    │
+│             hover:bg-red-700                             │
+│  Ghost:     transparent bg, text-slate-700             │
+│             hover:bg-slate-100                           │
 │                                                         │
-│  Padding:    12px 16px (medium)                        │
-│  Radius:     6px                                       │
-│  Gap (group): 8px                                      │
+│  Padding:    px-4 py-2 (medium)                         │
+│  Radius:     rounded-md                                 │
+│  Gap (group): gap-2                                    │
 │                                                         │
 │  States: default → hover → focus → active              │
 │           ↓ disabled (50% opacity)                     │
 │                                                         │
 │  Text: Verbs, specific, short                          │
-│         ✓ "创建项目"  ✗ "项目创建"                      │
+│        ✓ "创建项目"  ✗ "项目创建"                      │
 │                                                         │
-│  Icons: 16px in medium buttons                         │
+│  Icons: 16px in medium buttons                          │
 │         Always include aria-label                      │
 └─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Figma Make Prompt
+
+```
+Button for Dr.aiVOSS:
+
+Primary:
+- Background: Slate-900 (#0f172a)
+- Text: White
+- Hover: Slate-800 (#1e293b)
+- Padding: 12px 16px (px-4 py-2)
+- Radius: 6px (rounded-md)
+
+Secondary:
+- Background: Slate-100 (#f1f5f9)
+- Text: Slate-900 (#0f172a)
+- Hover: Slate-200 (#e2e8f0)
+- Same padding and radius
+
+Destructive:
+- Background: Red-600 (#dc2626)
+- Text: White
+- Hover: Red-700 (#b91c1c)
+
+States:
+- Disabled: 50% opacity, not-allowed cursor
+- Focus: 2px ring, Slate-400 (#94a3b8)
+- Loading: Spinner + "处理中..." text
+
+Text:
+- Verbs only: "创建项目" not "项目创建"
+- Maximum 4 Chinese characters
+- Be specific: "保存草稿" not "保存"
 ```
