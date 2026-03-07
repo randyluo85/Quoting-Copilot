@@ -4,6 +4,24 @@ This document defines the design language, UI patterns, and component guidelines
 
 ---
 
+## 📁 快速导航
+
+| 文档 | 用途 | 读者 |
+|------|------|------|
+| **[Figma Make 指南](./figma-make-guideline.md)** | 原型设计完整指南 | UI/UX 设计师、Figma 开发者 |
+| `design-tokens/colors.md` | 颜色令牌详解 | 开发者 |
+| `design-tokens/typography.md` | 字体排版详解 | 开发者 |
+| `design-tokens/spacing.md` | 间距系统详解 | 开发者 |
+| `components/button.md` | 按钮组件规范 | 开发者 |
+| `components/input.md` | 输入框组件规范 | 开发者 |
+| `components/table.md` | 表格组件规范 | 开发者 |
+| `components/card.md` | 卡片组件规范 | 开发者 |
+| `components/badge.md` | 标签组件规范 | 开发者 |
+| `components/tabs.md` | 标签页组件规范 | 开发者 |
+| `components/modal.md` | 模态框组件规范 | 开发者 |
+
+---
+
 ## 1. Global Design Principles
 
 - **Information Density**: As an enterprise tool, maximize data visibility without overwhelming the user. Use compact tables and tight spacing (`gap-2`, `gap-4`).
