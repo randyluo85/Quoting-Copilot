@@ -56,25 +56,25 @@
 | **Risk** | Risk/Scrapp Rate | 0.035 | 风险/废品率 |
 | **GK-Administration** | Admin Overhead | 0.252 | 管理间接费用率 |
 
-### 2.3 应用类型费率
+### 2.2 应用类型费率 (Application Type Rates)
 
-| 应用类型 | 费率 |
-|---------|-----|
-| **SCR** (选择性催化还原) | 0.12 |
-| **Therm** (热管理) | 0.15 |
-| **Air** (空气系统) | 0.12 |
-| **Other** | 0.12 |
+| 应用类型 | 英文名称 | 费率 |
+|---------|---------|-----|
+| **SCR** | Selective Catalytic Reduction | 0.12 |
+| **Therm** | Thermal Management | 0.15 |
+| **Air** | Air System | 0.12 |
+| **Other** | Other Applications | 0.12 |
 
-### 2.4 其他关键参数
+### 2.3 其他关键参数 (Other Key Parameters)
 
-| 参数 | 值 | 说明 |
-|------|-----|------|
-| **SK-Verrechnung** (VAVA) | 0.025 | 标准成本抵消 |
-| **SK-Verrechnung** (其他) | 0.04 | 标准成本抵消 |
-| **Stundensatz Entwicklung** (VAVA) | 55 €/h | 开发小时费率 |
-| **Stundensatz Entwicklung** (其他) | 80 €/h | 开发小时费率 |
-| **Fixkostendegression** | 0.9-0.95 | 固定成本递减 |
-| **Discount Rate** | 0.08 (8%) | 折现率 |
+| 参数 | 英文名称 | 值 | 说明 |
+|------|---------|-----|------|
+| **SK抵消率 (VAVA)** | SK Offset Rate (VAVA) | 0.025 | 标准成本抵消比率 |
+| **SK抵消率 (其他)** | SK Offset Rate (Others) | 0.04 | 标准成本抵消比率 |
+| **开发小时费率 (VAVA)** | Development Hourly Rate (VAVA) | 55 €/h | 开发工时费率 |
+| **开发小时费率 (其他)** | Development Hourly Rate (Others) | 80 €/h | 开发工时费率 |
+| **固定成本递减** | Fixed Cost Degression | 0.9-0.95 | 固定成本递减系数 |
+| **折现率** | Discount Rate | 0.08 (8%) | NPV计算折现率 |
 
 ---
 
