@@ -161,14 +161,14 @@ DB4% = DB4 / 销售价格
 销售价格 = HK3 + SK (标准成本利润)
 ```
 
-#### 价格限制 I (Price Limit I - SK标准)
+#### 价格限制 I (Price Limit I - SK Standard)
 
 ```
 价格限制 I = HK3 + SK抵消
 公式引用: =Kalkulation_MS1!F26
 ```
 
-#### 价格限制 II (Price Limit II - SK边际)
+#### 价格限制 II (Price Limit II - SK Margin)
 
 ```
 价格限制 II = HK3 + DS1附加费 + (0.138 × HK1)
