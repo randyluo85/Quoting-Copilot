@@ -187,8 +187,9 @@ Selling Price = HK3 + SK (Standard Cost Profit)
 
 ```
 价格限制 II = HK3 + DS1附加费 + (0.138 × HK1)
+Price Limit II = HK3 + DS1 Surcharge + (0.138 × HK1)
 
-注意: 0.138 是一个固定的边际调整系数
+注意: 0.138 是一个固定的边际调整系数 / 0.138 is a fixed margin adjustment factor
 ```
 
 ---
