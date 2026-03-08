@@ -246,22 +246,25 @@ NPV% = NPV / 总销售收入
 
 ### 4.2 总成本计算
 
-#### 标准成本
+#### 标准成本 (Standard Cost)
 
 ```
 总成本(OH) = 损益表!总成本 × 1000
+Total Cost (OH) = Income Statement!Total Cost × 1000
 
 Excel 公式 (NPV_MS1!D32:J33):
 =('Income Statement_MS1'!C57) × 1000
 ```
 
-#### 过程成本
+#### 过程成本 (Process Cost)
 
 ```
 总成本(PC) = 总成本(OH) + PEP过程管理费用 + PEP过程成本
+Total Cost (PC) = Total Cost (OH) + PEP Process Overhead + PEP Process Cost
 
 PEP过程管理费用:
-= IF(项目工时=0, 0, -总成本(OH) × 项目工时占比)
+PEP Process Overhead = IF(项目工时=0, 0, -总成本(OH) × 项目工时占比)
+                    = IF(Project Hours=0, 0, -Total Cost(OH) × Project Hours Ratio)
 ```
 
 ### 4.3 项目投资计算
