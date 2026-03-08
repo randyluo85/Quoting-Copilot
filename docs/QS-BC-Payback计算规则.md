@@ -557,3 +557,4 @@ def calculate_payback(discounted_cash_flows, initial_investment):
 **文档结束**
 
 > 本文档基于 `PBC_Master_MS1_MS6_2025_v1-模板.xlsm` Excel 文件整理，所有计算公式均已通过 openpyxl 验证。
+> 本版本仅包含中国工厂 (VOSS China) 相关配置，去除了客户费率配置和德语术语。
