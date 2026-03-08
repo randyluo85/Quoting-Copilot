@@ -446,30 +446,30 @@ Excel 公式 (NPV_MS1!Q27:Q33):
 def calculate_db4(sales_price, direct_materials, direct_labor,
                    overhead_rates, volume):
     """
-    计算 DB4 边际贡献 4
+    计算 DB4 边际贡献 4 / Calculate Margin Contribution Level 4
     """
     # Step 1: HK1 - 第一层直接成本
     hk1 = direct_materials + direct_labor
 
-    # Step 2: 可变成本
+    # Step 2: 可变成本 / Variable Cost
     risk = hk1 × overhead_rates['risk']
     variable_costs = hk1 + risk
 
-    # Step 3: HK3 - 制造成本
-    mgk = (direct_materials) × overhead_rates['mgk']
-    fgk = direct_labor × overhead_rates['fgk']
-    production_overhead = hk1 × overhead_rates['gk_production']
+    # Step 3: HK3 - 制造成本 / Manufacturing Cost Level 3
+    mgk = (direct_materials) × overhead_rates['mgk']  # 材料间接成本
+    fgk = direct_labor × overhead_rates['fgk']  # 制造间接成本
+    production_overhead = hk1 × overhead_rates['gk_production']  # 生产管理费用
     hk3 = variable_costs + mgk + fgk + production_overhead
 
-    # Step 4: DB1 - 边际贡献 1
+    # Step 4: DB1 - 边际贡献 1 / Margin Contribution Level 1
     db1 = sales_price - hk3
 
-    # Step 5: DB4 - 边际贡献 4
-    sales_overhead = hk1 × overhead_rates['gk_vertrieb']
-    rd_overhead = hk1 × overhead_rates['gk_entwicklung']
-    admin_overhead = hk1 × overhead_rates['gk_verwaltung']
-    sk = sales_price × overhead_rates['sk_rate']
-    ds1 = hk1 × overhead_rates['ds1']
+    # Step 5: DB4 - 边际贡献 4 / Margin Contribution Level 4
+    sales_overhead = hk1 × overhead_rates['gk_sales']  # 销售管理费用
+    rd_overhead = hk1 × overhead_rates['gk_development']  # 研发费用
+    admin_overhead = hk1 × overhead_rates['gk_admin']  # 管理费用
+    sk = sales_price × overhead_rates['sk_rate']  # 标准成本抵消
+    ds1 = hk1 × overhead_rates['ds1']  # DS1附加费
 
     db4 = db1 - sales_overhead - rd_overhead - admin_overhead - sk - ds1
 
