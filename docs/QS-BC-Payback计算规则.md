@@ -301,8 +301,10 @@ Excel 公式 (NPV_MS1!D56):
 
 ```
 折现现金流 = 项目现金流 × 折现因子
+Discounted Cash Flow = Project Cash Flow × Discount Factor
 
 累积现金流(Year n) = Σ(折现现金流 Year 1 to n)
+Cumulative Cash Flow(Year n) = Σ(Discounted Cash Flow Year 1 to n)
 
 Excel 公式 (NPV_MS1!Q27:Q33):
 =IF(SUM(N27:N28) < D56, SUM(N27:N28), "")
@@ -315,8 +317,10 @@ Excel 公式 (NPV_MS1!Q27:Q33):
 ```
 如果 累积折现现金流 >= 初始投资:
     回收期 = 已完整年数 + (剩余投资 / 下一年现金流)
+If Cumulative Discounted CF >= Initial Investment:
+    Payback Period = Complete Years + (Remaining Investment / Next Year CF)
 否则:
-    回收期 = "<1,0" (少于1年)
+    回收期 = "<1,0" (少于1年 / Less than 1 year)
 ```
 
 #### Excel 公式
@@ -329,9 +333,9 @@ Excel 公式 (NPV_MS1!Q27:Q33):
 =IF(Q35="<1,0", "<1,0", SUM(Q34:Q35))
 
 其中:
-- Q34 = 已计数的年数
-- P34 = 累积现金流
-- R35 = 剩余投资
+- Q34 = 已计数的年数 / Counted Years
+- P34 = 累积现金流 / Cumulative Cash Flow
+- R35 = 剩余投资 / Remaining Investment
 ```
 
 ### 5.3 摊销表结构
