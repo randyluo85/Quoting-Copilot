@@ -278,17 +278,19 @@ PEP Process Overhead = IF(项目工时=0, 0, -总成本(OH) × 项目工时占�
 
 ```
 总投资 = 机器投资 + 工装/DVP/其他 + 项目费用 + 项目成本回收 + Pay to Play + 系列工装分配
+Total Investment = Machine Investment + Tooling/DVP/Other + Project Expenses +
+                  Project Cost Recovery + Pay to Play + Series Tooling Allocation
 
 Excel 公式 (NPV_MS1!D56):
 = H5 + H6 + C9 + H8 + H9 + H7
 
 其中:
-- H5 = 机器投资 (来自 Project Costs!J27)
-- H6 = 工装/DVP/其他
-- C9 = 项目费用
-- H8 = 项目成本回收 (负值)
+- H5 = 机器投资 / Machine Investment (来自 Project Costs!J27)
+- H6 = 工装/DVP/其他 / Tooling/DVP/Other
+- C9 = 项目费用 / Project Expenses
+- H8 = 项目成本回收 (负值) / Project Cost Recovery (negative)
 - H9 = Pay to Play
-- H7 = 系列工装分配
+- H7 = 系列工装分配 / Series Tooling Allocation
 ```
 
 ---
