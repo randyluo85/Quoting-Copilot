@@ -108,49 +108,63 @@
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### 3.2 第一层：HK1 (直接成本)
+### 3.2 第一层：HK1 (直接成本 / Direct Cost Level 1)
 
 ```
 HK1 = 直接材料成本外购 + 直接材料成本自制 + 直接生产成本 + 调整成本
+HK1 = Direct Material Purchased + Direct Material In-House + Direct Labor + Adjustment
 ```
 
-### 3.3 第二层：可变成本
+### 3.3 第二层：可变成本 (Variable Cost)
 
 ```
 可变成本 = HK1 + Risk + 运输包装 + 处理成本
+Variable Cost = HK1 + Risk + Transportation & Packaging + Handling
 
-Risk = HK1 × Risk费率
+Risk = HK1 × Risk费率 (Risk Rate)
 ```
 
-### 3.4 第三层：HK3 (制造成本)
+### 3.4 第三层：HK3 (制造成本 / Manufacturing Cost Level 3)
 
 ```
 HK3 = 可变成本 + 间接材料成本(MGK) + 间接生产成本(FGK) + 生产管理费用
+HK3 = Variable Cost + Material Overhead + Manufacturing Overhead + Production Overhead
 
 间接材料成本 (MGK) = (直接材料成本外购 + 直接材料成本自制) × MGK费率
+Material Overhead = (Direct Material Purchased + Direct Material In-House) × MGK Rate
+
 间接生产成本 (FGK) = 直接生产成本 × FGK费率
+Manufacturing Overhead = Direct Labor × FGK Rate
+
 生产管理费用 = HK1 × GK-Production费率
+Production Overhead = HK1 × GK-Production Rate
 ```
 
-### 3.5 第四层：DB1 (边际贡献 1)
+### 3.5 第四层：DB1 (边际贡献 1 / Margin Contribution Level 1)
 
 ```
 DB1 = 销售价格 - HK3
+DB1 = Selling Price - HK3
+
 DB1% = DB1 / 销售价格
+DB1% = DB1 / Selling Price
 ```
 
-### 3.6 第五层：DB4 (边际贡献 4)
+### 3.6 第五层：DB4 (边际贡献 4 / Margin Contribution Level 4)
 
 ```
 DB4 = DB1 - 销售管理费用 - 研发费用 - 管理费用 - SK生产工厂 - DS1附加费 - 工装
-DB4% = DB4 / 销售价格
+DB4 = DB1 - Sales Overhead - Development Overhead - Admin Overhead - SK - DS1 - Tooling
 
-其中:
-- 销售管理费用 = HK1 × GK-Vertrieb费率
-- 研发费用 = HK1 × GK-Entwicklung费率
-- 管理费用 = HK1 × GK-Verwaltung费率
+DB4% = DB4 / 销售价格
+DB4% = DB4 / Selling Price
+
+其中 (Where):
+- 销售管理费用 = HK1 × GK-Vertrieb费率 (Sales Overhead Rate)
+- 研发费用 = HK1 × GK-Entwicklung费率 (Development Overhead Rate)
+- 管理费用 = HK1 × GK-Verwaltung费率 (Admin Overhead Rate)
 - SK生产工厂 = 销售价格 × SK抵消比率
-- DS1附加费 = HK1 × DS1费率
+- DS1附加费 = HK1 × DS1费率 (DS1 Rate)
 ```
 
 ### 3.7 销售价格计算
