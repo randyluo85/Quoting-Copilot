@@ -532,27 +532,27 @@ def calculate_payback(discounted_cash_flows, initial_investment):
 
 ## 附录 B: 数据输入验证
 
-### B.1 必填字段
+### B.1 必填字段 / Required Fields
 
-- 项目描述
-- 里程碑
-- 生产工厂
-- 客户
-- 生命周期年份
+- 项目描述 / Project Description
+- 里程碑 / Milestone
+- 生产工厂 / Production Plant
+- 客户 / Customer
+- 生命周期年份 / Lifecycle Years
 
-### B.2 数据一致性检查
+### B.2 数据一致性检查 / Data Consistency Checks
 
-- 销量总和应匹配生命周期总量
-- 单价应逐年递减(考虑降价)
-- 成本应与工厂费率匹配
+- 销量总和应匹配生命周期总量 / Total volume should match lifecycle total
+- 单价应逐年递减(考虑降价) / Unit price should decrease annually (considering price reduction)
+- 成本应与工厂费率匹配 / Cost should match plant rates
 
-### B.3 警告信号
+### B.3 警告信号 / Warning Signals
 
 | 指标 | 警告条件 |
 |------|---------|
-| DB4 | 为负值 |
-| NPV | 为负值 |
-| 回收期 | 超过项目生命周期 |
+| DB4 | 为负值 / Negative value |
+| NPV | 为负值 / Negative value |
+| 回收期 | 超过项目生命周期 / Exceeds project lifecycle |
 
 ---
 
