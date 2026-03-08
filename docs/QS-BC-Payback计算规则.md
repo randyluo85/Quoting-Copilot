@@ -1,0 +1,542 @@
+# QS BC Payback Excel 计算规则文档
+
+| 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 | 来源文件 |
+|--------|----------|----------|----------|--------|----------|
+| v1.0   | 2026-03-08 | 2026-03-08 | QS BC Payback 计算规则 | Randy Luo | PBC_Master_MS1_MS6_2025_v1-模板.xlsm |
+
+---
+
+## 📑 目录
+
+1. [系统概述](#1-系统概述)
+2. [基础数据配置](#2-基础数据配置-grunddaten)
+3. [报价汇总 QS 计算逻辑](#3-报价汇总-qs-计算逻辑)
+4. [商业案例 BC 分析](#4-商业案例-bc-分析)
+5. [投资回收计算](#5-投资回收-payback-计算)
+6. [关键公式汇总](#6-关键公式汇总)
+7. [术语表](#7-术语表)
+8. [工作表清单](#8-工作表清单)
+
+---
+
+## 1. 系统概述
+
+### 1.1 系统架构
+
+本 Excel 模板是一个完整的汽车零部件报价和财务分析系统，支持 **7 个里程碑 (MS1-MS6 及 MS6+1 年)** 的项目全生命周期管理。
+
+### 1.2 核心模块
+
+| 模块 | 工作表 | 功能 |
+|------|-------|------|
+| **基础数据** | Grunddaten | 费率配置主数据 |
+| **输入成本** | Input Cost_MS1~MS6+1 | 项目输入和成本数据 |
+| **报价计算** | Kalkulation_MS1~MS6+1 | 报价计算核心 |
+| **项目成本** | Project Costs_MS1~MS6+1 | 项目投资成本 |
+| **损益表** | Income Statement_MS1~MS6+1 | 收入和成本分析 |
+| **净现值** | NPV_MS1~MS6+1 | 净现值和商业案例 |
+| **摊销分析** | Amortization_MS1~MS6+1 | 摊销和投资回收 |
+
+### 1.3 数据单位
+
+- **单位成本**: €/100 (欧元每 100 件)
+- **总成本**: T€ (千欧元)
+- **注意**: T€ = €/100 × 销量 / 100,000
+
+---
+
+## 2. 基础数据配置 (Grunddaten)
+
+### 2.1 客户费率配置
+
+| 客户类型 | MGK | FGK | Risk/Scrapp | GK-Production | SG&A | DS1 |
+|---------|-----|-----|------------|--------------|-----|-----|
+| **Ford PC** | 0.062 | 0.25 | 0.015 | - | 0.21 | 0.06 |
+| **VW PC** | 0.08 | 0.256 | 0.017 | - | 0.168 | 0.06 |
+| **BMW PC** | 0.06 | 0.25 | 0.025 | - | 0.095 | 0.04 |
+| **Daimler PC** | 0.06 | 0.245 | 0.01 | - | 0.075 | 0.04 |
+| **Volvo CV** | 0.08 | 0.235 | 0.01 | - | 0.16 | 0.04 |
+| **Scania CV** | 0.066 | 0.15 | 0.02 | - | 0.2 | 0.07 |
+| **Daimler Bus** | 0.02 | 0.2 | 0.01 | - | 0.115 | 0.03 |
+| **Ø Over All** | 0.07 | 0.227 | 0.014 | - | 0.163 | 0.054 |
+
+### 2.2 生产工厂费率
+
+| 工厂 | MGK | FGK | Risk | GK-Production | GK-Vertrieb | GK-Entwicklung | GK-Verwaltung | DS1 |
+|-----|-----|-----|------|--------------|------------|---------------|--------------|-----|
+| **VOSS Germany** | 0.04 | 0.64 | 0.035 | 0.035 | 0.09 | 0.09 | 0.05 | - |
+| **VOSS Poland** | 0.055 | 0.6 | 0.02 | - | - | - | 0.06 | 0.2579 |
+| **VOSS Bulgaria** | 0.07 | 0.53 | 0.025 | - | - | - | 0.07 | 0.2579 |
+| **VOSS China** | 0.085 | 0.568 | 0.035 | - | - | - | 0.252 | - |
+| **VOSS USMCA** | 0.098 | 0.568 | 0.02 | - | - | - | 0.32 | - |
+| **VOSS India** | 0.06 | 0.37 | 0.02 | - | - | - | 0.08 | - |
+
+### 2.3 应用类型费率
+
+| 应用类型 | 费率 |
+|---------|-----|
+| **SCR** (选择性催化还原) | 0.12 |
+| **Therm** (热管理) | 0.15 |
+| **Air** (空气系统) | 0.12 |
+| **Other** | 0.12 |
+
+### 2.4 其他关键参数
+
+| 参数 | 值 | 说明 |
+|------|-----|------|
+| **SK-Verrechnung** (VAVA) | 0.025 | 标准成本抵消 |
+| **SK-Verrechnung** (其他) | 0.04 | 标准成本抵消 |
+| **Stundensatz Entwicklung** (VAVA) | 55 €/h | 开发小时费率 |
+| **Stundensatz Entwicklung** (其他) | 80 €/h | 开发小时费率 |
+| **Fixkostendegression** | 0.9-0.95 | 固定成本递减 |
+| **Discount Rate** | 0.08 (8%) | 折现率 |
+
+---
+
+## 3. 报价汇总 (QS) 计算逻辑
+
+### 3.1 成本层次结构
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  销售价格 (Selling Price)                                          │
+├─────────────────────────────────────────────────────────────────┤
+│  ↓                                                               │
+│  HK3 = 制造成本 Herstellkosten 3                                   │
+│  ├─ HK1 = 第一层直接成本                                          │
+│  ├─ MGK = 材料间接成本 Materialgemeinkosten                      │
+│  ├─ FGK = 制造间接成本 Fertigungsgemeinkosten                   │
+│  └─ 生产管理费用                                                 │
+├─────────────────────────────────────────────────────────────────┤
+│  ↓                                                               │
+│  DB1 = 边际贡献 1 Deckungsbeitrag 1 = 销售价格 - HK3              │
+├─────────────────────────────────────────────────────────────────┤
+│  ↓                                                               │
+│  SK = 标准成本 Standardkosten                                     │
+│  ├─ SK生产工厂                                                   │
+│  ├─ DS1附加费                                                   │
+│  └─ 工装                                                         │
+├─────────────────────────────────────────────────────────────────┤
+│  ↓                                                               │
+│  DB4 = 边际贡献 4 Deckungsbeitrag 4 = DB1 - SK                   │
+│  DB4% = DB4 / 销售价格                                            │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 3.2 第一层：HK1 (直接成本)
+
+```
+HK1 = 直接材料成本外购 + 直接材料成本自制 + 直接生产成本 + 调整成本
+```
+
+### 3.3 第二层：可变成本
+
+```
+可变成本 = HK1 + Risk + 运输包装 + 处理成本
+
+Risk = HK1 × Risk费率
+```
+
+### 3.4 第三层：HK3 (制造成本)
+
+```
+HK3 = 可变成本 + 间接材料成本(MGK) + 间接生产成本(FGK) + 生产管理费用
+
+间接材料成本 (MGK) = (直接材料成本外购 + 直接材料成本自制) × MGK费率
+间接生产成本 (FGK) = 直接生产成本 × FGK费率
+生产管理费用 = HK1 × GK-Production费率
+```
+
+### 3.5 第四层：DB1 (边际贡献 1)
+
+```
+DB1 = 销售价格 - HK3
+DB1% = DB1 / 销售价格
+```
+
+### 3.6 第五层：DB4 (边际贡献 4)
+
+```
+DB4 = DB1 - 销售管理费用 - 研发费用 - 管理费用 - SK生产工厂 - DS1附加费 - 工装
+DB4% = DB4 / 销售价格
+
+其中:
+- 销售管理费用 = HK1 × GK-Vertrieb费率
+- 研发费用 = HK1 × GK-Entwicklung费率
+- 管理费用 = HK1 × GK-Verwaltung费率
+- SK生产工厂 = 销售价格 × SK抵消比率
+- DS1附加费 = HK1 × DS1费率
+```
+
+### 3.7 销售价格计算
+
+#### 标准销售价格
+
+```
+销售价格 = HK3 + SK (标准成本利润)
+```
+
+#### 价格限制 I (Price Limit I - SK标准)
+
+```
+价格限制 I = HK3 + SK抵消
+公式引用: =Kalkulation_MS1!F26
+```
+
+#### 价格限制 II (Price Limit II - SK边际)
+
+```
+价格限制 II = HK3 + DS1附加费 + (0.138 × HK1)
+
+注意: 0.138 是一个固定的边际调整系数
+```
+
+---
+
+## 4. 商业案例 (BC) 分析
+
+### 4.1 NPV (净现值) 计算
+
+#### 折现因子计算
+
+```
+折现因子(Year n) = 1 / (1 + 折现率)^n
+
+示例 (8% 折现率):
+Year 1: 0.9259
+Year 2: 0.8573
+Year 3: 0.7938
+Year 4: 0.7350
+Year 5: 0.6806
+Year 6: 0.6302
+Year 7: 0.5835
+```
+
+#### 现金流计算
+
+```
+项目现金流 = 标准利润 + 折旧 - 包含在总成本中的项目成本
+
+标准利润 (OH - Overhead) = 销售收入 - 总成本(OH)
+
+折旧 = (机器投资 + 系列工装分配) / 使用年限
+
+Excel 公式 (NPV_MS1!D50:J50):
+=IF(D27=0, 0, ($H$5+$H$7)/$C$7)
+```
+
+#### NPV 计算公式
+
+```
+NPV = Σ(项目现金流 × 折现因子) - 初始总投资
+
+Excel 公式 (NPV_MS1!D58):
+=NPV(C6, D51:J51) - (D56)
+
+其中:
+- C6 = 折现率 (0.08)
+- D51:J51 = 各年项目现金流
+- D56 = 初始总投资
+```
+
+#### NPV 百分比
+
+```
+NPV% = NPV / 总销售收入
+```
+
+### 4.2 总成本计算
+
+#### 标准成本
+
+```
+总成本(OH) = 损益表!总成本 × 1000
+
+Excel 公式 (NPV_MS1!D32:J33):
+=('Income Statement_MS1'!C57) × 1000
+```
+
+#### 过程成本
+
+```
+总成本(PC) = 总成本(OH) + PEP过程管理费用 + PEP过程成本
+
+PEP过程管理费用:
+= IF(项目工时=0, 0, -总成本(OH) × 项目工时占比)
+```
+
+### 4.3 项目投资计算
+
+#### 总投资构成
+
+```
+总投资 = 机器投资 + 工装/DVP/其他 + 项目费用 + 项目成本回收 + Pay to Play + 系列工装分配
+
+Excel 公式 (NPV_MS1!D56):
+= H5 + H6 + C9 + H8 + H9 + H7
+
+其中:
+- H5 = 机器投资 (来自 Project Costs!J27)
+- H6 = 工装/DVP/其他
+- C9 = 项目费用
+- H8 = 项目成本回收 (负值)
+- H9 = Pay to Play
+- H7 = 系列工装分配
+```
+
+---
+
+## 5. 投资回收 (Payback) 计算
+
+### 5.1 折现现金流累积
+
+```
+折现现金流 = 项目现金流 × 折现因子
+
+累积现金流(Year n) = Σ(折现现金流 Year 1 to n)
+
+Excel 公式 (NPV_MS1!Q27:Q33):
+=IF(SUM(N27:N28) < D56, SUM(N27:N28), "")
+```
+
+### 5.2 回收期计算
+
+#### 回收期公式
+
+```
+如果 累积折现现金流 >= 初始投资:
+    回收期 = 已完整年数 + (剩余投资 / 下一年现金流)
+否则:
+    回收期 = "<1,0" (少于1年)
+```
+
+#### Excel 公式
+
+```
+回收期 (NPV_MS1!Q35):
+=IF(Q34=0, "<1,0", 1/P34 × R35)
+
+总回收期 (NPV_MS1!Q36):
+=IF(Q35="<1,0", "<1,0", SUM(Q34:Q35))
+
+其中:
+- Q34 = 已计数的年数
+- P34 = 累积现金流
+- R35 = 剩余投资
+```
+
+### 5.3 摊销表结构
+
+#### 标准摊销
+
+| 年份 | 折现现金流 | 累积现金流 | 回收判断 |
+|------|----------|-----------|---------|
+| 2026 (MS1) | D54 | N27 | Q27 |
+| 2027 (MS2) | E54 | N28 | Q28 |
+| ... | ... | ... | ... |
+
+#### 项目摊销
+
+类似结构，但使用项目特定的现金流数据。
+
+---
+
+## 6. 关键公式汇总
+
+### 6.1 Kalkulation_MS1 关键公式
+
+| 单元格 | 公式 | 说明 |
+|--------|------|------|
+| **F13** (HK1) | `=IF('Input Cost_MS1'!$D$116="PLN", ...)` | 引用 Input Cost 的 HK1 |
+| **F24** (HK3) | `=($C$24×(F8-'Input Cost_MS1'!D120))+...` | HK3 总成本计算 |
+| **F25** (DB1) | `=SUM(F22:F24)` | DB1 = 收入 - HK3 |
+| **F34** (DB4利润) | `='Input Cost_MS1'!D49` | DB4 利润 |
+| **F35** (DB4利润%) | `=F32+F33` | DB4 利润率 |
+
+### 6.2 NPV_MS1 关键公式
+
+| 单元格 | 公式 | 说明 |
+|--------|------|------|
+| **C6** (折现率) | `='Project Costs_MS1'!C3` | 折现率 |
+| **D50** (折旧) | `=IF(D27=0, 0, ($H$5+$H$7)/$C$7)` | 年折旧 |
+| **D58** (NPV) | `=NPV(C6,D51:J51)-(D56)` | 净现值 |
+| **Q35** (回收期) | `=IF(Q34=0, "<1,0", 1/P34×R35)` | 回收期 |
+| **Q36** (总回收期) | `=IF(Q35="<1,0", "<1,0", SUM(Q34:Q35))` | 总回收期 |
+
+### 6.3 Income Statement_MS1 关键公式
+
+| 项目 | 公式 | 说明 |
+|------|------|------|
+| 净销售额 | `=销量 × 单价` | 年度销售收入 |
+| 直接材料成本 | `=销量 × 单位材料成本` | T€ |
+| 直接生产成本 | `=销量 × 单位生产成本` | T€ |
+| HK3 | `=销量 × 单位HK3` | T€ |
+| DB1边际利润 | `=净销售额 - HK3总计` | T€ |
+| DB4边际利润 | `=DB1 - 各项管理费用 - SK - DS1` | T€ |
+| DB4边际利润% | `=DB4边际利润 / 净销售额` | % |
+
+---
+
+## 7. 术语表
+
+| 术语 | 英文 | 说明 |
+|------|------|------|
+| **MGK** | Materialgemeinkosten | 材料间接成本 |
+| **FGK** | Fertigungsgemeinkosten | 制造间接成本 |
+| **HK1** | Herstellkosten 1 | 第一层次制造成本(直接成本) |
+| **HK3** | Herstellkosten 3 | 第三层次制造成本(含间接费用) |
+| **DB1** | Deckungsbeitrag 1 | 第一层次边际贡献 |
+| **DB4** | Deckungsbeitrag 4 | 第四层次边际贡献(最终利润) |
+| **SK** | Standardkosten | 标准成本 |
+| **DS1** | Deckungsbeitragsstufe 1 | 第一利润阶段附加费 |
+| **NPV** | Net Present Value | 净现值 |
+| **Payback** | Payback Period | 投资回收期 |
+| **SOP** | Start of Production | 生产启动 |
+| **MS** | Milestone | 里程碑 |
+| **DVP** | Design Validation Plan | 设计验证计划 |
+| **PEP** | Product Evolution Process | 产品演进过程 |
+| **T€** | Tausend Euro | 千欧元 |
+
+---
+
+## 8. 工作表清单
+
+### 8.1 核心工作表
+
+| ID | 工作表名称 | 用途 |
+|----|----------|------|
+| 1 | Competitor | 竞争对手分析 |
+| 2 | KPI | 关键绩效指标 |
+| 3 | **Grunddaten** | **基础数据配置** |
+| 4 | Financial Status | 财务状况总览 |
+
+### 8.2 计算工作表 (每个里程碑一组)
+
+| 里程碑 | NPV | Income Statement | Input Cost | Project Costs | Kalkulation | detail | Lifecycle | Amortization |
+|--------|-----|------------------|-----------|--------------|-------------|-------|-----------|--------------|
+| MS1 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MS2 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MS3 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MS4 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MS5 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MS6 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MS6+1 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+### 8.3 其他工作表
+
+| ID | 工作表名称 | 用途 |
+|----|----------|------|
+| 12 | Project exp. | 项目扩展 |
+| 13 | Liste | 列表 |
+| 63 | Währung | 货币 |
+
+---
+
+## 附录 A: 计算伪代码
+
+### A.1 DB4 计算伪代码
+
+```python
+def calculate_db4(sales_price, direct_materials, direct_labor,
+                   overhead_rates, volume):
+    """
+    计算 DB4 边际贡献 4
+    """
+    # Step 1: HK1 - 第一层直接成本
+    hk1 = direct_materials + direct_labor
+
+    # Step 2: 可变成本
+    risk = hk1 × overhead_rates['risk']
+    variable_costs = hk1 + risk
+
+    # Step 3: HK3 - 制造成本
+    mgk = (direct_materials) × overhead_rates['mgk']
+    fgk = direct_labor × overhead_rates['fgk']
+    production_overhead = hk1 × overhead_rates['gk_production']
+    hk3 = variable_costs + mgk + fgk + production_overhead
+
+    # Step 4: DB1 - 边际贡献 1
+    db1 = sales_price - hk3
+
+    # Step 5: DB4 - 边际贡献 4
+    sales_overhead = hk1 × overhead_rates['gk_vertrieb']
+    rd_overhead = hk1 × overhead_rates['gk_entwicklung']
+    admin_overhead = hk1 × overhead_rates['gk_verwaltung']
+    sk = sales_price × overhead_rates['sk_rate']
+    ds1 = hk1 × overhead_rates['ds1']
+
+    db4 = db1 - sales_overhead - rd_overhead - admin_overhead - sk - ds1
+
+    return {
+        'hk1': hk1,
+        'hk3': hk3,
+        'db1': db1,
+        'db4': db4,
+        'db4_percent': db4 / sales_price
+    }
+```
+
+### A.2 NPV 计算伪代码
+
+```python
+def calculate_npv(cash_flows, discount_rate, initial_investment):
+    """
+    计算净现值 (NPV)
+    """
+    npv = -initial_investment
+    for year, cf in enumerate(cash_flows, 1):
+        discount_factor = 1 / (1 + discount_rate) ** year
+        npv += cf × discount_factor
+    return npv
+```
+
+### A.3 回收期计算伪代码
+
+```python
+def calculate_payback(discounted_cash_flows, initial_investment):
+    """
+    计算投资回收期
+    """
+    cumulative = 0
+    for year, dcf in enumerate(discounted_cash_flows, 1):
+        cumulative += dcf
+        if cumulative >= initial_investment:
+            # 计算精确回收时点
+            prev_cumulative = cumulative - dcf
+            remaining = initial_investment - prev_cumulative
+            fraction = remaining / dcf
+            return year - 1 + fraction
+    return float('inf')  # 无法回收
+```
+
+---
+
+## 附录 B: 数据输入验证
+
+### B.1 必填字段
+
+- 项目描述
+- 里程碑
+- 生产工厂
+- 客户
+- 生命周期年份
+
+### B.2 数据一致性检查
+
+- 销量总和应匹配生命周期总量
+- 单价应逐年递减(考虑降价)
+- 成本应与工厂费率匹配
+
+### B.3 警告信号
+
+| 指标 | 警告条件 |
+|------|---------|
+| DB4 | 为负值 |
+| NPV | 为负值 |
+| 回收期 | 超过项目生命周期 |
+
+---
+
+**文档结束**
+
+> 本文档基于 `PBC_Master_MS1_MS6_2025_v1-模板.xlsm` Excel 文件整理，所有计算公式均已通过 openpyxl 验证。
