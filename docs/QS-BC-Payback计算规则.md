@@ -173,6 +173,7 @@ DB4% = DB4 / Selling Price
 
 ```
 销售价格 = HK3 + SK (标准成本利润)
+Selling Price = HK3 + SK (Standard Cost Profit)
 ```
 
 #### 价格限制 I (Price Limit I - SK Standard)
