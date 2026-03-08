@@ -362,25 +362,29 @@ Excel 公式 (NPV_MS1!Q27:Q33):
 
 ---
 
-## 7. 术语表
+## 7. 术语表 (Terminology)
 
-| 术语 | 英文 | 说明 |
-|------|------|------|
-| **MGK** | Materialgemeinkosten | 材料间接成本 |
-| **FGK** | Fertigungsgemeinkosten | 制造间接成本 |
-| **HK1** | Herstellkosten 1 | 第一层次制造成本(直接成本) |
-| **HK3** | Herstellkosten 3 | 第三层次制造成本(含间接费用) |
-| **DB1** | Deckungsbeitrag 1 | 第一层次边际贡献 |
-| **DB4** | Deckungsbeitrag 4 | 第四层次边际贡献(最终利润) |
-| **SK** | Standardkosten | 标准成本 |
-| **DS1** | Deckungsbeitragsstufe 1 | 第一利润阶段附加费 |
+| 中文术语 | 英文术语 | 说明 |
+|---------|---------|------|
+| **MGK** | Material Overhead | 材料间接成本 |
+| **FGK** | Manufacturing Overhead | 制造间接成本 |
+| **HK1** | Manufacturing Cost Level 1 | 第一层次制造成本(直接成本) |
+| **HK3** | Manufacturing Cost Level 3 | 第三层次制造成本(含间接费用) |
+| **DB1** | Margin Contribution Level 1 | 第一层次边际贡献 |
+| **DB4** | Margin Contribution Level 4 | 第四层次边际贡献(最终利润) |
+| **SK** | Standard Cost | 标准成本 |
+| **DS1** | DS1 Surcharge | 第一利润阶段附加费 |
 | **NPV** | Net Present Value | 净现值 |
 | **Payback** | Payback Period | 投资回收期 |
 | **SOP** | Start of Production | 生产启动 |
 | **MS** | Milestone | 里程碑 |
 | **DVP** | Design Validation Plan | 设计验证计划 |
 | **PEP** | Product Evolution Process | 产品演进过程 |
-| **T€** | Tausend Euro | 千欧元 |
+| **T€** | Thousand Euro | 千欧元 |
+| **GK-Production** | Production Overhead | 生产管理费用 |
+| **GK-Vertrieb** | Sales Overhead | 销售管理费用 |
+| **GK-Entwicklung** | Development Overhead | 研发费用 |
+| **GK-Verwaltung** | Administration Overhead | 管理费用 |
 
 ---
 
