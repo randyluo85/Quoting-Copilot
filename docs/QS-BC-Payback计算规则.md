@@ -200,8 +200,9 @@ DB4% = DB4 / Selling Price
 
 ```
 折现因子(Year n) = 1 / (1 + 折现率)^n
+Discount Factor(Year n) = 1 / (1 + Discount Rate)^n
 
-示例 (8% 折现率):
+示例 (8% 折现率 / Example at 8% Discount Rate):
 Year 1: 0.9259
 Year 2: 0.8573
 Year 3: 0.7938
@@ -215,10 +216,13 @@ Year 7: 0.5835
 
 ```
 项目现金流 = 标准利润 + 折旧 - 包含在总成本中的项目成本
+Project Cash Flow = Standard Profit + Depreciation - Project Costs in Total Cost
 
-标准利润 (OH - Overhead) = 销售收入 - 总成本(OH)
+标准利润 = 销售收入 - 总成本
+Standard Profit (OH) = Sales Revenue - Total Cost (OH)
 
 折旧 = (机器投资 + 系列工装分配) / 使用年限
+Depreciation = (Machine Investment + Series Tooling Allocation) / Useful Life
 
 Excel 公式 (NPV_MS1!D50:J50):
 =IF(D27=0, 0, ($H$5+$H$7)/$C$7)
@@ -228,14 +232,15 @@ Excel 公式 (NPV_MS1!D50:J50):
 
 ```
 NPV = Σ(项目现金流 × 折现因子) - 初始总投资
+NPV = Σ(Project Cash Flow × Discount Factor) - Initial Investment
 
 Excel 公式 (NPV_MS1!D58):
 =NPV(C6, D51:J51) - (D56)
 
 其中:
-- C6 = 折现率 (0.08)
-- D51:J51 = 各年项目现金流
-- D56 = 初始总投资
+- C6 = 折现率 (0.08) / Discount Rate
+- D51:J51 = 各年项目现金流 / Annual Project Cash Flows
+- D56 = 初始总投资 / Initial Investment
 ```
 
 #### NPV 百分比
