@@ -87,24 +87,24 @@
 │  销售价格 (Selling Price)                                          │
 ├─────────────────────────────────────────────────────────────────┤
 │  ↓                                                               │
-│  HK3 = 制造成本 Herstellkosten 3                                   │
-│  ├─ HK1 = 第一层直接成本                                          │
-│  ├─ MGK = 材料间接成本 Materialgemeinkosten                      │
-│  ├─ FGK = 制造间接成本 Fertigungsgemeinkosten                   │
-│  └─ 生产管理费用                                                 │
+│  HK3 = 制造成本 (Manufacturing Cost Level 3)                      │
+│  ├─ HK1 = 第一层直接成本 (Direct Cost Level 1)                    │
+│  ├─ MGK = 材料间接成本 (Material Overhead)                       │
+│  ├─ FGK = 制造间接成本 (Manufacturing Overhead)                  │
+│  └─ 生产管理费用 (Production Overhead)                           │
 ├─────────────────────────────────────────────────────────────────┤
 │  ↓                                                               │
-│  DB1 = 边际贡献 1 Deckungsbeitrag 1 = 销售价格 - HK3              │
+│  DB1 = 边际贡献 1 (Margin Contribution 1) = 销售价格 - HK3         │
 ├─────────────────────────────────────────────────────────────────┤
 │  ↓                                                               │
-│  SK = 标准成本 Standardkosten                                     │
-│  ├─ SK生产工厂                                                   │
-│  ├─ DS1附加费                                                   │
-│  └─ 工装                                                         │
+│  SK = 标准成本 (Standard Cost)                                   │
+│  ├─ SK生产工厂 (Plant Standard Cost)                             │
+│  ├─ DS1附加费 (DS1 Surcharge)                                   │
+│  └─ 工装 (Tooling)                                              │
 ├─────────────────────────────────────────────────────────────────┤
 │  ↓                                                               │
-│  DB4 = 边际贡献 4 Deckungsbeitrag 4 = DB1 - SK                   │
-│  DB4% = DB4 / 销售价格                                            │
+│  DB4 = 边际贡献 4 (Margin Contribution 4) = DB1 - SK             │
+│  DB4% = DB4 / 销售价格 (DB4 Margin Percentage)                   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
