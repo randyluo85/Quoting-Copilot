@@ -487,7 +487,7 @@ def calculate_db4(sales_price, direct_materials, direct_labor,
 ```python
 def calculate_npv(cash_flows, discount_rate, initial_investment):
     """
-    计算净现值 (NPV)
+    计算净现值 / Calculate Net Present Value (NPV)
     """
     npv = -initial_investment
     for year, cf in enumerate(cash_flows, 1):
@@ -501,7 +501,7 @@ def calculate_npv(cash_flows, discount_rate, initial_investment):
 ```python
 def calculate_payback(discounted_cash_flows, initial_investment):
     """
-    计算投资回收期
+    计算投资回收期 / Calculate Payback Period
     """
     cumulative = 0
     for year, dcf in enumerate(discounted_cash_flows, 1):
