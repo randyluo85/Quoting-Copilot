@@ -553,6 +553,77 @@ def calculate_vp_from_target_db4(
 > - AE列VP是**反推值**，用于验证目标利润是否可行
 > - 两列独立存在，帮助Sales对比"市场定价"与"目标利润定价"
 
+### A.1.2 VP反推DB4公式 🆕 v1.5
+
+**用途：** 当销售手动输入或修改VP后，反推当前的净利率DB4是多少。
+
+**公式：**
+
+```python
+def calculate_db4_from_vp(vp: Decimal, sk_1: Decimal,
+                           tooling_1: Decimal, tooling_2: Decimal,
+                           sap: Decimal, rnd: Decimal,
+                           interest_rate: Decimal, consign_rate: Decimal,
+                           logistics_rate: Decimal) -> Decimal:
+    """
+    从VP反推DB4净利率 / Calculate DB4 from VP
+
+    Args:
+        vp: 销售单价（用户手动输入）
+        sk_1: SK-1综合成本
+        tooling_1, tooling_2: 模具分摊费用
+        sap: SAP附加费
+        rnd: R&D验证分摊费
+        interest_rate: 利息比例
+        consign_rate: 寄售比例
+        logistics_rate: 物流比例
+
+    Returns:
+        DB4净利率（百分比）
+    """
+    # 基于VP的费用
+    logistics = vp * logistics_rate
+    consign_stock = vp * consign_rate
+    interest = vp * interest_rate
+
+    # SK-2全成本
+    sk_2 = sk_1 + tooling_1 + tooling_2 + sap + rnd + logistics + consign_stock + interest
+
+    # DB4净利率
+    db4 = (vp - sk_2) / vp
+
+    return db4
+```
+
+**一步公式（简化版）：**
+
+```
+DB4 = 1 - [(SK-1 + 模具1 + 模具2 + SAP + R&D) ÷ VP] - 物流比例 - 寄售比例 - 利息比例
+```
+
+**计算示例：**
+
+```python
+# 场景：用户将VP从58元修改为60元，想知道当前DB4是多少
+vp = Decimal("60.00")
+sk_1 = Decimal("54.33")
+tooling_1 = Decimal("6.40")
+tooling_2 = Decimal("0")
+sap = Decimal("0")
+rnd = Decimal("0.54")
+logistics_rate = Decimal("0.015")
+consign_rate = Decimal("0")
+interest_rate = Decimal("0.01333")
+
+# 计算DB4
+db4 = calculate_db4_from_vp(vp, sk_1, tooling_1, tooling_2, sap, rnd,
+                            interest_rate, consign_rate, logistics_rate)
+
+# 结果：db4 = -0.0495 = -4.95%（亏损！）
+```
+
+**业务含义：** 用户输入VP=60元，但成本高达62.97元，导致净利率为负。这说明定价过低。
+
 ### A.2 NPV 计算伪代码
 
 ```python
