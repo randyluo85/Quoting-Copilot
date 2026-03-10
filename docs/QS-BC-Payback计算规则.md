@@ -495,6 +495,39 @@ def calculate_db4(sales_price, direct_materials, direct_labor,
     }
 ```
 
+### A.1.1 固定DB4回算VP公式 🆕 v1.2
+
+```python
+def calculate_vp_from_target_db4(
+    sk_1: Decimal,
+    tooling_1: Decimal,
+    tooling_2: Decimal,
+    sap: Decimal,
+    rnd: Decimal,
+    interest_rate: Decimal,
+    consign_rate: Decimal,
+    logistics_rate: Decimal,
+    target_db4: Decimal
+) -> Decimal:
+    """
+    从目标DB4比率反推VP (Reverse Calculate VP from Target DB4)
+
+    固定DB4回算VP = (SK-1 + 模具1 + 模具2 + SAP + R&D)
+                  ÷ (1 - 利息比例 - 寄售比例 - 物流比例 - 固定DB4比率)
+
+    Fixed DB4 Reverse VP = (SK-1 + Tooling_1 + Tooling_2 + SAP + R&D)
+                        / (1 - Interest_Rate - Consign_Rate - Logistics_Rate - Target_DB4_Rate)
+    """
+    base_cost = sk_1 + tooling_1 + tooling_2 + sap + rnd
+    denominator = 1 - interest_rate - consign_rate - logistics_rate - target_db4
+    return base_cost / denominator
+
+# 计算示例
+# SK-1 = 3.0404元, 模具1 = 0, 模具2 = 0, SAP = 0, R&D = 0
+# 利息比例 = 1.333%, 寄售比例 = 0%, 物流比例 = 0%, 目标DB4 = 5%
+# VP = 3.0404 / (1 - 0.01333 - 0 - 0 - 0.05) = 3.0404 / 0.9367 = 3.246元
+```
+
 ### A.2 NPV 计算伪代码
 
 ```python
