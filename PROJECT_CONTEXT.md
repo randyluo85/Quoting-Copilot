@@ -61,7 +61,7 @@
 
 ### 2.2 数据库结构
 
-> ⚠️ **数据库 Schema 的唯一权威来源** 是 `docs/DATABASE_DESIGN.md`。
+> ⚠️ **数据库 Schema 的唯一权威来源** 是 `docs/数据库设计.md`。
 > 本节仅列出与业务逻辑密切相关的关键字段引用。
 
 **核心实体映射：**
@@ -70,7 +70,8 @@
 |---------|--------|---------|
 | 物料主数据 | `materials` | `id` (物料编码), `std_price` |
 | 工序费率 | `process_rates` | `process_code`, `work_center`, `std_mhr_var`, `std_mhr_fix`, `std_mhr_total` |
-| 产线 | `production_lines` | `avg_wages_per_hour`, `rent_unit_price`, `energy_unit_price`, `interest_rate` |
+| 产线 | `production_lines` | `avg_wages_per_hour`, `rent_unit_price`, `interest_rate` |
+| 工厂 | `factories` | `energy_unit_price` |
 | 项目 | `projects` | `id`, `project_code`, `status`, `annual_volume`, `factory_id` |
 | BOM 行 | `product_materials` | `std_cost`, `confidence` |
 
@@ -85,11 +86,11 @@ calculated → sales_input → completed
 - 新增 `sales_input` 状态（Sales 输入商业参数）
 - Sales 完成计算后直接进入 `completed` 状态，可导出报价单
 
-完整表结构、索引、约束请参考 [`docs/DATABASE_DESIGN.md`](docs/DATABASE_DESIGN.md)。
+完整表结构、索引、约束请参考 [`docs/数据库设计.md`](docs/数据库设计.md)。
 
 ### 2.2.3 向量数据结构 🆕 v2.5
 
-> **详细设计**：[docs/VECTOR_DESIGN.md](docs/VECTOR_DESIGN.md)
+> **详细设计**：[docs/向量设计.md](docs/向量设计.md)
 
 | 业务概念 | 对应表 | 关键字段 | 用途 |
 |---------|--------|---------|------|
@@ -121,15 +122,13 @@ calculated → sales_input → completed
 后端计算服务必须严格执行以下公式：
 
 **Standard Cost (标准成本):**
-$$ Cost_{std} = \sum (Qty \times MaterialPrice_{std}) + \sum \left( \frac{CycleTime}{3600} \times (MHR_{total} + Personnel \times LaborRate) \right) $$
+$$ Cost_{std} = \sum (Qty \times MaterialPrice_{std}) + \sum \left( \frac{CycleTime}{3600} \times MHR_{total} \right) $$
 
 > **参数说明：**
 > - `CycleTime`: 标准工时（单位：**秒**），需除以 3600 转换为小时
-> - `MHR_total`: 机时费率 = `std_mhr_var` (变动) + `std_mhr_fix` (固定)
-> - `Personnel`: 标准人工配置（人/机）
-> - `LaborRate`: 小时工资（从产线获取）
+> - `MHR_total`: 机时费率 = `std_mhr_var` (变动) + `std_mhr_fix` (固定)，已内嵌人工成本
 >
-> **详细计算逻辑**：参见 [`docs/PROCESS_COST_LOGIC.md`](docs/PROCESS_COST_LOGIC.md)
+> **详细计算逻辑**：参见 [`docs/工艺成本计算逻辑.md`](docs/工艺成本计算逻辑.md)
 
 ### 3.2 红绿灯置信度逻辑 (Traffic Light Logic)
 
