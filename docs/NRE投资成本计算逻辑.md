@@ -2,13 +2,15 @@
 
 | 版本号 | 创建时间 | 更新时间 | 文档主题 | 创建人 |
 |--------|----------|----------|----------|--------|
-| v2.1   | 2026-02-03 | 2026-02-25 | NRE 投资成本计算逻辑 | Randy Luo |
+| v2.3   | 2026-02-03 | 2026-03-13 | NRE 投资成本计算逻辑 | Randy Luo |
 
 ---
 
 **版本变更记录：**
 | 版本 | 日期 | 变更内容 |
 |------|------|----------|
+| v2.3 | 2026-03-13 | 🔄 **文档定位收敛**：移除 API、Schema、Pydantic、开发实施清单等开发定义，仅保留业务逻辑、计算原理与流程 |
+| v2.2 | 2026-03-13 | 🔴 **录入流程调整**：投资项单价/数量由工艺部（IE）通过 VM 触发的邮件链接录入并回填项目；收件人按产线后台配置自动匹配 |
 | v2.1 | 2026-02-25 | 🆕 **新增功能**：NRE 费用支持"销售溢价加成 (Markup)"与"混合分摊规则设定"，支持一次性支付与按件分摊的组合模式 |
 | v2.0 | 2026-02-15 | 🆕 **新增投资项计算公式**：定义四种投资类型的详细计算规则（检具=点位数×单价，工装=功能模块数×单价，成型工装=长度×单价，模具=产品特征×单价）；新增计算参数字段 |
 | v1.3 | 2026-02-05 | 同步 v2.0 流程变更；移除 VAVE 相关引用 |
@@ -21,7 +23,7 @@
 
 **NRE (Non-Recurring Engineering)** 费用是指为了生产特定产品而发生的一次性投入。在 Dr.aiVOSS 系统中，NRE 不随订单数量线性增加，而是作为**"资产"**进行管理。
 
-系统将 NRE 分为四大类（Enum: `InvestmentType`），每类有特定的计算公式：
+系统将 NRE 分为五大类，每类有特定的计算公式：
 
 | 代码 | 名称 | 英文 | 计算公式 | 典型示例 |
 |------|------|------|----------|---------|
@@ -44,7 +46,7 @@
 | 体积 | cm³ | 注塑模 | 模具体积 100,000cm³ × ¥1.5/cm³ = ¥150,000 |
 | 吨位 | 吨 | 冲压模 | 冲压吨位 200吨 × ¥800/吨 = ¥160,000 |
 
-**单价来源：** `std_investment_costs` 表，根据材质类型、复杂度、吨位等参数查询标准单价范围。
+**单价来源：** 投资项标准库，根据材质类型、复杂度、吨位等参数查询标准单价范围。
 
 ---
 
@@ -114,38 +116,35 @@
 
 ---
 
-## 2. 业务实体关系模型 (ERD 逻辑)
+## 2. 业务对象关系逻辑
 
 为了简化操作并确保数据准确，采用 **"BOM 挂载"** 模式，而非"工序挂载"模式。
 
 ```mermaid
-erDiagram
-    PRODUCT ||--o{ INVESTMENT_ITEM : "requires"
-    INVESTMENT_ITEM }|--|| INVESTMENT_TYPE : "is a"
-    INVESTMENT_ITEM ||--o| SHARED_ASSET_POOL : "references"
-
-    PRODUCT {
-        string part_number "BOM ID"
-        string part_name
-        int total_lifecycle_volume "生命周期总销量"
-    }
-
-    INVESTMENT_ITEM {
-        string name
-        decimal unit_cost "单价"
-        int quantity "需求数量"
-        int asset_lifecycle "设计寿命(次)"
-        bool is_shared "是否共享"
-    }
+flowchart LR
+    PRODUCT[产品/BOM对象] --> ITEM[投资项]
+    ITEM --> TYPE[投资类型]
+    ITEM --> SHARE[共享资产池]
 ```
 
 ---
 
 ## 3. 详细计算逻辑
 
+### 3.0 录入责任与触发流程（v2.2）
+
+投资项成本参数（单价、数量）由**工艺部（IE）**录入，VM 负责触发与闭环确认。
+
+**流程：**
+1. VM 在项目内发起"投资项录入邮件"。
+2. 系统根据项目所属产线，读取后台配置的工艺同事收件人。
+3. 邮件发送 BOM 表格录入链接（带有效期）。
+4. 工艺同事点击链接，按当前投资项录入方法填写单价与数量并提交确认。
+5. 系统自动回填投资项到项目，并通知 VM 进入后续汇总。
+
 ### 3.1 基础投入计算 (Total Investment)
 
-这是最底层的物理成本计算，由 **IE** 负责录入。
+这是最底层的物理成本计算，由 **IE** 负责录入（VM 负责邮件触发与进度确认）。
 
 #### 逻辑分支 A：标准数量计算
 
@@ -339,233 +338,22 @@ $$SK\text{-}2 = SK\text{-}1 + \sum_{i=1}^{n} UnitAmort_i + SAP + Logistics + R\&
 
 ---
 
-## 4. 数据库设计规范 (Schema)
-
-> **文档职责说明**：完整的数据库表结构定义请参考 [数据库设计.md](数据库设计.md)，本文档仅提供计算相关字段的补充说明。
-
-### 表 1: `investment_items` (项目投资明细)
-
-| 字段名 | 类型 | 说明 | 示例值 |
-|--------|------|------|--------|
-| `id` | CHAR(36) | PK, UUID | - |
-| `project_id` | CHAR(36) | FK, 关联项目 | - |
-| `product_id` | CHAR(36) | **FK, 关联 BOM/产品** | 指向 Housing |
-| `item_type` | VARCHAR(20) | 枚举: MOLD, GAUGE, JIG, FIXTURE, FORMING_TOOL | MOLD |
-| `name` | VARCHAR(200) | 投资项名称 | Housing Injection Mold |
-| `unit_cost_est` | DECIMAL(12,2) | **计算后单价**（= calc_param × unit_price_std） | 170000.00 |
-| `currency` | VARCHAR(10) | 币种 | CNY |
-| `quantity` | INT | 数量 | 1 |
-| `asset_lifecycle` | INT | 设计寿命 (模次) | 300000 |
-| `is_shared` | BOOLEAN | 是否共享资产 | FALSE |
-| `shared_source_id` | CHAR(36) | 若共享，指向源 ID | NULL |
-| `status` | VARCHAR(20) | 状态: DRAFT / CONFIRMED | DRAFT |
-
-#### 🆕 计算参数字段（v2.0 新增）
-
-| 字段名 | 类型 | 适用类型 | 说明 | 示例值 |
-|--------|------|----------|------|--------|
-| `calc_method` | VARCHAR(20) | ALL | 计算方法: FEATURE / POINTS / MODULES / LENGTH / FIXED | FEATURE |
-| `calc_param` | DECIMAL(10,2) | ALL | **计算参数值**（点位数/模块数/长度/特征值） | 32.00 |
-| `calc_param_unit` | VARCHAR(20) | ALL | 参数单位: kg / cm3 / ton / points / modules / mm | points |
-| `unit_price_std` | DECIMAL(10,2) | ALL | **标准单价**（从标准库获取或手动输入） | 500.00 |
-| `feature_type` | VARCHAR(20) | MOLD | 模具特征类型: WEIGHT / VOLUME / TONNAGE | WEIGHT |
-
-**计算逻辑：**
-```
-unit_cost_est = calc_param × unit_price_std
-total_cost = unit_cost_est × quantity
-```
-
-**各类型字段映射：**
-| 投资类型 | calc_method | calc_param | calc_param_unit | feature_type |
-|----------|-------------|------------|-----------------|--------------|
-| MOLD (模具) | FEATURE | 重量/体积/吨位 | kg / cm³ / ton | WEIGHT / VOLUME / TONNAGE |
-| GAUGE (检具) | POINTS | 点位数 | points | - |
-| FIXTURE (工装) | MODULES | 功能模块数 | modules | - |
-| FORMING_TOOL (成型工装) | LENGTH | 长度 | mm | - |
-| JIG (夹具) | FIXED | 1 | unit | - |
-
-### 表 2: `amortization_strategies` (分摊策略)
-
-| 字段名 | 类型 | 说明 | 示例值 |
-|--------|------|------|--------|
-| `id` | CHAR(36) | PK, UUID | - |
-| `project_id` | CHAR(36) | FK, 关联项目 | - |
-| `mode` | VARCHAR(20) | UPFRONT / AMORTIZED | AMORTIZED |
-| `amortization_volume` | INT | 分摊基数销量 | 29750 |
-| `duration_years` | INT | 分摊年限 | 2 |
-| `interest_rate` | DECIMAL(5,4) | 年利率 | 0.0600 |
-| `calculated_unit_add` | DECIMAL(10,4) | **计算结果：单件分摊额** | 6.4038 |
-| `created_at` | DATETIME | 创建时间 | DEFAULT NOW() |
-
----
-
-## 5. 数据模型定义
-
-### 5.1 Pydantic 模型
-
-```python
-from enum import Enum
-from typing import Literal, Optional
-from pydantic import BaseModel, Field, field_validator
-from decimal import Decimal
-
-class InvestmentType(str, Enum):
-    """投资类型"""
-    MOLD = "MOLD"               # 模具
-    GAUGE = "GAUGE"             # 检具
-    JIG = "JIG"                 # 夹具
-    FIXTURE = "FIXTURE"         # 工装
-    FORMING_TOOL = "FORMING_TOOL"  # 成型工装 🆕
-
-
-class CalcMethod(str, Enum):
-    """计算方法"""
-    FEATURE = "FEATURE"   # 产品特征（模具）
-    POINTS = "POINTS"     # 点位数（检具）
-    MODULES = "MODULES"   # 功能模块数（工装）
-    LENGTH = "LENGTH"     # 长度（成型工装）
-    FIXED = "FIXTED"      # 固定价格（夹具）
-
-
-class FeatureType(str, Enum):
-    """模具特征类型"""
-    WEIGHT = "WEIGHT"     # 重量 (kg)
-    VOLUME = "VOLUME"     # 体积 (cm³)
-    TONNAGE = "TONNAGE"   # 吨位 (ton)
-
-
-class InvestmentItem(BaseModel):
-    """投资项"""
-    id: str | None = None
-    project_id: str
-    product_id: str
-    item_type: InvestmentType
-    name: str
-
-    # 🆕 v2.0 计算参数
-    calc_method: CalcMethod
-    calc_param: Decimal = Field(default=Decimal("1"), description="计算参数值（点位数/模块数/长度/特征值）")
-    calc_param_unit: str = Field(default="unit", description="参数单位")
-    unit_price_std: Decimal = Field(description="标准单价（从标准库获取或手动输入）")
-
-    # 计算后的单价
-    unit_cost_est: Decimal | None = Field(default=None, description="计算后单价 = calc_param × unit_price_std")
-
-    currency: str = "CNY"
-    quantity: int = 1
-    asset_lifecycle: int | None = None  # 设计寿命（模次），空表示无限
-    is_shared: bool = False
-    shared_source_id: str | None = None
-    status: Literal["DRAFT", "CONFIRMED"] = "DRAFT"
-
-    # 模具专用字段
-    feature_type: FeatureType | None = None
-
-    def model_post_init(self, __context):
-        """自动计算单价"""
-        if self.unit_cost_est is None:
-            self.unit_cost_est = self.calc_param * self.unit_price_std
-
-    @property
-    def total_investment(self) -> Decimal:
-        """总投资"""
-        return (self.unit_cost_est or self.calc_param * self.unit_price_std) * self.quantity
-
-    @field_validator('calc_method', mode='before')
-    @classmethod
-    def set_default_calc_method(cls, v, info):
-        """根据投资类型自动设置计算方法"""
-        if v is None:
-            item_type = info.data.get('item_type')
-            mapping = {
-                InvestmentType.MOLD: CalcMethod.FEATURE,
-                InvestmentType.GAUGE: CalcMethod.POINTS,
-                InvestmentType.FIXTURE: CalcMethod.MODULES,
-                InvestmentType.FORMING_TOOL: CalcMethod.LENGTH,
-                InvestmentType.JIG: CalcMethod.FIXED,
-            }
-            return mapping.get(item_type, CalcMethod.FIXED)
-        return v
-
-
-class InvestmentItemCreate(BaseModel):
-    """创建投资项请求"""
-    project_id: str
-    product_id: str
-    item_type: InvestmentType
-    name: str
-
-    # 计算参数
-    calc_param: Decimal = Field(default=Decimal("1"), description="计算参数值")
-    calc_param_unit: str = Field(default="unit", description="参数单位")
-    unit_price_std: Decimal = Field(description="标准单价")
-
-    # 可选参数
-    quantity: int = 1
-    asset_lifecycle: int | None = None
-    feature_type: FeatureType | None = None
-    is_shared: bool = False
-    shared_source_id: str | None = None
-
-
-class AmortizationMode(str, Enum):
-    """分摊模式"""
-    UPFRONT = "UPFRONT"           # 一次性支付
-    AMORTIZED = "AMORTIZED"       # 分摊进单价
-
-
-class AmortizationStrategy(BaseModel):
-    """分摊策略"""
-    id: str | None = None
-    project_id: str
-    mode: AmortizationMode
-    amortization_volume: int | None = None   # 分摊基数销量
-    duration_years: int = 2                  # 分摊年限
-    interest_rate: Decimal = Field(default=Decimal("0.06"), description="资本利率（Capital Interest Rate）")
-    calculated_unit_add: Decimal | None = None  # 计算结果：单件分摊额（含 Capital Interest）
-
-    def calculate_unit_amort(self, total_investment: Decimal) -> Decimal:
-        """计算单件分摊额（含 Capital Interest）
-
-        注意：此利息为模具投资的资本成本，与 QS 表中的 Working Capital Interest 是不同的概念。
-        """
-        if self.mode == AmortizationMode.UPFRONT:
-            return Decimal("0")
-
-        if not self.amortization_volume or self.amortization_volume <= 0:
-            return Decimal("0")
-
-        # VOSS 单利公式: I × (1 + R × Y) / V
-        # 其中 (1 + R × Y) 为 Capital Interest 因子
-        interest_factor = Decimal("1") + self.interest_rate * self.duration_years
-        return total_investment * interest_factor / self.amortization_volume
-
-
-class InvestmentCalculationResult(BaseModel):
-    """投资计算结果"""
-    items: list[InvestmentItem]
-    strategy: AmortizationStrategy
-    total_investment: Decimal
-    unit_amortization: Decimal
-    replacement_warning: list[str] = []  # 寿命不足警告
-
-    # 🆕 v2.0 计算明细
-    calculation_details: list[dict] = []  # 各投资项的计算明细
-```
-
----
-
-## 6. 系统交互流程
+## 4. 系统交互流程
 
 ```mermaid
 sequenceDiagram
-    participant IE as IE (工程师)
+    participant VM as VM (成本协调)
+    participant IE as IE (工艺同事)
     participant SYS as Dr.aiVOSS 系统
     participant DB as 历史价格库
     participant SALES as Sales (销售)
 
-    Note over IE, SYS: 阶段一：技术估价
+    Note over VM, IE: 阶段一：录入触发与回填
+    VM->>SYS: 发起投资项录入邮件
+    SYS-->>IE: 发送邮件（含BOM录入链接）
+    IE->>SYS: 点击链接并填写单价/数量
+    IE->>SYS: 提交确认回填
+    Note over IE, SYS: 阶段二：技术估价
     IE->>SYS: 选择产品 (BOM: Housing)
     IE->>SYS: 添加投资项 (Type=MOLD)
     SYS->>DB: 查询相似模具价格
@@ -574,7 +362,7 @@ sequenceDiagram
     IE->>SYS: 录入预估价 (17w) & 寿命 (30w)
     SYS->>SYS: 校验寿命 vs 总销量
 
-    Note over SALES, SYS: 阶段二：商业策略
+    Note over SALES, SYS: 阶段三：商业策略
     SALES->>SYS: 设定分摊策略 (2年摊完)
     SYS->>SYS: 读取利率 (6%)
     SYS->>SYS: 执行分摊公式计算
@@ -584,33 +372,15 @@ sequenceDiagram
 
 ---
 
-## 7. 开发实施 Checklist
-
-| 任务 | 责任方 | 状态 |
-|------|--------|------|
-| 后端：实现 `InvestmentItem` CRUD 接口 | 后端开发 | ⬜ |
-| 后端：实现"寿命自动计算数量"逻辑 (`lifecycle_check`) | 后端开发 | ⬜ |
-| 后端：实现 VOSS 特有的"含息分摊"算法 | 后端开发 | ⬜ |
-| **🆕 后端：实现投资项计算公式逻辑（v2.0）** | 后端开发 | ⬜ |
-| **🆕 后端：实现标准单价查询（std_investment_costs 表）** | 后端开发 | ⬜ |
-| 前端：开发 IE 工作台的"投资录入卡片"（五分类） | 前端开发 | ⬜ |
-| 前端：开发 Sales 端的"分摊计算器"（实时变动） | 前端开发 | ⬜ |
-| **🆕 前端：开发投资项计算参数输入组件** | 前端开发 | ⬜ |
-| 数据库：完成 `investment_items` 表的建表与索引 | DBA | ⬜ |
-| **🆕 数据库：添加 v2.0 计算参数字段（calc_method, calc_param, unit_price_std 等）** | DBA | ⬜ |
-
----
-
-## 8. 与其他文档的关联
+## 5. 与其他文档的关联
 
 | 文档 | 关联点 |
 |------|--------|
-| [数据库设计.md](数据库设计.md) | 依赖 `projects`, `project_products` 表 |
 | [报价汇总计算逻辑.md](报价汇总计算逻辑.md) | 分摊结果影响 QS 表的 Tooling 列 |
 | [投资回收期计算逻辑.md](投资回收期计算逻辑.md) | 投资总额是 Payback 计算的输入 |
 | [商业案例计算逻辑.md](商业案例计算逻辑.md) | 分摊策略影响 BC 表的年度成本 |
 
-### 8.1 数据流向
+### 5.1 数据流向
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -637,122 +407,6 @@ sequenceDiagram
 │                 Quotation Summary                           │
 │  Tooling 列 = Unit Amort                                    │
 └─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 9. API 端点定义
-
-### 9.1 投资项管理
-
-| 方法 | 端点 | 功能 |
-|------|------|------|
-| GET | `/api/v1/investments/{project_id}` | 获取项目投资列表 |
-| POST | `/api/v1/investments` | 创建投资项 |
-| PUT | `/api/v1/investments/{id}` | 更新投资项 |
-| DELETE | `/api/v1/investments/{id}` | 删除投资项 |
-
-### 9.2 分摊计算
-
-| 方法 | 端点 | 功能 |
-|------|------|------|
-| POST | `/api/v1/investments/calculate-amort` | 计算分摊策略 |
-| GET | `/api/v1/investments/{project_id}/amort-strategy` | 获取当前分摊策略 |
-| PUT | `/api/v1/investments/{project_id}/amort-strategy` | 更新分摊策略 |
-
-### 9.3 响应示例
-
-**v2.0 更新：包含计算参数明细**
-
-```json
-{
-  "project_id": "PRJ-2026-001",
-  "total_investment": 218000.00,
-  "items": [
-    {
-      "id": "INV-001",
-      "item_type": "MOLD",
-      "name": "Housing Injection Mold",
-      "calc_method": "FEATURE",
-      "calc_param": 500.00,
-      "calc_param_unit": "kg",
-      "unit_price_std": 300.00,
-      "unit_cost_est": 150000.00,
-      "feature_type": "WEIGHT",
-      "quantity": 1,
-      "asset_lifecycle": 300000,
-      "total": 150000.00
-    },
-    {
-      "id": "INV-002",
-      "item_type": "GAUGE",
-      "name": "综合检具",
-      "calc_method": "POINTS",
-      "calc_param": 32.00,
-      "calc_param_unit": "points",
-      "unit_price_std": 500.00,
-      "unit_cost_est": 16000.00,
-      "quantity": 1,
-      "total": 16000.00
-    },
-    {
-      "id": "INV-003",
-      "item_type": "FIXTURE",
-      "name": "去水口工装",
-      "calc_method": "MODULES",
-      "calc_param": 4.00,
-      "calc_param_unit": "modules",
-      "unit_price_std": 8000.00,
-      "unit_cost_est": 32000.00,
-      "quantity": 1,
-      "total": 32000.00
-    },
-    {
-      "id": "INV-004",
-      "item_type": "FORMING_TOOL",
-      "name": "折弯成型工装",
-      "calc_method": "LENGTH",
-      "calc_param": 1200.00,
-      "calc_param_unit": "mm",
-      "unit_price_std": 25.00,
-      "unit_cost_est": 30000.00,
-      "quantity": 1,
-      "total": 30000.00
-    }
-  ],
-  "strategy": {
-    "mode": "AMORTIZED",
-    "amortization_volume": 29750,
-    "duration_years": 2,
-    "capital_interest_rate": 0.06,
-    "unit_amortization": 8.20
-  },
-  "calculation_details": [
-    {
-      "item_id": "INV-001",
-      "formula": "calc_param × unit_price_std",
-      "calculation": "500 kg × ¥300/kg = ¥150,000"
-    },
-    {
-      "item_id": "INV-002",
-      "formula": "calc_param × unit_price_std",
-      "calculation": "32 points × ¥500/point = ¥16,000"
-    },
-    {
-      "item_id": "INV-003",
-      "formula": "calc_param × unit_price_std",
-      "calculation": "4 modules × ¥8,000/module = ¥32,000"
-    },
-    {
-      "item_id": "INV-004",
-      "formula": "calc_param × unit_price_std",
-      "calculation": "1200 mm × ¥25/mm = ¥30,000"
-    }
-  ],
-  "warnings": [
-    "销量 50,000 超出模具寿命 30,000，已自动增加重置模具费"
-  ]
-}
 ```
 
 ---

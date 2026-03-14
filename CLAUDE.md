@@ -387,5 +387,5 @@ interface Process {
 
 必须编写 Unit Test 来验证以下计算结果：
 - 物料成本计算：`SUM(std_price × quantity)`
-- 工艺成本计算：`SUM((cycle_time / 3600) × (mhr_var + mhr_fix + personnel × labor_rate))`
+- 工艺成本计算：`SUM(mhr_total × (cycle_time / 3600) + mhr_total × (setup_time / (annual_volume / production_batches)))`（`production_batches` 默认 12）
 - Payback 回收期计算：`项目总投资 / 项目月度净利`

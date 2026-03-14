@@ -109,10 +109,12 @@ sofia/
 系统后端标准成本计算公式：
 
 **Standard Cost (标准成本):**
-$$ Cost_{std} = \sum (Qty \times P_{std}) + \sum (CycleTime \times MHR_{std}) $$
+$$ Cost_{std} = \sum (Qty \times P_{std}) + \sum \left( MHR_{std} \times \frac{CycleTime}{3600} + MHR_{std} \times \frac{SetUpTime}{AnnualVolume / ProductionBatches} \right) $$
 
 其中：
 - $CycleTime$ = 标准工时（秒）
+- $SetUpTime$ = 单次换型时间（小时/批）
+- $ProductionBatches$ = 年生产批次（默认 12 批次/年）
 - $MHR_{std}$ = MHR_var + MHR_fix（已含人工成本）
 
 ## 7. 工序编码体系 🆕
